@@ -2,12 +2,14 @@ package org.subethamail.smtp.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.util.Map;
 
@@ -308,8 +310,8 @@ public class Session implements Runnable, MessageContext
 	{
 		this.socket = socket;
 		this.input = this.socket.getInputStream();
-		this.reader = new CRLFTerminatedReader(this.input);
-		this.writer = new PrintWriter(this.socket.getOutputStream());
+		this.reader = new CRLFTerminatedReader(this.input, StandardCharsets.US_ASCII);
+		this.writer = new PrintWriter(new OutputStreamWriter(this.socket.getOutputStream(), StandardCharsets.US_ASCII));
 
 		this.socket.setSoTimeout(this.server.getConnectionTimeout());
 	}
