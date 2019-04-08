@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+
 /**
  * A Reader for use with SMTP or other protocols in which lines
  * must end with CRLF.  Extends Reader and overrides its
@@ -35,43 +36,35 @@ import java.nio.charset.Charset;
  * greater than or equal to MAX_LINE_LENGTH (998) which is defined
  * in <a href="http://rfc.net/rfc2822.html#s2.1.1.">RFC 2822</a>.
  */
-public class CRLFTerminatedReader extends FilterReader
-{
-	static int MAX_LINE_LENGTH = 998;
+public class CRLFTerminatedReader extends FilterReader {
+	private static int MAX_LINE_LENGTH = 998;
 
 	@SuppressWarnings("serial")
-	public class TerminationException extends IOException
-	{
-		private int where;
+	public class TerminationException extends IOException {
+		private final int where;
 
-		public TerminationException(int where)
-		{
+		public TerminationException(final int where) {
 			super();
 			this.where = where;
 		}
 
-		public TerminationException(String s, int where)
-		{
+		public TerminationException(final String s, final int where) {
 			super(s);
 			this.where = where;
 		}
 
-		public int position()
-		{
+		public int position() {
 			return this.where;
 		}
 	}
 
 	@SuppressWarnings("serial")
-	public class MaxLineLengthException extends IOException
-	{
-		public MaxLineLengthException()
-		{
+	public class MaxLineLengthException extends IOException {
+		public MaxLineLengthException() {
 			super();
 		}
 
-		public MaxLineLengthException(String s)
-		{
+		public MaxLineLengthException(final String s) {
 			super(s);
 		}
 	}
@@ -79,27 +72,20 @@ public class CRLFTerminatedReader extends FilterReader
 	/**
 	 * Constructs this CRLFTerminatedReader.
 	 *
-	 * @param in
-	 *            an InputStream
-	 * @param charset
-	 *            the {@link Charset} to use
+	 * @param in an InputStream
+	 * @param charset the {@link Charset} to use
 	 */
-	public CRLFTerminatedReader(InputStream in, Charset charset)
-	{
+	public CRLFTerminatedReader(final InputStream in, final Charset charset) {
 		super(new InputStreamReader(in, charset));
 	}
 
 	/**
 	 * Constructs this CRLFTerminatedReader.
 	 *
-	 * @param in
-	 *            an InputStream
-	 * @param enc
-	 *            the {@link Charset} to use
+	 * @param in an InputStream
+	 * @param enc the {@link Charset} to use
 	 */
-	public CRLFTerminatedReader(InputStream in, String enc)
-			throws UnsupportedEncodingException
-	{
+	public CRLFTerminatedReader(final InputStream in, final String enc) throws UnsupportedEncodingException {
 		this(in, Charset.forName(enc));
 	}
 
@@ -107,85 +93,74 @@ public class CRLFTerminatedReader extends FilterReader
 	private static final char CR = 13;
 	private static final char LF = 10;
 
-	private int tainted = -1;
-
 	/**
-	 * Read a line of text which is terminated by CRLF.  The concluding
-	 * CRLF characters are not returned with the String, but if either CR
-	 * or LF appears in the text in any other sequence it is returned
-	 * in the String like any other character.  Some characters at the
-	 * end of the stream may be lost if they are in a "line" not
-	 * terminated by CRLF.
+	 * Read a line of text which is terminated by CRLF. The concluding CRLF characters are not
+	 * returned with the String, but if either CR or LF appears in the text in any other sequence it
+	 * is returned in the String like any other character. Some characters at the end of the stream
+	 * may be lost if they are in a "line" not terminated by CRLF.
 	 *
-	 * @return either a String containing the contents of a
-	 * line which must end with CRLF, or null if the end of the
-	 * stream has been reached, possibly discarding some characters
-	 * in a line not terminated with CRLF.
+	 * @return either a String containing the contents of a line which must end with CRLF, or null
+	 *         if the end of the stream has been reached, possibly discarding some characters in a
+	 *         line not terminated with CRLF.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public String readLine() throws IOException
-	{
-		StringBuilder lineBuffer = new StringBuilder();
+	public String readLine() throws IOException {
+		final StringBuilder lineBuilder = new StringBuilder();
 
-		/* This boolean tells which state we are in,
-		 * depending upon whether or not we got a CR
-		 * in the preceding read().
+		/*
+		 * This boolean tells which state we are in, depending upon whether or not we got a CR in
+		 * the preceding read().
 		 */
 		boolean cr_just_received = false;
 
-		while (true)
-		{
-			int inChar = this.read();
+		/* If not -1 this int tells us where the first "wrong" line break is */
+		int tainted = -1;
 
-			if (!cr_just_received)
-			{
+		while (true) {
+			final int inChar = this.read();
+
+			if (!cr_just_received) {
 				//the most common case, somewhere before the end of a line
-				switch (inChar)
-				{
+				switch (inChar) {
 					case CR:
 						cr_just_received = true;
 						break;
 					case EOF:
 						return null; // premature EOF -- discards data(?)
 					case LF: //the normal ending of a line
-						if (this.tainted == -1)
-							this.tainted = lineBuffer.length();
-					// intentional fall-through
-					default:
-						lineBuffer.append((char) inChar);
-				}
-			}
-			else
-			{
-				// CR has been received, we may be at end of line
-				switch (inChar)
-				{
-					case LF: // LF without a preceding CR
-						if (this.tainted != -1)
-						{
-							int pos = this.tainted;
-							this.tainted = -1;
-							throw new TerminationException(
-									"\"bare\" CR or LF in data stream", pos);
+						if (tainted == -1) {
+							tainted = lineBuilder.length();
 						}
-						return lineBuffer.toString();
+						// intentional fall-through
+					default:
+						lineBuilder.append((char) inChar);
+				}
+			} else {
+				// CR has been received, we may be at end of line
+				switch (inChar) {
+					case LF: // LF without a preceding CR
+						if (tainted != -1) {
+							throw new TerminationException("\"bare\" CR or LF in data stream", tainted);
+						}
+						return lineBuilder.toString();
 					case EOF:
 						return null; // premature EOF -- discards data(?)
 					case CR: //we got two (or more) CRs in a row
-						if (this.tainted == -1)
-							this.tainted = lineBuffer.length();
-						lineBuffer.append(CR);
+						if (tainted == -1) {
+							tainted = lineBuilder.length();
+						}
+						lineBuilder.append(CR);
 						break;
 					default: //we got some other character following a CR
-						if (this.tainted == -1)
-							this.tainted = lineBuffer.length();
-						lineBuffer.append(CR);
-						lineBuffer.append((char) inChar);
+						if (tainted == -1) {
+							tainted = lineBuilder.length();
+						}
+						lineBuilder.append(CR);
+						lineBuilder.append((char) inChar);
 						cr_just_received = false;
 				}
 			}
-			if (lineBuffer.length() >= MAX_LINE_LENGTH)
-			{
+			if (lineBuilder.length() >= MAX_LINE_LENGTH) {
 				throw new MaxLineLengthException("Input line length is too long!");
 			}
 		}
