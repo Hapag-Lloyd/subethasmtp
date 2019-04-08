@@ -1,6 +1,7 @@
 package org.subethamail.smtp.io;
 
 import java.io.EOFException;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -8,13 +9,8 @@ import java.io.InputStream;
  * An InputStream class that terminates the stream when it encounters a US-ASCII
  * encoded dot CR LF byte sequence immediately following a CR LF line end.
  */
-public class DotTerminatedInputStream extends InputStream
+public class DotTerminatedInputStream extends FilterInputStream
 {
-	/**
-	 * The wrapped input stream.
-	 */
-	private InputStream in;
-
 	/**
 	 * The last bytes returned by the {@link #read()} function. The first byte
 	 * in the array contains the byte returned by the penultimate read() call.
@@ -49,24 +45,26 @@ public class DotTerminatedInputStream extends InputStream
 	 * @throws IllegalArgumentException
 	 *             if the terminator array is null or empty
 	 */
-	public DotTerminatedInputStream(InputStream in)
+	public DotTerminatedInputStream(final InputStream in)
 	{
-		this.in = in;
+		super(in);
 	}
 
 	@Override
 	public int read() throws IOException
 	{
-		if (nextBytes == null)
+		if (nextBytes == null) {
 			initNextBytes();
-		if (endReached)
+		}
+		if (endReached) {
 			return -1;
+		}
 		if (lastBytesAreCrLf() && nextBytesAreDotCrLf())
 		{
 			endReached = true;
 			return -1;
 		}
-		int result = nextBytes[0];
+		final int result = nextBytes[0];
 		if (result == -1)
 		{
 			// End of stream reached without seeing the terminator
@@ -79,9 +77,9 @@ public class DotTerminatedInputStream extends InputStream
 	private void initNextBytes() throws IOException
 	{
 		nextBytes = new int[3];
-		nextBytes[0] = in.read();
-		nextBytes[1] = in.read();
-		nextBytes[2] = in.read();
+		nextBytes[0] = super.read();
+		nextBytes[1] = super.read();
+		nextBytes[2] = super.read();
 	}
 
 	private boolean lastBytesAreCrLf()
@@ -106,6 +104,6 @@ public class DotTerminatedInputStream extends InputStream
 		lastBytes[1] = (byte) nextBytes[0];
 		nextBytes[0] = nextBytes[1];
 		nextBytes[1] = nextBytes[2];
-		nextBytes[2] = in.read();
+		nextBytes[2] = super.read();
 	}
 }

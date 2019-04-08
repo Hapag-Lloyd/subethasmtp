@@ -1,5 +1,6 @@
 package org.subethamail.smtp.io;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -10,7 +11,7 @@ import java.io.OutputStream;
  *
  * See RFC 5321 4.1.1.4. second paragraph
  */
-public class DotTerminatedOutputStream extends OutputStream
+public class DotTerminatedOutputStream extends FilterOutputStream
 {
 	private static final byte[] DOT_CRLF = new byte[]{
 			'.', '\r', '\n'
@@ -18,11 +19,6 @@ public class DotTerminatedOutputStream extends OutputStream
 	private static final byte[] CRLF_DOT_CRLF = new byte[]{
 			'\r', '\n', '.', '\r', '\n'
 	};
-
-	/**
-	 * The wrapped output stream.
-	 */
-	private final OutputStream out;
 
 	/**
 	 * The last bytes written out by the {@link #write()} function. The first
@@ -34,21 +30,21 @@ public class DotTerminatedOutputStream extends OutputStream
 			'\r', '\n'
 	};
 
-	public DotTerminatedOutputStream(OutputStream out)
+	public DotTerminatedOutputStream(final OutputStream out)
 	{
-		this.out = out;
+		super(out);
 	}
 
 	@Override
-	public void write(int b) throws IOException
+	public void write(final int b) throws IOException
 	{
 		lastBytes[0] = lastBytes[1];
 		lastBytes[1] = (byte) b;
-		out.write(b);
+		super.write(b);
 	}
 
 	@Override
-	public void write(byte[] b, int off, int len) throws IOException
+	public void write(final byte[] b, final int off, final int len) throws IOException
 	{
 		if (len == 1)
 		{
@@ -60,7 +56,7 @@ public class DotTerminatedOutputStream extends OutputStream
 			lastBytes[0] = b[off + len - 2];
 			lastBytes[1] = b[off + len - 1];
 		}
-		out.write(b, off, len);
+		super.write(b, off, len);
 	}
 
 	/**
@@ -71,10 +67,11 @@ public class DotTerminatedOutputStream extends OutputStream
 	 */
 	public void writeTerminatingSequence() throws IOException
 	{
-		if (lastBytes[0] == '\r' && lastBytes[1] == '\n')
-			out.write(DOT_CRLF);
-		else
-			out.write(CRLF_DOT_CRLF);
+		if (lastBytes[0] == '\r' && lastBytes[1] == '\n') {
+			super.write(DOT_CRLF);
+		} else {
+			super.write(CRLF_DOT_CRLF);
+		}
 	}
 
 }
