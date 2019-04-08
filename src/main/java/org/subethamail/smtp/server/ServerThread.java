@@ -44,14 +44,16 @@ class ServerThread extends Thread
 	 */
 	private volatile boolean shuttingDown;
 
-	public ServerThread(SMTPServer server, ServerSocket serverSocket)
+	private boolean updateThreadName = true;
+
+	public ServerThread(final SMTPServer server, final ServerSocket serverSocket)
 	{
 		super(ServerThread.class.getName() + " " + server.getDisplayableLocalSocketAddress());
 		this.server = server;
 		this.serverSocket = serverSocket;
 		// reserve a few places for graceful disconnects with informative
 		// messages
-		int countOfConnectionPermits = server.getMaxConnections() + 10;
+		final int countOfConnectionPermits = server.getMaxConnections() + 10;
 		this.connectionPermits = new Semaphore(countOfConnectionPermits);
 		this.sessionThreads = new HashSet<Session>(countOfConnectionPermits * 4 / 3 + 1);
 	}
@@ -70,14 +72,14 @@ class ServerThread extends Thread
 		{
 			runAcceptLoop();
 			log.info("SMTP server {} stopped accepting connections",
-					server.getDisplayableLocalSocketAddress());
+				server.getDisplayableLocalSocketAddress());
 		}
-		catch (RuntimeException e)
+		catch (final RuntimeException e)
 		{
 			log.error("Unexpected exception in server socket thread, server is stopped", e);
 			throw e;
 		}
-		catch (Error e)
+		catch (final Error e)
 		{
 			log.error("Unexpected error in server socket thread, server is stopped", e);
 			throw e;
@@ -100,7 +102,7 @@ class ServerThread extends Thread
 				// block if too many connections are open
 				connectionPermits.acquire();
 			}
-			catch (InterruptedException consumed)
+			catch (final InterruptedException consumed)
 			{
 				continue; // exit or retry
 			}
@@ -110,7 +112,7 @@ class ServerThread extends Thread
 			{
 				socket = this.serverSocket.accept();
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				connectionPermits.release();
 				// it also happens during shutdown, when the socket is closed
@@ -122,7 +124,7 @@ class ServerThread extends Thread
 					{
 						Thread.sleep(1000);
 					}
-					catch (InterruptedException consumed)
+					catch (final InterruptedException consumed)
 					{
 						// fall through
 					}
@@ -134,8 +136,9 @@ class ServerThread extends Thread
 			try
 			{
 				session = new Session(server, this, socket);
+				session.setUpdateThreadName(isUpdateThreadName());
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				connectionPermits.release();
 				log.error("Error while starting a connection", e);
@@ -143,7 +146,7 @@ class ServerThread extends Thread
 				{
 					socket.close();
 				}
-				catch (IOException e1)
+				catch (final IOException e1)
 				{
 					log.debug("Cannot close socket after exception", e1);
 				}
@@ -160,7 +163,7 @@ class ServerThread extends Thread
 			try {
 				server.getExecutorService().execute(session);
 			}
-			catch (RejectedExecutionException e) {
+			catch (final RejectedExecutionException e) {
 				connectionPermits.release();
 				synchronized (this)
 				{
@@ -171,7 +174,7 @@ class ServerThread extends Thread
 				{
 					socket.close();
 				}
-				catch (IOException e1)
+				catch (final IOException e1)
 				{
 					log.debug("Cannot close socket after exception", e1);
 				}
@@ -198,7 +201,7 @@ class ServerThread extends Thread
 		interrupt();
 		try {
 			join();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -213,7 +216,7 @@ class ServerThread extends Thread
 			this.serverSocket.close();
 			log.debug("SMTP Server socket shut down");
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			log.error("Failed to close server socket.", e);
 		}
@@ -230,7 +233,7 @@ class ServerThread extends Thread
 		synchronized (this) {
 			sessionsToBeClosed = new ArrayList<Session>(sessionThreads);
 		}
-		for (Session sessionThread : sessionsToBeClosed)
+		for (final Session sessionThread : sessionsToBeClosed)
 		{
 			sessionThread.quit();
 		}
@@ -238,10 +241,10 @@ class ServerThread extends Thread
 		server.getExecutorService().shutdown();
 		try {
 			server.getExecutorService().awaitTermination(Long.MAX_VALUE,
-					TimeUnit.NANOSECONDS);
-		} catch (InterruptedException e) {
+				TimeUnit.NANOSECONDS);
+		} catch (final InterruptedException e) {
 			log.warn("Interrupted waiting for termination of session threads",
-					e);
+				e);
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -260,12 +263,19 @@ class ServerThread extends Thread
 	 * Registers that the specified {@link Session} thread ended. Session
 	 * threads must call this function.
 	 */
-	public void sessionEnded(Session session)
+	public void sessionEnded(final Session session)
 	{
 		synchronized (this)
 		{
 			sessionThreads.remove(session);
 		}
 		connectionPermits.release();
+	}
+
+	public boolean isUpdateThreadName() {
+		return updateThreadName;
+	}
+	public void setUpdateThreadName(final boolean updateThreadName) {
+		this.updateThreadName = updateThreadName;
 	}
 }
