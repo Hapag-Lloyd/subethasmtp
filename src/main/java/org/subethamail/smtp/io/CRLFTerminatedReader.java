@@ -1,5 +1,7 @@
 package org.subethamail.smtp.io;
 
+import java.io.FilterReader;
+
 /***********************************************************************
  * Copyright (c) 2000-2006 The Apache Software Foundation.             *
  * All rights reserved.                                                *
@@ -19,8 +21,9 @@ package org.subethamail.smtp.io;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 /**
  * A Reader for use with SMTP or other protocols in which lines
  * must end with CRLF.  Extends Reader and overrides its
@@ -32,7 +35,7 @@ import java.io.UnsupportedEncodingException;
  * greater than or equal to MAX_LINE_LENGTH (998) which is defined
  * in <a href="http://rfc.net/rfc2822.html#s2.1.1.">RFC 2822</a>.
  */
-public class CRLFTerminatedReader extends Reader
+public class CRLFTerminatedReader extends FilterReader
 {
 	static int MAX_LINE_LENGTH = 998;
 
@@ -78,30 +81,32 @@ public class CRLFTerminatedReader extends Reader
 	 *
 	 * @param in
 	 *            an InputStream
-	 * @param charsetName
-	 *            the String name of a supported charset. "ASCII" is common
-	 *            here.
-	 * @throws UnsupportedEncodingException
-	 *             if the named charset is not supported
+	 * @param charset
+	 *            the {@link Charset} to use
 	 */
-	InputStream in;
-
-	public CRLFTerminatedReader(InputStream in)
+	public CRLFTerminatedReader(InputStream in, Charset charset)
 	{
-		this.in = in;
+		super(new InputStreamReader(in, charset));
 	}
 
+	/**
+	 * Constructs this CRLFTerminatedReader.
+	 *
+	 * @param in
+	 *            an InputStream
+	 * @param enc
+	 *            the {@link Charset} to use
+	 */
 	public CRLFTerminatedReader(InputStream in, String enc)
 			throws UnsupportedEncodingException
 	{
-		this(in);
+		this(in, Charset.forName(enc));
 	}
 
 	private StringBuffer lineBuffer = new StringBuffer();
-	private final int
-			EOF = -1,
-			CR  = 13,
-			LF  = 10;
+	private static final int EOF = -1;
+	private static final char CR = 13;
+	private static final char LF = 10;
 
 	private int tainted = -1;
 
@@ -186,33 +191,5 @@ public class CRLFTerminatedReader extends Reader
 				throw new MaxLineLengthException("Input line length is too long!");
 			}
 		}
-	}
-
-	@Override
-	public int read() throws IOException
-	{
-		return this.in.read();
-	}
-
-	@Override
-	public boolean ready() throws IOException
-	{
-		return this.in.available() > 0;
-	}
-
-	@Override
-	public int read(char[] cbuf, int off, int len) throws IOException
-	{
-		byte[] temp = new byte[len];
-		int result = this.in.read(temp, 0, len);
-		for (int i = 0; i < result; i++)
-			cbuf[i] = (char) temp[i];
-		return result;
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		this.in.close();
 	}
 }
