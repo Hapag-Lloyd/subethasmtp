@@ -103,7 +103,6 @@ public class CRLFTerminatedReader extends FilterReader
 		this(in, Charset.forName(enc));
 	}
 
-	private StringBuffer lineBuffer = new StringBuffer();
 	private static final int EOF = -1;
 	private static final char CR = 13;
 	private static final char LF = 10;
@@ -126,8 +125,7 @@ public class CRLFTerminatedReader extends FilterReader
 	 */
 	public String readLine() throws IOException
 	{
-		//start with the StringBuffer empty
-		this.lineBuffer.delete(0, this.lineBuffer.length());
+		StringBuilder lineBuffer = new StringBuilder();
 
 		/* This boolean tells which state we are in,
 		 * depending upon whether or not we got a CR
