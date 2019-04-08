@@ -151,10 +151,10 @@ public class CRLFTerminatedReader extends FilterReader
 						return null; // premature EOF -- discards data(?)
 					case LF: //the normal ending of a line
 						if (this.tainted == -1)
-							this.tainted = this.lineBuffer.length();
+							this.tainted = lineBuffer.length();
 					// intentional fall-through
 					default:
-						this.lineBuffer.append((char) inChar);
+						lineBuffer.append((char) inChar);
 				}
 			}
 			else
@@ -170,23 +170,23 @@ public class CRLFTerminatedReader extends FilterReader
 							throw new TerminationException(
 									"\"bare\" CR or LF in data stream", pos);
 						}
-						return this.lineBuffer.toString();
+						return lineBuffer.toString();
 					case EOF:
 						return null; // premature EOF -- discards data(?)
 					case CR: //we got two (or more) CRs in a row
 						if (this.tainted == -1)
-							this.tainted = this.lineBuffer.length();
-						this.lineBuffer.append((char) this.CR);
+							this.tainted = lineBuffer.length();
+						lineBuffer.append(CR);
 						break;
 					default: //we got some other character following a CR
 						if (this.tainted == -1)
-							this.tainted = this.lineBuffer.length();
-						this.lineBuffer.append((char) this.CR);
-						this.lineBuffer.append((char) inChar);
+							this.tainted = lineBuffer.length();
+						lineBuffer.append(CR);
+						lineBuffer.append((char) inChar);
 						cr_just_received = false;
 				}
 			}
-			if (this.lineBuffer.length() >= MAX_LINE_LENGTH)
+			if (lineBuffer.length() >= MAX_LINE_LENGTH)
 			{
 				throw new MaxLineLengthException("Input line length is too long!");
 			}
