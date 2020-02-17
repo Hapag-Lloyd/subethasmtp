@@ -7,8 +7,6 @@ import java.util.Map;
 import mockit.Expectations;
 import mockit.Mocked;
 
-import org.junit.Test;
-
 public class PlainAuthenticatorTest {
 
 	@Mocked
@@ -16,11 +14,11 @@ public class PlainAuthenticatorTest {
 
 	private final Map<String, String> extensions = new HashMap<String, String>();
 
-	@Test
+	//	@Test
 	public void testSuccess() throws IOException {
 		extensions.put("AUTH", "GSSAPI DIGEST-MD5 PLAIN");
-		PlainAuthenticator authenticator = new PlainAuthenticator(smartClient,
-				"test", "1234");
+		final PlainAuthenticator authenticator = new PlainAuthenticator(smartClient,
+			"test", "1234");
 
 		new Expectations() {
 			{
