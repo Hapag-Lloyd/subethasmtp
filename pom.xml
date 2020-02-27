@@ -1,7 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.lars-sh</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.9.7</version>
+		<relativePath></relativePath>
+	</parent>
+
 	<groupId>com.hlag.contribute</groupId>
 	<artifactId>org.subethamail.subethasmtp</artifactId>
 	<version>3.1.8-SNAPSHOT</version>
@@ -10,25 +17,6 @@
 	<description>SubEtha SMTP is an easy-to-use server-side SMTP library for Java.</description>
 	<url>http://subethasmtp.googlecode.com</url>
 	<inceptionYear>2006</inceptionYear>
-
-	<scm>
-		<connection>http://subethasmtp.googlecode.com/svn</connection>
-		<developerConnection>https://subethasmtp.googlecode.com/svn</developerConnection>
-		<url>http://subethasmtp.googlecode.com/svn</url>
-	</scm>
-	<issueManagement>
-		<system>Google</system>
-		<url>http://code.google.com/p/subethasmtp/issues/list</url>
-	</issueManagement>
-	<mailingLists>
-		<mailingList>
-			<name>User and Developer List</name>
-			<subscribe>http://www.subethamail.org/se/list/smtp</subscribe>
-			<unsubscribe>http://www.subethamail.org/se/list/smtp</unsubscribe>
-			<post>smtp@subethamail.org</post>
-			<archive>http://www.subethamail.org/se/archive.jsp?listId=13</archive>
-		</mailingList>
-	</mailingLists>
 	<licenses>
 		<license>
 			<name>Apache 2.0</name>
@@ -36,6 +24,7 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
 	<developers>
 		<developer>
 			<id>latchkey</id>
@@ -75,105 +64,26 @@
 			</roles>
 		</developer>
 	</developers>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>org.subethamail.smtp.Version</mainClass>
-							<packageName>org.subethamail.smtp</packageName>
-						</manifest>
-						<manifestEntries>
-							<Specification-Version>${project.version}</Specification-Version>
-							<Implementation-Version>${maven.build.timestamp}</Implementation-Version>
-							<url>${project.url}</url>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<!-- always sign -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.0</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.8</version>
-			</plugin>
-		</plugins>
-	</build>
-	<dependencies>
-		<dependency>
-			<groupId>com.googlecode.jmockit</groupId>
-			<artifactId>jmockit</artifactId>
-			<version>0.999.11</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.5</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4.4</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1.1</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.1</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.6.1</version>
-			<type>jar</type>
-			<scope>test</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-			<version>1.3.9</version>
-			<type>jar</type>
-		</dependency>
-	</dependencies>
+
+	<mailingLists>
+		<mailingList>
+			<name>User and Developer List</name>
+			<subscribe>http://www.subethamail.org/se/list/smtp</subscribe>
+			<unsubscribe>http://www.subethamail.org/se/list/smtp</unsubscribe>
+			<post>smtp@subethamail.org</post>
+			<archive>http://www.subethamail.org/se/archive.jsp?listId=13</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>http://subethasmtp.googlecode.com/svn</connection>
+		<developerConnection>https://subethasmtp.googlecode.com/svn</developerConnection>
+		<url>http://subethasmtp.googlecode.com/svn</url>
+	</scm>
+	<issueManagement>
+		<system>Google</system>
+		<url>http://code.google.com/p/subethasmtp/issues/list</url>
+	</issueManagement>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>sonatype-nexus-snapshots</id>
@@ -186,13 +96,58 @@
 			<url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 	</distributionManagement>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.build.timestamp.format>MMMM dd yyyy</maven.build.timestamp.format>
 
-		<maven.compiler.failOnWarning>true</maven.compiler.failOnWarning>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+	<properties>
+		<parent-pom.create-changelog-md>false</parent-pom.create-changelog-md>
+		<parent-pom.default-sources-folder>java</parent-pom.default-sources-folder>
+		<parent-pom.create-lombok-config>false</parent-pom.create-lombok-config>
+		<parent-pom.create-travis-yml>true</parent-pom.create-travis-yml>
+		<eclipse.compiler.javadoc>disabled</eclipse.compiler.javadoc>
+		<eclipse.compiler.nullAnalysis>disabled</eclipse.compiler.nullAnalysis>
+		<eclipse.compiler.potentialNullReference>info</eclipse.compiler.potentialNullReference>
+		<jar.manifest.mainClass>org.subethamail.smtp.Version</jar.manifest.mainClass>
+		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+
+		<checkstyle.skip>true</checkstyle.skip>
+		<formatter.skip>true</formatter.skip>
+		<pmd.skip>true</pmd.skip>
+		<spotbugs.skip>true</spotbugs.skip>
 	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>1.3.9</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.jmockit</groupId>
+			<artifactId>jmockit</artifactId>
+			<version>0.999.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.5</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
