@@ -15,13 +15,12 @@
 
 	<name>SubEtha SMTP</name>
 	<description>SubEtha SMTP is an easy-to-use server-side SMTP library for Java.</description>
-	<url>http://subethasmtp.googlecode.com</url>
+	<url>https://${parent-pom.github.organization}.github.io/${parent-pom.github.project}/</url>
 	<inceptionYear>2006</inceptionYear>
 	<licenses>
 		<license>
-			<name>Apache 2.0</name>
-			<url>http://code.google.com/p/subethasmtp/source/browse/trunk/LICENSE.txt</url>
-			<distribution>repo</distribution>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
 		</license>
 	</licenses>
 
@@ -65,25 +64,19 @@
 		</developer>
 	</developers>
 
-	<mailingLists>
-		<mailingList>
-			<name>User and Developer List</name>
-			<subscribe>http://www.subethamail.org/se/list/smtp</subscribe>
-			<unsubscribe>http://www.subethamail.org/se/list/smtp</unsubscribe>
-			<post>smtp@subethamail.org</post>
-			<archive>http://www.subethamail.org/se/archive.jsp?listId=13</archive>
-		</mailingList>
-	</mailingLists>
-
 	<scm>
-		<connection>http://subethasmtp.googlecode.com/svn</connection>
-		<developerConnection>https://subethasmtp.googlecode.com/svn</developerConnection>
-		<url>http://subethasmtp.googlecode.com/svn</url>
+		<connection>scm:git:git@github.com:${parent-pom.github.organization}/${parent-pom.github.project}.git</connection>
+		<developerConnection>scm:git:git@github.com:${parent-pom.github.organization}/${parent-pom.github.project}.git</developerConnection>
+		<url>https://github.com/${parent-pom.github.organization}/${parent-pom.github.project}</url>
 	</scm>
 	<issueManagement>
-		<system>Google</system>
-		<url>http://code.google.com/p/subethasmtp/issues/list</url>
+		<system>GitHub Issues</system>
+		<url>https://github.com/${parent-pom.github.organization}/${parent-pom.github.project}/issues</url>
 	</issueManagement>
+	<ciManagement>
+		<system>GitHub Actions</system>
+		<url>https://github.com/${parent-pom.github.organization}/${parent-pom.github.project}/actions</url>
+	</ciManagement>
 
 	<properties>
 		<parent-pom.create-changelog-md>false</parent-pom.create-changelog-md>
