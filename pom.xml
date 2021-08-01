@@ -84,25 +84,13 @@
 		<system>Google</system>
 		<url>http://code.google.com/p/subethasmtp/issues/list</url>
 	</issueManagement>
-	<distributionManagement>
-		<snapshotRepository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>http://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Nexus Release Repository</name>
-			<url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>
 
 	<properties>
 		<parent-pom.create-changelog-md>false</parent-pom.create-changelog-md>
 		<parent-pom.create-lombok-config>false</parent-pom.create-lombok-config>
 		<parent-pom.default-sources-folder>java</parent-pom.default-sources-folder>
 		<parent-pom.github.organization>Hapag-Lloyd</parent-pom.github.organization>
-		<parent-pom.github.project>subethamail</parent-pom.github.project>
+		<parent-pom.github.project>subethasmtp</parent-pom.github.project>
 
 		<eclipse.compiler.javadoc>disabled</eclipse.compiler.javadoc>
 		<eclipse.compiler.nullAnalysis>disabled</eclipse.compiler.nullAnalysis>
