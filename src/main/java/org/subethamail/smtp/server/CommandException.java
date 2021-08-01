@@ -6,22 +6,20 @@ package org.subethamail.smtp.server;
 @SuppressWarnings("serial")
 public class CommandException extends Exception {
 	/** */
-	public CommandException(String string, Throwable throwable) {
+	public CommandException(final String string, final Throwable throwable) {
 		super(string, throwable);
 	}
 
 	/** */
-	public CommandException(String string) {
+	public CommandException(final String string) {
 		super(string);
 	}
 
 	/** */
-	public CommandException() {
-		super();
-	}
+	public CommandException() {}
 
 	/** */
-	public CommandException(Throwable throwable) {
+	public CommandException(final Throwable throwable) {
 		super(throwable);
 	}
 }

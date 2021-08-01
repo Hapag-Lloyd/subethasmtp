@@ -4,13 +4,13 @@ import java.util.Properties;
 
 import javax.mail.Session;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.wiser.Wiser;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * This class attempts to quickly start/stop 10 Wiser servers. It makes sure
@@ -32,7 +32,7 @@ public class StartStopTest extends TestCase {
 	protected int counter = 0;
 
 	/** */
-	public StartStopTest(String name) {
+	public StartStopTest(final String name) {
 		super(name);
 	}
 
@@ -41,7 +41,7 @@ public class StartStopTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		Properties props = new Properties();
+		final Properties props = new Properties();
 		props.setProperty("mail.smtp.host", "localhost");
 		props.setProperty("mail.smtp.port", Integer.toString(PORT));
 		this.session = Session.getDefaultInstance(props);
@@ -62,13 +62,15 @@ public class StartStopTest extends TestCase {
 	}
 
 	/** */
-	private void startStop(boolean pause) throws Exception {
-		Wiser wiser = new Wiser();
+	private void startStop(final boolean pause) throws Exception {
+		final Wiser wiser = new Wiser();
 		wiser.setPort(PORT);
 
 		wiser.start();
 
-		if (pause) Thread.sleep(1000);
+		if (pause) {
+			Thread.sleep(1000);
+		}
 
 		wiser.stop();
 

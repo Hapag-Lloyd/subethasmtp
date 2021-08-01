@@ -14,7 +14,7 @@ public class LoginFailedException extends Exception {
 	}
 
 	/** Creates a new instance of LoginFailedException */
-	public LoginFailedException(String msg) {
+	public LoginFailedException(final String msg) {
 		super(msg);
 	}
 }

@@ -21,7 +21,10 @@ public class WiserMessage {
 
 	String envelopeReceiver;
 
-	WiserMessage(Wiser wiser, String envelopeSender, String envelopeReceiver, byte[] messageData) {
+	WiserMessage(final Wiser wiser,
+			final String envelopeSender,
+			final String envelopeReceiver,
+			final byte[] messageData) {
 		this.wiser = wiser;
 		this.envelopeSender = envelopeSender;
 		this.envelopeReceiver = envelopeReceiver;
@@ -30,7 +33,7 @@ public class WiserMessage {
 
 	/**
 	 * Generate a JavaMail MimeMessage.
-	 * 
+	 *
 	 * @throws MessagingException
 	 */
 	public MimeMessage getMimeMessage() throws MessagingException {
@@ -61,14 +64,14 @@ public class WiserMessage {
 	/**
 	 * Dumps the rough contents of the message for debugging purposes
 	 */
-	public void dumpMessage(PrintStream out) throws MessagingException {
+	public void dumpMessage(final PrintStream out) throws MessagingException {
 		out.println("===== Dumping message =====");
 
 		out.println("Envelope sender: " + this.getEnvelopeSender());
 		out.println("Envelope recipient: " + this.getEnvelopeReceiver());
 
 		// It should all be convertible with ascii or utf8
-		String content = new String(this.getData());
+		final String content = new String(this.getData());
 		out.println(content);
 
 		out.println("===== End message dump =====");
@@ -81,7 +84,9 @@ public class WiserMessage {
 	 */
 	@Override
 	public String toString() {
-		if (this.getData() == null) return "";
+		if (this.getData() == null) {
+			return "";
+		}
 
 		return new String(this.getData());
 	}

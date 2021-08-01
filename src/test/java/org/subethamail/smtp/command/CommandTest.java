@@ -6,7 +6,7 @@ import org.subethamail.smtp.util.ServerTestCase;
  * @author Jon Stevens
  */
 public class CommandTest extends ServerTestCase {
-	public CommandTest(String name) {
+	public CommandTest(final String name) {
 		super(name);
 	}
 

@@ -6,5 +6,5 @@ package org.subethamail.smtp.auth;
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
  */
 public interface UsernamePasswordValidator {
-	public void login(final String username, final String password) throws LoginFailedException;
+	void login(final String username, final String password) throws LoginFailedException;
 }

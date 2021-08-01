@@ -16,17 +16,15 @@ public class DropConnectionException extends RejectException {
 	int code;
 
 	/** */
-	public DropConnectionException() {
-		super();
-	}
+	public DropConnectionException() {}
 
 	/** */
-	public DropConnectionException(String message) {
+	public DropConnectionException(final String message) {
 		super(message);
 	}
 
 	/** */
-	public DropConnectionException(int code, String message) {
+	public DropConnectionException(final int code, final String message) {
 		super(code, message);
 	}
 }

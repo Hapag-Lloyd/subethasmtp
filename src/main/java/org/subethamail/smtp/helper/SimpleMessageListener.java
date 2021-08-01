@@ -29,7 +29,7 @@ public interface SimpleMessageListener {
 	 * @return true if the listener wants delivery of the message, false if the
 	 *         message is not for this listener.
 	 */
-	public boolean accept(String from, String recipient);
+	boolean accept(String from, String recipient);
 
 	/**
 	 * When message data arrives, this method will be called for every recipient
@@ -45,5 +45,5 @@ public interface SimpleMessageListener {
 	 *                              error will be reported to the client.
 	 * @throws IOException          if there is an IO error reading the input data.
 	 */
-	public void deliver(String from, String recipient, InputStream data) throws TooMuchDataException, IOException;
+	void deliver(String from, String recipient, InputStream data) throws TooMuchDataException, IOException;
 }

@@ -7,7 +7,7 @@ import org.subethamail.smtp.util.ServerTestCase;
  */
 public class QuitTest extends ServerTestCase {
 	/** */
-	public QuitTest(String name) {
+	public QuitTest(final String name) {
 		super(name);
 	}
 

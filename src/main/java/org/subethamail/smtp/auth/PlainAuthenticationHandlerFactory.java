@@ -19,24 +19,26 @@ import org.subethamail.smtp.util.Base64;
  * @author Ian White <ibwhite@gmail.com>
  */
 public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerFactory {
-	static List<String> MECHANISMS = new ArrayList<String>(1);
+	static List<String> MECHANISMS = new ArrayList<>(1);
 	static {
 		MECHANISMS.add("PLAIN");
 	}
 
-	private UsernamePasswordValidator helper;
+	private final UsernamePasswordValidator helper;
 
 	/** */
-	public PlainAuthenticationHandlerFactory(UsernamePasswordValidator helper) {
+	public PlainAuthenticationHandlerFactory(final UsernamePasswordValidator helper) {
 		this.helper = helper;
 	}
 
 	/** */
+	@Override
 	public List<String> getAuthenticationMechanisms() {
 		return MECHANISMS;
 	}
 
 	/** */
+	@Override
 	public AuthenticationHandler create() {
 		return new Handler();
 	}
@@ -49,8 +51,9 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 		private String password;
 
 		/* */
-		public String auth(String clientInput) throws RejectException {
-			StringTokenizer stk = new StringTokenizer(clientInput);
+		@Override
+		public String auth(final String clientInput) throws RejectException {
+			final StringTokenizer stk = new StringTokenizer(clientInput);
 			String secret = stk.nextToken();
 			if (secret.trim().equalsIgnoreCase("AUTH")) {
 				// Let's read the RFC2554 "initial-response" parameter
@@ -60,18 +63,19 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 					throw new RejectException(504, "AUTH mechanism mismatch");
 				}
 
-				if (stk.hasMoreTokens()) {
-					// the client submitted an initial response
-					secret = stk.nextToken();
-				} else {
+				if (!stk.hasMoreTokens()) {
 					// the client did not submit an initial response, we'll get it in the next pass
 					return "334 Ok";
 				}
+				// the client submitted an initial response
+				secret = stk.nextToken();
 			}
 
-			byte[] decodedSecret = Base64.decode(secret);
-			if (decodedSecret == null) throw new RejectException(501, /* 5.5.4 */
-					"Invalid command argument, not a valid Base64 string");
+			final byte[] decodedSecret = Base64.decode(secret);
+			if (decodedSecret == null) {
+				throw new RejectException(501, /* 5.5.4 */
+						"Invalid command argument, not a valid Base64 string");
+			}
 
 			/*
 			 * RFC4616: The client presents the authorization identity (identity to act as),
@@ -81,22 +85,22 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 			 */
 
 			int i, j;
-			for (i = 0; i < decodedSecret.length && decodedSecret[i] != 0; i++);
+			for (i = 0; i < decodedSecret.length && decodedSecret[i] != 0; i++) {}
 			if (i >= decodedSecret.length) {
 				throw new RejectException(501, /* 5.5.4 */
 						"Invalid command argument, does not contain NUL");
 			}
 
-			for (j = i + 1; j < decodedSecret.length && decodedSecret[j] != 0; j++);
+			for (j = i + 1; j < decodedSecret.length && decodedSecret[j] != 0; j++) {}
 			if (j >= decodedSecret.length) {
 				throw new RejectException(501, /* 5.5.4 */
 						"Invalid command argument, does not contain the second NUL");
 			}
 
 			@SuppressWarnings("unused")
-			String authorizationId = new String(decodedSecret, 0, i);
-			String authenticationId = new String(decodedSecret, i + 1, j - i - 1);
-			String passwd = new String(decodedSecret, j + 1, decodedSecret.length - j - 1);
+			final String authorizationId = new String(decodedSecret, 0, i);
+			final String authenticationId = new String(decodedSecret, i + 1, j - i - 1);
+			final String passwd = new String(decodedSecret, j + 1, decodedSecret.length - j - 1);
 
 			// might be nice to do something with authorizationId, but for
 			// purposes of the UsernamePasswordValidator, we just want to use
@@ -106,7 +110,7 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 			this.password = passwd;
 			try {
 				PlainAuthenticationHandlerFactory.this.helper.login(this.username.toString(), this.password);
-			} catch (LoginFailedException lfe) {
+			} catch (final LoginFailedException lfe) {
 				throw new RejectException(535, /* 5.7.8 */
 						"Authentication credentials invalid");
 			}
@@ -115,6 +119,7 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 		}
 
 		/* */
+		@Override
 		public Object getIdentity() {
 			return this.username;
 		}

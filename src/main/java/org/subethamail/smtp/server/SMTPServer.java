@@ -185,9 +185,8 @@ public class SMTPServer {
 	public String getHostName() {
 		if (this.hostName == null) {
 			return UNKNOWN_HOSTNAME;
-		} else {
-			return this.hostName;
 		}
+		return this.hostName;
 	}
 
 	/** The host name that will be reported to SMTP clients */
@@ -348,9 +347,9 @@ public class SMTPServer {
 	 * @throws IOException when creating the socket failed
 	 */
 	public SSLSocket createSSLSocket(final Socket socket) throws IOException {
-		final SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
+		final SSLSocketFactory sf = (SSLSocketFactory) SSLSocketFactory.getDefault();
 		final InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-		final SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
+		final SSLSocket s = (SSLSocket) sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true);
 
 		// we are a server
 		s.setUseClientMode(false);

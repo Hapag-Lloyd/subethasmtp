@@ -126,9 +126,12 @@ public class Base64 {
 			final int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | sArr[s++] & 0xff;
 
 			// Encode the int into four chars
-			dArr[d++] = CA[i >>> 18 & 0x3f];
-			dArr[d++] = CA[i >>> 12 & 0x3f];
-			dArr[d++] = CA[i >>> 6 & 0x3f];
+			dArr[d] = CA[i >>> 18 & 0x3f];
+			d++;
+			dArr[d] = CA[i >>> 12 & 0x3f];
+			d++;
+			dArr[d] = CA[i >>> 6 & 0x3f];
+			d++;
 			dArr[d++] = CA[i & 0x3f];
 
 			// Add optional line separator
@@ -203,7 +206,8 @@ public class Base64 {
 			// Assemble three bytes into an int from four "valid" characters.
 			int i = 0;
 			for (int j = 0; j < 4; j++) { // j only increased if a valid char was found.
-				final int c = IA[sArr[s++]];
+				final int c = IA[sArr[s]];
+				s++;
 				if (c >= 0) {
 					i |= c << 18 - j * 6;
 				} else {
@@ -211,11 +215,14 @@ public class Base64 {
 				}
 			}
 			// Add the bytes
-			dArr[d++] = (byte) (i >> 16);
+			dArr[d] = (byte) (i >> 16);
+			d++;
 			if (d < len) {
-				dArr[d++] = (byte) (i >> 8);
+				dArr[d] = (byte) (i >> 8);
+				d++;
 				if (d < len) {
-					dArr[d++] = (byte) i;
+					dArr[d] = (byte) i;
+					d++;
 				}
 			}
 		}
@@ -271,9 +278,12 @@ public class Base64 {
 			final int i = IA[sArr[sIx++]] << 18 | IA[sArr[sIx++]] << 12 | IA[sArr[sIx++]] << 6 | IA[sArr[sIx++]];
 
 			// Add the bytes
-			dArr[d++] = (byte) (i >> 16);
-			dArr[d++] = (byte) (i >> 8);
-			dArr[d++] = (byte) i;
+			dArr[d] = (byte) (i >> 16);
+			d++;
+			dArr[d] = (byte) (i >> 8);
+			d++;
+			dArr[d] = (byte) i;
+			d++;
 
 			// If line separator, jump over it.
 			if (sepCnt > 0 && ++cc == 19) {
@@ -286,11 +296,13 @@ public class Base64 {
 			// Decode last 1-3 bytes (incl '=') into 1-3 bytes
 			int i = 0;
 			for (int j = 0; sIx <= eIx - pad; j++) {
-				i |= IA[sArr[sIx++]] << 18 - j * 6;
+				i |= IA[sArr[sIx]] << 18 - j * 6;
+				sIx++;
 			}
 
 			for (int r = 16; d < len; r -= 8) {
-				dArr[d++] = (byte) (i >> r);
+				dArr[d] = (byte) (i >> r);
+				d++;
 			}
 		}
 
@@ -330,9 +342,12 @@ public class Base64 {
 			final int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | sArr[s++] & 0xff;
 
 			// Encode the int into four chars
-			dArr[d++] = (byte) CA[i >>> 18 & 0x3f];
-			dArr[d++] = (byte) CA[i >>> 12 & 0x3f];
-			dArr[d++] = (byte) CA[i >>> 6 & 0x3f];
+			dArr[d] = (byte) CA[i >>> 18 & 0x3f];
+			d++;
+			dArr[d] = (byte) CA[i >>> 12 & 0x3f];
+			d++;
+			dArr[d] = (byte) CA[i >>> 6 & 0x3f];
+			d++;
 			dArr[d++] = (byte) CA[i & 0x3f];
 
 			// Add optional line separator
@@ -404,7 +419,8 @@ public class Base64 {
 			// Assemble three bytes into an int from four "valid" characters.
 			int i = 0;
 			for (int j = 0; j < 4; j++) { // j only increased if a valid char was found.
-				final int c = IA[sArr[s++] & 0xff];
+				final int c = IA[sArr[s] & 0xff];
+				s++;
 				if (c >= 0) {
 					i |= c << 18 - j * 6;
 				} else {
@@ -413,11 +429,14 @@ public class Base64 {
 			}
 
 			// Add the bytes
-			dArr[d++] = (byte) (i >> 16);
+			dArr[d] = (byte) (i >> 16);
+			d++;
 			if (d < len) {
-				dArr[d++] = (byte) (i >> 8);
+				dArr[d] = (byte) (i >> 8);
+				d++;
 				if (d < len) {
-					dArr[d++] = (byte) i;
+					dArr[d] = (byte) i;
+					d++;
 				}
 			}
 		}
@@ -474,9 +493,12 @@ public class Base64 {
 			final int i = IA[sArr[sIx++]] << 18 | IA[sArr[sIx++]] << 12 | IA[sArr[sIx++]] << 6 | IA[sArr[sIx++]];
 
 			// Add the bytes
-			dArr[d++] = (byte) (i >> 16);
-			dArr[d++] = (byte) (i >> 8);
-			dArr[d++] = (byte) i;
+			dArr[d] = (byte) (i >> 16);
+			d++;
+			dArr[d] = (byte) (i >> 8);
+			d++;
+			dArr[d] = (byte) i;
+			d++;
 
 			// If line separator, jump over it.
 			if (sepCnt > 0 && ++cc == 19) {
@@ -489,11 +511,13 @@ public class Base64 {
 			// Decode last 1-3 bytes (incl '=') into 1-3 bytes
 			int i = 0;
 			for (int j = 0; sIx <= eIx - pad; j++) {
-				i |= IA[sArr[sIx++]] << 18 - j * 6;
+				i |= IA[sArr[sIx]] << 18 - j * 6;
+				sIx++;
 			}
 
 			for (int r = 16; d < len; r -= 8) {
-				dArr[d++] = (byte) (i >> r);
+				dArr[d] = (byte) (i >> r);
+				d++;
 			}
 		}
 
@@ -575,7 +599,8 @@ public class Base64 {
 			// Assemble three bytes into an int from four "valid" characters.
 			int i = 0;
 			for (int j = 0; j < 4; j++) { // j only increased if a valid char was found.
-				final int c = IA[str.charAt(s++)];
+				final int c = IA[str.charAt(s)];
+				s++;
 				if (c >= 0) {
 					i |= c << 18 - j * 6;
 				} else {
@@ -583,11 +608,14 @@ public class Base64 {
 				}
 			}
 			// Add the bytes
-			dArr[d++] = (byte) (i >> 16);
+			dArr[d] = (byte) (i >> 16);
+			d++;
 			if (d < len) {
-				dArr[d++] = (byte) (i >> 8);
+				dArr[d] = (byte) (i >> 8);
+				d++;
 				if (d < len) {
-					dArr[d++] = (byte) i;
+					dArr[d] = (byte) i;
+					d++;
 				}
 			}
 		}
@@ -646,9 +674,12 @@ public class Base64 {
 					| IA[s.charAt(sIx++)];
 
 			// Add the bytes
-			dArr[d++] = (byte) (i >> 16);
-			dArr[d++] = (byte) (i >> 8);
-			dArr[d++] = (byte) i;
+			dArr[d] = (byte) (i >> 16);
+			d++;
+			dArr[d] = (byte) (i >> 8);
+			d++;
+			dArr[d] = (byte) i;
+			d++;
 
 			// If line separator, jump over it.
 			if (sepCnt > 0 && ++cc == 19) {
@@ -661,11 +692,13 @@ public class Base64 {
 			// Decode last 1-3 bytes (incl '=') into 1-3 bytes
 			int i = 0;
 			for (int j = 0; sIx <= eIx - pad; j++) {
-				i |= IA[s.charAt(sIx++)] << 18 - j * 6;
+				i |= IA[s.charAt(sIx)] << 18 - j * 6;
+				sIx++;
 			}
 
 			for (int r = 16; d < len; r -= 8) {
-				dArr[d++] = (byte) (i >> r);
+				dArr[d] = (byte) (i >> r);
+				d++;
 			}
 		}
 

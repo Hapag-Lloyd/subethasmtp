@@ -10,7 +10,7 @@ import java.io.IOException;
 public class AuthenticationNotSupportedException extends IOException {
 	private static final long serialVersionUID = 4269158574227243089L;
 
-	public AuthenticationNotSupportedException(String message) {
+	public AuthenticationNotSupportedException(final String message) {
 		super(message);
 	}
 }

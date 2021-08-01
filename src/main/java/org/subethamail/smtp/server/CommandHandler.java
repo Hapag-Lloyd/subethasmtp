@@ -25,12 +25,12 @@ public class CommandHandler {
 	/**
 	 * The map of known SMTP commands. Keys are upper case names of the commands.
 	 */
-	private Map<String, Command> commandMap = new HashMap<String, Command>();
+	private final Map<String, Command> commandMap = new HashMap<>();
 
 	/** */
 	public CommandHandler() {
 		// This solution should be more robust than the earlier "manual" configuration.
-		for (CommandRegistry registry : CommandRegistry.values()) {
+		for (final CommandRegistry registry : CommandRegistry.values()) {
 			this.addCommand(registry.getCommand());
 		}
 	}
@@ -42,8 +42,8 @@ public class CommandHandler {
 	 *                          commands with {@link RequireTLSCommandWrapper} when
 	 *                          appropriate.
 	 */
-	public CommandHandler(Collection<Command> availableCommands) {
-		for (Command command : availableCommands) {
+	public CommandHandler(final Collection<Command> availableCommands) {
+		for (final Command command : availableCommands) {
 			this.addCommand(command);
 		}
 	}
@@ -51,25 +51,27 @@ public class CommandHandler {
 	/**
 	 * Adds or replaces the specified command.
 	 */
-	public void addCommand(Command command) {
-		if (log.isDebugEnabled()) log.debug("Added command: " + command.getName());
+	public void addCommand(final Command command) {
+		if (log.isDebugEnabled()) {
+			log.debug("Added command: " + command.getName());
+		}
 
 		this.commandMap.put(command.getName(), command);
 	}
 
 	/**
 	 * Returns the command object corresponding to the specified command name.
-	 * 
+	 *
 	 * @param commandName case insensitive name of the command.
 	 * @return the command object, or null, if the command is unknown.
 	 */
-	public Command getCommand(String commandName) {
-		String upperCaseCommandName = commandName.toUpperCase(Locale.ENGLISH);
+	public Command getCommand(final String commandName) {
+		final String upperCaseCommandName = commandName.toUpperCase(Locale.ENGLISH);
 		return this.commandMap.get(upperCaseCommandName);
 	}
 
 	/** */
-	public boolean containsCommand(String command) {
+	public boolean containsCommand(final String command) {
 		return this.commandMap.containsKey(command);
 	}
 
@@ -79,12 +81,12 @@ public class CommandHandler {
 	}
 
 	/** */
-	public void handleCommand(Session context, String commandString)
+	public void handleCommand(final Session context, final String commandString)
 			throws SocketTimeoutException, IOException, DropConnectionException {
 		try {
-			Command command = this.getCommandFromString(commandString);
+			final Command command = this.getCommandFromString(commandString);
 			command.execute(commandString, context);
-		} catch (CommandException e) {
+		} catch (final CommandException e) {
 			context.sendResponse("500 " + e.getMessage());
 		}
 	}
@@ -93,21 +95,21 @@ public class CommandHandler {
 	 * @return the HelpMessage object for the given command name (verb)
 	 * @throws CommandException
 	 */
-	public HelpMessage getHelp(String command) throws CommandException {
+	public HelpMessage getHelp(final String command) throws CommandException {
 		return this.getCommandFromString(command).getHelp();
 	}
 
 	/** */
-	private Command getCommandFromString(String commandString)
+	private Command getCommandFromString(final String commandString)
 			throws UnknownCommandException, InvalidCommandNameException {
 		Command command = null;
-		String key = this.toKey(commandString);
+		final String key = this.toKey(commandString);
 		if (key != null) {
 			command = this.commandMap.get(key);
 		}
 		if (command == null) {
 			// some commands have a verb longer than 4 letters
-			String verb = this.toVerb(commandString);
+			final String verb = this.toVerb(commandString);
 			if (verb != null) {
 				command = this.commandMap.get(verb);
 			}
@@ -119,16 +121,20 @@ public class CommandHandler {
 	}
 
 	/** */
-	private String toKey(String string) throws InvalidCommandNameException {
-		if (string == null || string.length() < 4) throw new InvalidCommandNameException("Error: bad syntax");
+	private String toKey(final String string) throws InvalidCommandNameException {
+		if (string == null || string.length() < 4) {
+			throw new InvalidCommandNameException("Error: bad syntax");
+		}
 
 		return string.substring(0, 4).toUpperCase(Locale.ENGLISH);
 	}
 
 	/** */
-	private String toVerb(String string) throws InvalidCommandNameException {
-		StringTokenizer stringTokenizer = new StringTokenizer(string);
-		if (!stringTokenizer.hasMoreTokens()) throw new InvalidCommandNameException("Error: bad syntax");
+	private String toVerb(final String string) throws InvalidCommandNameException {
+		final StringTokenizer stringTokenizer = new StringTokenizer(string);
+		if (!stringTokenizer.hasMoreTokens()) {
+			throw new InvalidCommandNameException("Error: bad syntax");
+		}
 
 		return stringTokenizer.nextToken().toUpperCase(Locale.ENGLISH);
 	}

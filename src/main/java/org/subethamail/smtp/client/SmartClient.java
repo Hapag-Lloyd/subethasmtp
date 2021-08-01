@@ -42,7 +42,7 @@ public class SmartClient extends SMTPClient {
 	 * upper case, like "AUTH", value is the extension parameters string in unparsed
 	 * form. If the server does not support EHLO, then this map is empty.
 	 */
-	private final Map<String, String> extensions = new HashMap<String, String>();
+	private final Map<String, String> extensions = new HashMap<>();
 
 	/**
 	 * If supplied (not null), then it will be called after EHLO, to authenticate
@@ -59,23 +59,24 @@ public class SmartClient extends SMTPClient {
 
 	/**
 	 * Connects to the specified server and issues the initial HELO command.
-	 * 
+	 *
 	 * @throws UnknownHostException if problem looking up hostname
 	 * @throws SMTPException        if problem reported by the server
 	 * @throws IOException          if problem communicating with host
 	 */
-	public SmartClient(String host, int port, String myHost) throws UnknownHostException, IOException, SMTPException {
+	public SmartClient(final String host, final int port, final String myHost)
+			throws UnknownHostException, IOException, SMTPException {
 		this(host, port, null, myHost);
 	}
 
 	/**
 	 * Connects to the specified server and issues the initial HELO command.
-	 * 
+	 *
 	 * @throws UnknownHostException if problem looking up hostname
 	 * @throws SMTPException        if problem reported by the server
 	 * @throws IOException          if problem communicating with host
 	 */
-	public SmartClient(String host, int port, SocketAddress bindpoint, String myHost)
+	public SmartClient(final String host, final int port, final SocketAddress bindpoint, final String myHost)
 			throws UnknownHostException, IOException, SMTPException {
 		this.setBindpoint(bindpoint);
 		this.setHeloHost(myHost);
@@ -88,21 +89,23 @@ public class SmartClient extends SMTPClient {
 	 * it fails or if the server does not accept messages.
 	 */
 	@Override
-	public void connect(String host, int port) throws SMTPException, AuthenticationNotSupportedException, IOException {
-		if (heloHost == null) throw new IllegalStateException("Helo host must be specified before connecting");
+	public void connect(final String host, final int port)
+			throws SMTPException, AuthenticationNotSupportedException, IOException {
+		if (heloHost == null) {
+			throw new IllegalStateException("Helo host must be specified before connecting");
+		}
 
 		super.connect(host, port);
 		try {
 			this.receiveAndCheck(); // The server announces itself first
 			this.sendHeloOrEhlo();
-			if (this.authenticator != null) this.authenticator.authenticate();
-		} catch (SMTPException e) {
+			if (this.authenticator != null) {
+				this.authenticator.authenticate();
+			}
+		} catch (final SMTPException | AuthenticationNotSupportedException e) {
 			this.quit();
 			throw e;
-		} catch (AuthenticationNotSupportedException e) {
-			this.quit();
-			throw e;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			this.close(); // just close the socket, issuing QUIT is hopeless now
 			throw e;
 		}
@@ -114,7 +117,7 @@ public class SmartClient extends SMTPClient {
 	 */
 	protected void sendHeloOrEhlo() throws IOException, SMTPException {
 		extensions.clear();
-		Response resp = this.sendReceive("EHLO " + heloHost);
+		final Response resp = this.sendReceive("EHLO " + heloHost);
 		if (resp.isSuccess()) {
 			parseEhloResponse(resp);
 		} else if (resp.getCode() == 500 || resp.getCode() == 502) {
@@ -130,15 +133,15 @@ public class SmartClient extends SMTPClient {
 	 * Extracts the list of SMTP extensions from the server's response to EHLO, and
 	 * stores them in {@link #extensions}.
 	 */
-	private void parseEhloResponse(Response resp) throws IOException {
-		BufferedReader reader = new BufferedReader(new StringReader(resp.getMessage()));
+	private void parseEhloResponse(final Response resp) throws IOException {
+		final BufferedReader reader = new BufferedReader(new StringReader(resp.getMessage()));
 		// first line contains server name and welcome message, skip it
 		reader.readLine();
 		String line;
 		while (null != (line = reader.readLine())) {
-			int iFirstSpace = line.indexOf(' ');
-			String keyword = iFirstSpace == -1 ? line : line.substring(0, iFirstSpace);
-			String parameters = iFirstSpace == -1 ? "" : line.substring(iFirstSpace + 1);
+			final int iFirstSpace = line.indexOf(' ');
+			final String keyword = iFirstSpace == -1 ? line : line.substring(0, iFirstSpace);
+			final String parameters = iFirstSpace == -1 ? "" : line.substring(iFirstSpace + 1);
 			extensions.put(keyword.toUpperCase(Locale.ENGLISH), parameters);
 		}
 	}
@@ -149,19 +152,21 @@ public class SmartClient extends SMTPClient {
 	 */
 	@Override
 	protected Response receive() throws IOException {
-		Response response = super.receive();
-		if (response.getCode() == 421) serverClosingTransmissionChannel = true;
+		final Response response = super.receive();
+		if (response.getCode() == 421) {
+			serverClosingTransmissionChannel = true;
+		}
 		return response;
 	}
 
 	/** */
-	public void from(String from) throws IOException, SMTPException {
+	public void from(final String from) throws IOException, SMTPException {
 		this.sendAndCheck("MAIL FROM: <" + from + ">");
 		this.sentFrom = true;
 	}
 
 	/** */
-	public void to(String to) throws IOException, SMTPException {
+	public void to(final String to) throws IOException, SMTPException {
 		this.sendAndCheck("RCPT TO: <" + to + ">");
 		this.recipientCount++;
 	}
@@ -176,7 +181,7 @@ public class SmartClient extends SMTPClient {
 	/**
 	 * Actually write some data
 	 */
-	public void dataWrite(byte[] data, int numBytes) throws IOException {
+	public void dataWrite(final byte[] data, final int numBytes) throws IOException {
 		this.dataOutput.write(data, 0, numBytes);
 	}
 
@@ -197,14 +202,16 @@ public class SmartClient extends SMTPClient {
 	 * It still closes the connection, but it does not send the QUIT command if a
 	 * 421 Service closing transmission channel is received previously. In these
 	 * cases QUIT would fail anyway.
-	 * 
+	 *
 	 * @see <a href="http://tools.ietf.org/html/rfc5321#section-3.8">RFC 5321
 	 *      Terminating Sessions and Connections</a>
 	 */
 	public void quit() {
 		try {
-			if (this.isConnected() && !this.serverClosingTransmissionChannel) this.sendAndCheck("QUIT");
-		} catch (IOException ex) {
+			if (this.isConnected() && !this.serverClosingTransmissionChannel) {
+				this.sendAndCheck("QUIT");
+			}
+		} catch (final IOException ex) {
 			log.warn("Failed to issue QUIT to " + this.hostPort);
 		}
 
@@ -234,7 +241,7 @@ public class SmartClient extends SMTPClient {
 
 	/**
 	 * Returns the SMTP extensions supported by the server.
-	 * 
+	 *
 	 * @return the extension map. Key is the extension keyword in upper case, value
 	 *         is the unparsed string of extension parameters.
 	 */
@@ -247,7 +254,7 @@ public class SmartClient extends SMTPClient {
 	 * sent to the server in the parameter of the HELO and EHLO commands. This has
 	 * no default and is required.
 	 */
-	public void setHeloHost(String myHost) {
+	public void setHeloHost(final String myHost) {
 		this.heloHost = myHost;
 	}
 
@@ -271,7 +278,7 @@ public class SmartClient extends SMTPClient {
 	 * authenticate this client to the server. The default is that no authentication
 	 * will happen.
 	 */
-	public void setAuthenticator(Authenticator authenticator) {
+	public void setAuthenticator(final Authenticator authenticator) {
 		this.authenticator = authenticator;
 	}
 }

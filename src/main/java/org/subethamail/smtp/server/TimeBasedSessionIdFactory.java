@@ -19,7 +19,9 @@ public class TimeBasedSessionIdFactory implements SessionIdFactory {
 	public String create() {
 		long id = System.currentTimeMillis();
 		synchronized (this) {
-			if (id <= lastAllocatedId) id = lastAllocatedId + 1;
+			if (id <= lastAllocatedId) {
+				id = lastAllocatedId + 1;
+			}
 			lastAllocatedId = id;
 		}
 		return Long.toString(id, 36).toUpperCase(Locale.ENGLISH);

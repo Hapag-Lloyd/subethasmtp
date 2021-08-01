@@ -37,11 +37,10 @@ public class CRLFTerminatedReader extends FilterReader {
 	private static int MAX_LINE_LENGTH = 998;
 
 	@SuppressWarnings("serial")
-	public class TerminationException extends IOException {
+	public static class TerminationException extends IOException {
 		private final int where;
 
 		public TerminationException(final int where) {
-			super();
 			this.where = where;
 		}
 
@@ -56,10 +55,8 @@ public class CRLFTerminatedReader extends FilterReader {
 	}
 
 	@SuppressWarnings("serial")
-	public class MaxLineLengthException extends IOException {
-		public MaxLineLengthException() {
-			super();
-		}
+	public static class MaxLineLengthException extends IOException {
+		public MaxLineLengthException() {}
 
 		public MaxLineLengthException(final String s) {
 			super(s);

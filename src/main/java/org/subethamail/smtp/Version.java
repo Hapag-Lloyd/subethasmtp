@@ -11,20 +11,20 @@ package org.subethamail.smtp;
 public class Version {
 	/** */
 	public static String getSpecification() {
-		Package pkg = Version.class.getPackage();
-		return (pkg == null) ? null : pkg.getSpecificationVersion();
+		final Package pkg = Version.class.getPackage();
+		return pkg == null ? null : pkg.getSpecificationVersion();
 	}
 
 	/** */
 	public static String getImplementation() {
-		Package pkg = Version.class.getPackage();
-		return (pkg == null) ? null : pkg.getImplementationVersion();
+		final Package pkg = Version.class.getPackage();
+		return pkg == null ? null : pkg.getImplementationVersion();
 	}
 
 	/**
 	 * A simple main method that prints the version and exits
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		System.out.println("Version: " + getSpecification());
 		System.out.println("Implementation: " + getImplementation());
 	}

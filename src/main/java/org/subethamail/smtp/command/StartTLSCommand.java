@@ -28,7 +28,7 @@ public class StartTLSCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException {
+	public void execute(final String commandString, final Session sess) throws IOException {
 		if (!commandString.trim().toUpperCase(Locale.ENGLISH).equals(this.getName())) {
 			sess.sendResponse("501 Syntax error (no parameters allowed)");
 			return;
@@ -40,7 +40,7 @@ public class StartTLSCommand extends BaseCommand {
 		}
 
 		try {
-			Socket socket = sess.getSocket();
+			final Socket socket = sess.getSocket();
 			if (socket instanceof SSLSocket) {
 				sess.sendResponse("454 TLS not available due to temporary reason: TLS already active");
 				return;
@@ -48,7 +48,7 @@ public class StartTLSCommand extends BaseCommand {
 
 			sess.sendResponse("220 Ready to start TLS");
 
-			SSLSocket s = sess.getServer().createSSLSocket(socket);
+			final SSLSocket s = sess.getServer().createSSLSocket(socket);
 			s.startHandshake();
 			log.debug("Cipher suite: " + s.getSession().getCipherSuite());
 
@@ -58,19 +58,19 @@ public class StartTLSCommand extends BaseCommand {
 
 			if (s.getNeedClientAuth()) {
 				try {
-					Certificate[] peerCertificates = s.getSession().getPeerCertificates();
+					final Certificate[] peerCertificates = s.getSession().getPeerCertificates();
 					sess.setTlsPeerCertificates(peerCertificates);
-				} catch (SSLPeerUnverifiedException e) {
+				} catch (final SSLPeerUnverifiedException e) {
 					// IGNORE, just leave the certificate chain null
 				}
 			}
-		} catch (SSLHandshakeException ex) {
+		} catch (final SSLHandshakeException ex) {
 			// "no cipher suites in common" is common and puts a lot of crap in the logs.
 			// This will at least limit it to a single WARN line and not a whole stacktrace.
 			// Unfortunately it might catch some other types of SSLHandshakeException (if
 			// in fact other types exist), but oh well.
 			log.warn("startTLS() failed: " + ex);
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			log.warn("startTLS() failed: " + ex.getMessage(), ex);
 		}
 	}

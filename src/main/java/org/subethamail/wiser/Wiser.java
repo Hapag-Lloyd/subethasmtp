@@ -56,26 +56,26 @@ public class Wiser implements SimpleMessageListener {
 	}
 
 	/** Convenience constructor */
-	public Wiser(int port) {
+	public Wiser(final int port) {
 		this();
 		this.setPort(port);
 	}
 
 	/**
 	 * The port that the server should listen on.
-	 * 
+	 *
 	 * @param port
 	 */
-	public void setPort(int port) {
+	public void setPort(final int port) {
 		this.server.setPort(port);
 	}
 
 	/**
 	 * The hostname that the server should listen on.
-	 * 
+	 *
 	 * @param hostname
 	 */
-	public void setHostname(String hostname) {
+	public void setHostname(final String hostname) {
 		this.server.setHostName(hostname);
 	}
 
@@ -90,23 +90,30 @@ public class Wiser implements SimpleMessageListener {
 	}
 
 	/** A main() for this class. Starts up the server. */
-	public static void main(String[] args) throws Exception {
-		Wiser wiser = new Wiser();
+	public static void main(final String[] args) throws Exception {
+		final Wiser wiser = new Wiser();
 		wiser.start();
 	}
 
 	/** Always accept everything */
-	public boolean accept(String from, String recipient) {
-		if (log.isDebugEnabled()) log.debug("Accepting mail from " + from + " to " + recipient);
+	@Override
+	public boolean accept(final String from, final String recipient) {
+		if (log.isDebugEnabled()) {
+			log.debug("Accepting mail from " + from + " to " + recipient);
+		}
 
 		return true;
 	}
 
 	/** Cache the messages in memory */
-	public void deliver(String from, String recipient, InputStream data) throws TooMuchDataException, IOException {
-		if (log.isDebugEnabled()) log.debug("Delivering mail from " + from + " to " + recipient);
+	@Override
+	public void deliver(final String from, final String recipient, InputStream data)
+			throws TooMuchDataException, IOException {
+		if (log.isDebugEnabled()) {
+			log.debug("Delivering mail from " + from + " to " + recipient);
+		}
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		data = new BufferedInputStream(data);
 
 		// read the data from the stream
@@ -115,9 +122,11 @@ public class Wiser implements SimpleMessageListener {
 			out.write(current);
 		}
 
-		byte[] bytes = out.toByteArray();
+		final byte[] bytes = out.toByteArray();
 
-		if (log.isDebugEnabled()) log.debug("Creating message from data with " + bytes.length + " bytes");
+		if (log.isDebugEnabled()) {
+			log.debug("Creating message from data with " + bytes.length + " bytes");
+		}
 
 		// create a new WiserMessage.
 		this.messages.add(new WiserMessage(this, from, recipient, bytes));
@@ -153,10 +162,12 @@ public class Wiser implements SimpleMessageListener {
 	 * For debugging purposes, dumps a rough outline of the messages to the output
 	 * stream.
 	 */
-	public void dumpMessages(PrintStream out) throws MessagingException {
+	public void dumpMessages(final PrintStream out) throws MessagingException {
 		out.println("----- Start printing messages -----");
 
-		for (WiserMessage wmsg : this.getMessages()) wmsg.dumpMessage(out);
+		for (final WiserMessage wmsg : this.getMessages()) {
+			wmsg.dumpMessage(out);
+		}
 
 		out.println("----- End printing messages -----");
 	}

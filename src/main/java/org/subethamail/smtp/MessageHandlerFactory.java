@@ -17,5 +17,5 @@ public interface MessageHandlerFactory {
 	 *
 	 * @param ctx provides information about the client.
 	 */
-	public MessageHandler create(MessageContext ctx);
+	MessageHandler create(MessageContext ctx);
 }

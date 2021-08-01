@@ -7,7 +7,7 @@ import org.subethamail.smtp.util.ServerTestCase;
  */
 public class ReceiptTest extends ServerTestCase {
 	/** */
-	public ReceiptTest(String name) {
+	public ReceiptTest(final String name) {
 		super(name);
 	}
 

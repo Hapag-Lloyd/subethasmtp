@@ -20,12 +20,12 @@ public class RejectException extends RuntimeException {
 	}
 
 	/** */
-	public RejectException(String message) {
+	public RejectException(final String message) {
 		this(554, message);
 	}
 
 	/** */
-	public RejectException(int code, String message) {
+	public RejectException(final int code, final String message) {
 		super(message);
 
 		this.code = code;

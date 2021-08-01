@@ -3,9 +3,9 @@ package org.subethamail.smtp.command;
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
 import org.subethamail.smtp.auth.UsernamePasswordValidator;
+import org.subethamail.smtp.util.Base64;
 import org.subethamail.smtp.util.Client;
 import org.subethamail.smtp.util.ServerTestCase;
-import org.subethamail.smtp.util.Base64;
 import org.subethamail.smtp.util.TextUtils;
 
 /**
@@ -17,8 +17,9 @@ public class AuthTest extends ServerTestCase {
 
 	static final String REQUIRED_PASSWORD = "mySecret01";
 
-	class RequiredUsernamePasswordValidator implements UsernamePasswordValidator {
-		public void login(String username, String password) throws LoginFailedException {
+	static class RequiredUsernamePasswordValidator implements UsernamePasswordValidator {
+		@Override
+		public void login(final String username, final String password) throws LoginFailedException {
 			if (!username.equals(REQUIRED_USERNAME) || !password.equals(REQUIRED_PASSWORD)) {
 				throw new LoginFailedException();
 			}
@@ -26,7 +27,7 @@ public class AuthTest extends ServerTestCase {
 	}
 
 	/** */
-	public AuthTest(String name) {
+	public AuthTest(final String name) {
 		super(name);
 	}
 
@@ -41,9 +42,9 @@ public class AuthTest extends ServerTestCase {
 		this.wiser.setHostname("localhost");
 		this.wiser.setPort(PORT);
 
-		UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
+		final UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
 
-		EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
+		final EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
 		this.wiser.getServer().setAuthenticationHandlerFactory(fact);
 
 		this.wiser.start();
@@ -82,10 +83,10 @@ public class AuthTest extends ServerTestCase {
 		this.send("AUTH PLAIN");
 		this.expect("334");
 
-		String authString
+		final String authString
 				= new String(new byte[] { 0 }) + REQUIRED_USERNAME + new String(new byte[] { 0 }) + REQUIRED_PASSWORD;
 
-		String enc_authString = Base64.encodeToString(TextUtils.getAsciiBytes(authString), false);
+		final String enc_authString = Base64.encodeToString(TextUtils.getAsciiBytes(authString), false);
 		this.send(enc_authString);
 		this.expect("235");
 
@@ -119,7 +120,7 @@ public class AuthTest extends ServerTestCase {
 		this.send("AUTH LOGIN");
 		this.expect("334");
 
-		String enc_username = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME), false);
+		final String enc_username = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME), false);
 
 		this.send(enc_username);
 		this.expect("334");
@@ -133,7 +134,7 @@ public class AuthTest extends ServerTestCase {
 		this.send(enc_username);
 		this.expect("334");
 
-		String enc_pwd = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD), false);
+		final String enc_pwd = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD), false);
 		this.send(enc_pwd);
 		this.expect("235");
 

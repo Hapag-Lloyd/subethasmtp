@@ -27,11 +27,12 @@ public class DataCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException, DropConnectionException {
+	public void execute(final String commandString, final Session sess) throws IOException, DropConnectionException {
 		if (!sess.isMailTransactionInProgress()) {
 			sess.sendResponse("503 5.5.1 Error: need MAIL command");
 			return;
-		} else if (sess.getRecipientCount() == 0) {
+		}
+		if (sess.getRecipientCount() == 0) {
 			sess.sendResponse("503 Error: need RCPT command");
 			return;
 		}
@@ -59,10 +60,10 @@ public class DataCommand extends BaseCommand {
 			// suck it up so it doesn't pollute further exchanges. This code used to
 			// throw an exception, but this seems an arbitrary part of the contract that
 			// we might as well relax.
-			while (stream.read() != -1);
-		} catch (DropConnectionException ex) {
+			while (stream.read() != -1) {}
+		} catch (final DropConnectionException ex) {
 			throw ex; // Propagate this
-		} catch (RejectException ex) {
+		} catch (final RejectException ex) {
 			sess.sendResponse(ex.getErrorResponse());
 			return;
 		}

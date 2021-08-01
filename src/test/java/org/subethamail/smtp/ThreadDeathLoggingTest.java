@@ -5,8 +5,6 @@ import java.io.InputStream;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.subethamail.smtp.MessageHandlerFactory;
-import org.subethamail.smtp.TooMuchDataException;
 import org.subethamail.smtp.client.SMTPException;
 import org.subethamail.smtp.client.SmartClient;
 import org.subethamail.smtp.helper.SimpleMessageListener;
@@ -28,23 +26,21 @@ public class ThreadDeathLoggingTest {
 	public void testNoMailJar() throws SMTPException, IOException {
 		// if this variable is set to null, than a NPE will be thrown, which is
 		// also good for testing.
-		MessageHandlerFactory handlerFactory = new SimpleMessageListenerAdapter(new SimpleMessageListener() {
+		final MessageHandlerFactory handlerFactory = new SimpleMessageListenerAdapter(new SimpleMessageListener() {
 			@Override
-			public void deliver(String from, String recipient, InputStream data)
-					throws TooMuchDataException, IOException {
-				return;
-			}
+			public void deliver(final String from, final String recipient, final InputStream data)
+					throws TooMuchDataException, IOException {}
 
 			@Override
-			public boolean accept(String from, String recipient) {
+			public boolean accept(final String from, final String recipient) {
 				return false;
 			}
 		});
-		SMTPServer smtpServer = new SMTPServer(handlerFactory);
+		final SMTPServer smtpServer = new SMTPServer(handlerFactory);
 		smtpServer.setPort(0);
 		smtpServer.start();
 		try {
-			SmartClient client = new SmartClient("localhost", smtpServer.getPort(), "test-client.example.org");
+			final SmartClient client = new SmartClient("localhost", smtpServer.getPort(), "test-client.example.org");
 			client.from("john@exmaple.com");
 			client.to("jane@example.org");
 			client.quit();

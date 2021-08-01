@@ -7,7 +7,7 @@ import org.subethamail.smtp.util.ServerTestCase;
  */
 public class StartTLSTest extends ServerTestCase {
 	/** */
-	public StartTLSTest(String name) {
+	public StartTLSTest(final String name) {
 		super(name);
 	}
 

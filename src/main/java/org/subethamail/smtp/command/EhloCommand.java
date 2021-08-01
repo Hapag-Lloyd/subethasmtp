@@ -22,8 +22,8 @@ public class EhloCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException {
-		String[] args = this.getArgs(commandString);
+	public void execute(final String commandString, final Session sess) throws IOException {
+		final String[] args = this.getArgs(commandString);
 		if (args.length < 2) {
 			sess.sendResponse("501 Syntax: EHLO hostname");
 			return;
@@ -44,13 +44,13 @@ public class EhloCommand extends BaseCommand {
 		// Postfix doesn't care, so we won't either. If you want more, read:
 		// http://homepages.tesco.net/J.deBoynePollard/FGA/smtp-avoid-helo.html
 
-		StringBuilder response = new StringBuilder();
+		final StringBuilder response = new StringBuilder();
 
 		response.append("250-");
 		response.append(sess.getServer().getHostName());
 		response.append("\r\n" + "250-8BITMIME");
 
-		int maxSize = sess.getServer().getMaxMessageSize();
+		final int maxSize = sess.getServer().getMaxMessageSize();
 		if (maxSize > 0) {
 			response.append("\r\n" + "250-SIZE ");
 			response.append(maxSize);
@@ -62,9 +62,9 @@ public class EhloCommand extends BaseCommand {
 		}
 
 		// Check to see if we support authentication
-		AuthenticationHandlerFactory authFact = sess.getServer().getAuthenticationHandlerFactory();
+		final AuthenticationHandlerFactory authFact = sess.getServer().getAuthenticationHandlerFactory();
 		if (authFact != null) {
-			List<String> supportedMechanisms = authFact.getAuthenticationMechanisms();
+			final List<String> supportedMechanisms = authFact.getAuthenticationMechanisms();
 			if (!supportedMechanisms.isEmpty()) {
 				response.append("\r\n" + "250-" + AuthCommand.VERB + " ");
 				response.append(TextUtils.joinTogether(supportedMechanisms, " "));

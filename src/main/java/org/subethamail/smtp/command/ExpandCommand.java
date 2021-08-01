@@ -6,7 +6,7 @@ import org.subethamail.smtp.server.BaseCommand;
 import org.subethamail.smtp.server.Session;
 
 /**
- * 
+ *
  * @author Michele Zuccala < zuccala.m@gmail.com >
  */
 public class ExpandCommand extends BaseCommand {
@@ -17,7 +17,7 @@ public class ExpandCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException {
+	public void execute(final String commandString, final Session sess) throws IOException {
 		sess.sendResponse("502 EXPN command is disabled");
 	}
 }

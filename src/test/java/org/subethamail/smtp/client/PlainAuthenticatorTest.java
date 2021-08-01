@@ -11,7 +11,7 @@ public class PlainAuthenticatorTest {
 	@Mocked
 	private SmartClient smartClient;
 
-	private final Map<String, String> extensions = new HashMap<String, String>();
+	private final Map<String, String> extensions = new HashMap<>();
 
 	// @Test
 	public void testSuccess() throws IOException {

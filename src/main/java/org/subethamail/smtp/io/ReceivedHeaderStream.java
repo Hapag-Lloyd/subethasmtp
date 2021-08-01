@@ -27,13 +27,13 @@ public class ReceivedHeaderStream extends FilterInputStream {
 	 * @param singleRecipient The single recipient of the message. If there are more
 	 *                        than one recipients then this must be null.
 	 */
-	public ReceivedHeaderStream(InputStream in,
-			String heloHost,
-			InetAddress host,
-			String whoami,
-			String softwareName,
-			String id,
-			String singleRecipient) {
+	public ReceivedHeaderStream(final InputStream in,
+			final String heloHost,
+			final InetAddress host,
+			final String whoami,
+			final String softwareName,
+			final String id,
+			final String singleRecipient) {
 		super(in);
 
 		/*
@@ -41,16 +41,20 @@ public class ReceivedHeaderStream extends FilterInputStream {
 		 * by mx.google.com with SMTP id 32si2669129wfa.13.2009.05.27.18.27.31; Wed, 27
 		 * May 2009 18:27:48 -0700 (PDT)
 		 */
-		DateFormat fmt = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z (z)", Locale.US);
-		String timestamp = fmt.format(new Date());
+		final DateFormat fmt = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z (z)", Locale.US);
+		final String timestamp = fmt.format(new Date());
 
-		StringBuilder header = new StringBuilder();
+		final StringBuilder header = new StringBuilder();
 		header.append("Received: from " + heloHost + " (" + constructTcpInfo(host) + ")\r\n");
 		header.append("        by " + whoami + "\r\n");
 		header.append("        with SMTP");
-		if (softwareName != null) header.append(" (" + softwareName + ")");
+		if (softwareName != null) {
+			header.append(" (" + softwareName + ")");
+		}
 		header.append(" id ").append(id);
-		if (singleRecipient != null) header.append("\r\n        for " + singleRecipient);
+		if (singleRecipient != null) {
+			header.append("\r\n        for " + singleRecipient);
+		}
 		header.append(";\r\n");
 		header.append("        " + timestamp + "\r\n");
 
@@ -60,18 +64,19 @@ public class ReceivedHeaderStream extends FilterInputStream {
 	/**
 	 * Returns a formatted TCP-info element, depending on the success of the IP
 	 * address name resolution either with domain name or only the address literal.
-	 * 
+	 *
 	 * @param host the address of the remote SMTP client.
 	 * @return the formatted TCP-info element as defined by RFC 5321
 	 */
-	private String constructTcpInfo(InetAddress host) {
+	private String constructTcpInfo(final InetAddress host) {
 		// if it is not successful it just returns the address
-		String domain = host.getCanonicalHostName();
-		String address = host.getHostAddress();
+		final String domain = host.getCanonicalHostName();
+		final String address = host.getHostAddress();
 		// check whether the host name resolution was successful
-		if (domain.equals(address)) return "[" + address + "]";
-		else
-			return domain + " [" + address + "]";
+		if (domain.equals(address)) {
+			return "[" + address + "]";
+		}
+		return domain + " [" + address + "]";
 	}
 
 	/* */
@@ -88,7 +93,7 @@ public class ReceivedHeaderStream extends FilterInputStream {
 
 	/* */
 	@Override
-	public synchronized void mark(int readlimit) {
+	public synchronized void mark(final int readlimit) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -101,31 +106,32 @@ public class ReceivedHeaderStream extends FilterInputStream {
 	/* */
 	@Override
 	public int read() throws IOException {
-		if (this.header.available() > 0) return this.header.read();
-		else
-			return super.read();
-	}
-
-	/* */
-	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
 		if (this.header.available() > 0) {
-			int countRead = this.header.read(b, off, len);
-			if (countRead < len) {
-				// We need to add a little extra from the normal stream
-				int remainder = len - countRead;
-				int additionalRead = super.read(b, off + countRead, remainder);
-
-				return countRead + additionalRead;
-			} else
-				return countRead;
-		} else
-			return super.read(b, off, len);
+			return this.header.read();
+		}
+		return super.read();
 	}
 
 	/* */
 	@Override
-	public int read(byte[] b) throws IOException {
+	public int read(final byte[] b, final int off, final int len) throws IOException {
+		if (this.header.available() <= 0) {
+			return super.read(b, off, len);
+		}
+		final int countRead = this.header.read(b, off, len);
+		if (countRead < len) {
+			// We need to add a little extra from the normal stream
+			final int remainder = len - countRead;
+			final int additionalRead = super.read(b, off + countRead, remainder);
+
+			return countRead + additionalRead;
+		}
+		return countRead;
+	}
+
+	/* */
+	@Override
+	public int read(final byte[] b) throws IOException {
 		return this.read(b, 0, b.length);
 	}
 
@@ -137,7 +143,7 @@ public class ReceivedHeaderStream extends FilterInputStream {
 
 	/* */
 	@Override
-	public long skip(long n) throws IOException {
+	public long skip(final long n) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 }

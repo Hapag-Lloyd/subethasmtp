@@ -8,7 +8,7 @@ import org.subethamail.smtp.util.ServerTestCase;
  */
 public class RequireTlsTest extends ServerTestCase {
 	/** */
-	public RequireTlsTest(String name) {
+	public RequireTlsTest(final String name) {
 		super(name);
 	}
 

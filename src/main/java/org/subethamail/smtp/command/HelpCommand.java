@@ -25,21 +25,21 @@ public class HelpCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session context) throws IOException {
-		String args = this.getArgPredicate(commandString);
+	public void execute(final String commandString, final Session context) throws IOException {
+		final String args = this.getArgPredicate(commandString);
 		if ("".equals(args)) {
 			context.sendResponse(this.getCommandMessage(context.getServer()));
 			return;
 		}
 		try {
 			context.sendResponse(context.getServer().getCommandHandler().getHelp(args).toOutputString());
-		} catch (CommandException e) {
+		} catch (final CommandException e) {
 			context.sendResponse("504 HELP topic \"" + args + "\" unknown.");
 		}
 	}
 
 	/** */
-	private String getCommandMessage(SMTPServer server) {
+	private String getCommandMessage(final SMTPServer server) {
 		return "214-"
 				+ server.getSoftwareName()
 				+ " on "
@@ -52,9 +52,9 @@ public class HelpCommand extends BaseCommand {
 	}
 
 	/** */
-	protected String getFormattedTopicList(SMTPServer server) {
-		StringBuilder sb = new StringBuilder();
-		for (String key : server.getCommandHandler().getVerbs()) {
+	protected String getFormattedTopicList(final SMTPServer server) {
+		final StringBuilder sb = new StringBuilder();
+		for (final String key : server.getCommandHandler().getVerbs()) {
 			sb.append("214-     " + key + "\r\n");
 		}
 		return sb.toString();

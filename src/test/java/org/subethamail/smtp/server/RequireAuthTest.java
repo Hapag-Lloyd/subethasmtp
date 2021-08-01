@@ -16,8 +16,9 @@ public class RequireAuthTest extends ServerTestCase {
 
 	static final String REQUIRED_PASSWORD = "mySecret01";
 
-	class RequiredUsernamePasswordValidator implements UsernamePasswordValidator {
-		public void login(String username, String password) throws LoginFailedException {
+	static class RequiredUsernamePasswordValidator implements UsernamePasswordValidator {
+		@Override
+		public void login(final String username, final String password) throws LoginFailedException {
 			if (!username.equals(REQUIRED_USERNAME) || !password.equals(REQUIRED_PASSWORD)) {
 				throw new LoginFailedException();
 			}
@@ -25,7 +26,7 @@ public class RequireAuthTest extends ServerTestCase {
 	}
 
 	/** */
-	public RequireAuthTest(String name) {
+	public RequireAuthTest(final String name) {
 		super(name);
 	}
 
@@ -40,9 +41,9 @@ public class RequireAuthTest extends ServerTestCase {
 		this.wiser.setHostname("localhost");
 		this.wiser.setPort(PORT);
 
-		UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
+		final UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
 
-		EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
+		final EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
 		this.wiser.getServer().setAuthenticationHandlerFactory(fact);
 		this.wiser.getServer().setRequireAuth(true);
 		this.wiser.start();
@@ -101,12 +102,12 @@ public class RequireAuthTest extends ServerTestCase {
 		this.send("AUTH LOGIN");
 		this.expect("334");
 
-		String enc_username = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME), false);
+		final String enc_username = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME), false);
 
 		this.send(enc_username);
 		this.expect("334");
 
-		String enc_pwd = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD), false);
+		final String enc_pwd = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD), false);
 		this.send(enc_pwd);
 		this.expect("235");
 

@@ -23,13 +23,13 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	 * Maps the auth type (eg "PLAIN") to a handler. The mechanism name (key) is in
 	 * upper case.
 	 */
-	Map<String, AuthenticationHandlerFactory> plugins = new HashMap<String, AuthenticationHandlerFactory>();
+	Map<String, AuthenticationHandlerFactory> plugins = new HashMap<>();
 
 	/**
 	 * A more orderly list of the supported mechanisms. Mechanism names are in upper
 	 * case.
 	 */
-	List<String> mechanisms = new ArrayList<String>();
+	List<String> mechanisms = new ArrayList<>();
 
 	/** */
 	public MultipleAuthenticationHandlerFactory() {
@@ -37,16 +37,16 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	}
 
 	/** */
-	public MultipleAuthenticationHandlerFactory(Collection<AuthenticationHandlerFactory> factories) {
-		for (AuthenticationHandlerFactory fact : factories) {
+	public MultipleAuthenticationHandlerFactory(final Collection<AuthenticationHandlerFactory> factories) {
+		for (final AuthenticationHandlerFactory fact : factories) {
 			this.addFactory(fact);
 		}
 	}
 
 	/** */
-	public void addFactory(AuthenticationHandlerFactory fact) {
-		List<String> partialMechanisms = fact.getAuthenticationMechanisms();
-		for (String mechanism : partialMechanisms) {
+	public void addFactory(final AuthenticationHandlerFactory fact) {
+		final List<String> partialMechanisms = fact.getAuthenticationMechanisms();
+		for (final String mechanism : partialMechanisms) {
 			if (!this.mechanisms.contains(mechanism)) {
 				this.mechanisms.add(mechanism);
 				this.plugins.put(mechanism, fact);
@@ -55,11 +55,13 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	}
 
 	/** */
+	@Override
 	public List<String> getAuthenticationMechanisms() {
 		return this.mechanisms;
 	}
 
 	/** */
+	@Override
 	public AuthenticationHandler create() {
 		return new Handler();
 	}
@@ -70,18 +72,22 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 		AuthenticationHandler active;
 
 		/* */
-		public String auth(String clientInput) throws RejectException {
+		@Override
+		public String auth(final String clientInput) throws RejectException {
 			if (this.active == null) {
-				StringTokenizer stk = new StringTokenizer(clientInput);
-				String auth = stk.nextToken();
-				if (!"AUTH".equalsIgnoreCase(auth)) throw new IllegalArgumentException(
-						"Not an AUTH command: " + clientInput);
+				final StringTokenizer stk = new StringTokenizer(clientInput);
+				final String auth = stk.nextToken();
+				if (!"AUTH".equalsIgnoreCase(auth)) {
+					throw new IllegalArgumentException("Not an AUTH command: " + clientInput);
+				}
 
-				String method = stk.nextToken();
-				AuthenticationHandlerFactory fact
+				final String method = stk.nextToken();
+				final AuthenticationHandlerFactory fact
 						= MultipleAuthenticationHandlerFactory.this.plugins.get(method.toUpperCase(Locale.ENGLISH));
 
-				if (fact == null) throw new RejectException(504, "Method not supported");
+				if (fact == null) {
+					throw new RejectException(504, "Method not supported");
+				}
 
 				this.active = fact.create();
 			}
@@ -90,6 +96,7 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 		}
 
 		/* */
+		@Override
 		public Object getIdentity() {
 			return this.active.getIdentity();
 		}

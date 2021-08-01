@@ -27,7 +27,7 @@ public class ExtraDotOutputStream extends CRLFOutputStream {
 	 *
 	 * @param out the OutputStream to be wrapped
 	 */
-	public ExtraDotOutputStream(OutputStream out) {
+	public ExtraDotOutputStream(final OutputStream out) {
 		super(out);
 	}
 
@@ -38,7 +38,7 @@ public class ExtraDotOutputStream extends CRLFOutputStream {
 	 * @see CRLFOutputStream#writeChunk(byte[], int, int)
 	 */
 	@Override
-	protected void writeChunk(byte buffer[], int offset, int length) throws IOException {
+	protected void writeChunk(final byte buffer[], final int offset, final int length) throws IOException {
 		if (length > 0 && buffer[offset] == '.' && this.startOfLine) {
 			// add extra dot (the first of the pair)
 			this.out.write('.');
@@ -55,7 +55,7 @@ public class ExtraDotOutputStream extends CRLFOutputStream {
 	 * @throws IOException if an error occurs writing the byte
 	 */
 	@Override
-	public void write(int b) throws IOException {
+	public void write(final int b) throws IOException {
 		if (b == '.' && this.statusLast != LAST_WAS_OTHER) {
 			// add extra dot (the first of the pair)
 			this.out.write('.');

@@ -13,7 +13,7 @@ class BetterByteArrayOutputStream extends ByteArrayOutputStream {
 	public BetterByteArrayOutputStream() {}
 
 	/** */
-	public BetterByteArrayOutputStream(int size) {
+	public BetterByteArrayOutputStream(final int size) {
 		super(size);
 	}
 

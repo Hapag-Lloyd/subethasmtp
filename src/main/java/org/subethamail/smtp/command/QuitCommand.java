@@ -18,7 +18,7 @@ public class QuitCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException {
+	public void execute(final String commandString, final Session sess) throws IOException {
 		sess.sendResponse("221 Bye");
 		sess.quit();
 	}

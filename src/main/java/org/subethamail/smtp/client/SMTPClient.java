@@ -77,7 +77,7 @@ public class SMTPClient {
 
 		String message;
 
-		public Response(int code, String text) {
+		public Response(final int code, final String text) {
 			this.code = code;
 			this.message = text;
 		}
@@ -109,39 +109,46 @@ public class SMTPClient {
 
 	/**
 	 * Establishes a connection to host and port.
-	 * 
+	 *
 	 * @throws UnknownHostException if the hostname cannot be resolved
 	 * @throws IOException          if there is a problem connecting to the port
 	 */
-	public SMTPClient(String host, int port) throws UnknownHostException, IOException {
+	public SMTPClient(final String host, final int port) throws UnknownHostException, IOException {
 		this(host, port, null);
 	}
 
 	/**
 	 * Establishes a connection to host and port from the specified local socket
 	 * address.
-	 * 
+	 *
 	 * @param bindpoint the local socket address. If null, the system will pick up
 	 *                  an ephemeral port and a valid local address.
 	 * @throws UnknownHostException if the hostname cannot be resolved
 	 * @throws IOException          if there is a problem connecting to the port
 	 */
-	public SMTPClient(String host, int port, SocketAddress bindpoint) throws UnknownHostException, IOException {
+	public SMTPClient(final String host, final int port, final SocketAddress bindpoint)
+			throws UnknownHostException, IOException {
 		this.bindpoint = bindpoint;
 		connect(host, port);
 	}
 
 	/**
 	 * Establishes a connection to host and port.
-	 * 
+	 *
 	 * @throws IOException if there is a problem connecting to the port
 	 */
-	public void connect(String host, int port) throws IOException {
-		if (connected) throw new IllegalStateException("Already connected");
+	public void connect(final String host, final int port) throws IOException {
+		if (connected) {
+			throw new IllegalStateException("Already connected");
+		}
 
-		if (this.hostPort == null) this.hostPort = host + ":" + port;
+		if (this.hostPort == null) {
+			this.hostPort = host + ":" + port;
+		}
 
-		if (log.isDebugEnabled()) log.debug("Connecting to " + this.hostPort);
+		if (log.isDebugEnabled()) {
+			log.debug("Connecting to " + this.hostPort);
+		}
 
 		this.socket = createSocket();
 		this.socket.bind(this.bindpoint);
@@ -157,7 +164,7 @@ public class SMTPClient {
 			this.dotTerminatedOutput = new DotTerminatedOutputStream(this.rawOutput);
 			this.dataOutput = new ExtraDotOutputStream(this.dotTerminatedOutput);
 			this.writer = new PrintWriter(this.rawOutput, true);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			close();
 			throw e;
 		}
@@ -190,9 +197,13 @@ public class SMTPClient {
 	 *
 	 * @param msg should not have any newlines
 	 */
-	protected void send(String msg) throws IOException {
-		if (log.isDebugEnabled()) log.debug("Client: " + msg);
-		if (!connected) throw new IllegalStateException("Not connected");
+	protected void send(final String msg) throws IOException {
+		if (log.isDebugEnabled()) {
+			log.debug("Client: " + msg);
+		}
+		if (!connected) {
+			throw new IllegalStateException("Not connected");
+		}
 
 		// Force \r\n since println() behaves differently on different platforms
 		this.writer.print(msg + "\r\n");
@@ -203,36 +214,44 @@ public class SMTPClient {
 	 * Note that the response text comes back without trailing newlines.
 	 */
 	protected Response receive() throws IOException {
-		if (!connected) throw new IllegalStateException("Not connected");
+		if (!connected) {
+			throw new IllegalStateException("Not connected");
+		}
 
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		String line = null;
 
 		boolean done = false;
 		do {
 			line = this.reader.readLine();
 			if (line == null) {
-				if (builder
-						.length() == 0) throw new EOFException("Server disconnected unexpectedly, no reply received");
-				else
-					throw new IOException("Malformed SMTP reply: " + builder);
+				if (builder.length() == 0) {
+					throw new EOFException("Server disconnected unexpectedly, no reply received");
+				}
+				throw new IOException("Malformed SMTP reply: " + builder);
 			}
 
-			if (log.isDebugEnabled()) log.debug("Server: " + line);
+			if (log.isDebugEnabled()) {
+				log.debug("Server: " + line);
+			}
 
-			if (line.length() < 4) throw new IOException("Malformed SMTP reply: " + line);
+			if (line.length() < 4) {
+				throw new IOException("Malformed SMTP reply: " + line);
+			}
 			builder.append(line.substring(4));
 
-			if (line.charAt(3) == '-') builder.append('\n');
-			else
+			if (line.charAt(3) == '-') {
+				builder.append('\n');
+			} else {
 				done = true;
+			}
 		} while (!done);
 
 		int code;
-		String codeString = line.substring(0, 3);
+		final String codeString = line.substring(0, 3);
 		try {
 			code = Integer.parseInt(codeString);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			throw new IOException("Malformed SMTP reply: " + line, e);
 		}
 
@@ -246,20 +265,22 @@ public class SMTPClient {
 	 * @param msg should not have any newlines
 	 * @return the response from the server
 	 */
-	public Response sendReceive(String msg) throws IOException {
+	public Response sendReceive(final String msg) throws IOException {
 		this.send(msg);
 		return this.receive();
 	}
 
 	/** If response is not success, throw an exception */
 	public Response receiveAndCheck() throws IOException, SMTPException {
-		Response resp = this.receive();
-		if (!resp.isSuccess()) throw new SMTPException(resp);
+		final Response resp = this.receive();
+		if (!resp.isSuccess()) {
+			throw new SMTPException(resp);
+		}
 		return resp;
 	}
 
 	/** If response is not success, throw an exception */
-	public Response sendAndCheck(String msg) throws IOException, SMTPException {
+	public Response sendAndCheck(final String msg) throws IOException, SMTPException {
 		this.send(msg);
 		return this.receiveAndCheck();
 	}
@@ -272,8 +293,10 @@ public class SMTPClient {
 			try {
 				this.socket.close();
 
-				if (log.isDebugEnabled()) log.debug("Closed connection to " + this.hostPort);
-			} catch (IOException ex) {
+				if (log.isDebugEnabled()) {
+					log.debug("Closed connection to " + this.hostPort);
+				}
+			} catch (final IOException ex) {
 				log.error("Problem closing connection to " + this.hostPort, ex);
 			}
 		}
@@ -289,7 +312,7 @@ public class SMTPClient {
 	 * Sets the local socket address. If null, the system will pick up an ephemeral
 	 * port and a valid local address. Default is null.
 	 */
-	public void setBindpoint(SocketAddress bindpoint) {
+	public void setBindpoint(final SocketAddress bindpoint) {
 		this.bindpoint = bindpoint;
 	}
 
@@ -305,7 +328,7 @@ public class SMTPClient {
 	 * host:port, where host and port are the values which were used to open the TCP
 	 * connection to the server, as they were passed to the connect method.
 	 */
-	public void setHostPort(String hostPort) {
+	public void setHostPort(final String hostPort) {
 		this.hostPort = hostPort;
 	}
 

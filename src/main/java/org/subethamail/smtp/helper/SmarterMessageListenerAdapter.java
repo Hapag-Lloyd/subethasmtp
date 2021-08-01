@@ -38,16 +38,16 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
 	 */
 	private static int DEFAULT_DATA_DEFERRED_SIZE = 1024 * 1024 * 5;
 
-	private Collection<SmarterMessageListener> listeners;
+	private final Collection<SmarterMessageListener> listeners;
 
-	private int dataDeferredSize;
+	private final int dataDeferredSize;
 
 	/**
 	 * Initializes this factory with a single listener.
 	 *
 	 * Default data deferred size is 5 megs.
 	 */
-	public SmarterMessageListenerAdapter(SmarterMessageListener listener) {
+	public SmarterMessageListenerAdapter(final SmarterMessageListener listener) {
 		this(Collections.singleton(listener), DEFAULT_DATA_DEFERRED_SIZE);
 	}
 
@@ -56,28 +56,30 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
 	 *
 	 * Default data deferred size is 5 megs.
 	 */
-	public SmarterMessageListenerAdapter(Collection<SmarterMessageListener> listeners) {
+	public SmarterMessageListenerAdapter(final Collection<SmarterMessageListener> listeners) {
 		this(listeners, DEFAULT_DATA_DEFERRED_SIZE);
 	}
 
 	/**
 	 * Initializes this factory with the listeners.
-	 * 
+	 *
 	 * @param dataDeferredSize The server will buffer incoming messages to disk when
 	 *                         they hit this limit in the DATA received.
 	 */
-	public SmarterMessageListenerAdapter(Collection<SmarterMessageListener> listeners, int dataDeferredSize) {
+	public SmarterMessageListenerAdapter(final Collection<SmarterMessageListener> listeners,
+			final int dataDeferredSize) {
 		this.listeners = listeners;
 		this.dataDeferredSize = dataDeferredSize;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.
 	 * MessageContext)
 	 */
-	public MessageHandler create(MessageContext ctx) {
+	@Override
+	public MessageHandler create(final MessageContext ctx) {
 		return new Handler(ctx);
 	}
 
@@ -89,55 +91,59 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
 
 		String from;
 
-		List<Receiver> deliveries = new ArrayList<Receiver>();
+		List<Receiver> deliveries = new ArrayList<>();
 
 		/** */
-		public Handler(MessageContext ctx) {
+		public Handler(final MessageContext ctx) {
 			this.ctx = ctx;
 		}
 
 		/** */
-		public void from(String from) throws RejectException {
+		@Override
+		public void from(final String from) throws RejectException {
 			this.from = from;
 		}
 
 		/** */
-		public void recipient(String recipient) throws RejectException {
-			for (SmarterMessageListener listener : SmarterMessageListenerAdapter.this.listeners) {
-				Receiver rec = listener.accept(this.from, recipient);
+		@Override
+		public void recipient(final String recipient) throws RejectException {
+			for (final SmarterMessageListener listener : SmarterMessageListenerAdapter.this.listeners) {
+				final Receiver rec = listener.accept(this.from, recipient);
 
-				if (rec != null) this.deliveries.add(rec);
+				if (rec != null) {
+					this.deliveries.add(rec);
+				}
 			}
 
-			if (this.deliveries.isEmpty()) throw new RejectException(553, "<" + recipient + "> address unknown.");
+			if (this.deliveries.isEmpty()) {
+				throw new RejectException(553, "<" + recipient + "> address unknown.");
+			}
 		}
 
 		/** */
-		public void data(InputStream data) throws TooMuchDataException, IOException {
+		@Override
+		public void data(final InputStream data) throws TooMuchDataException, IOException {
 			if (this.deliveries.size() == 1) {
 				this.deliveries.get(0).deliver(data);
 			} else {
-				DeferredFileOutputStream dfos
-						= new DeferredFileOutputStream(SmarterMessageListenerAdapter.this.dataDeferredSize);
-
-				try {
+				try (DeferredFileOutputStream dfos
+						= new DeferredFileOutputStream(SmarterMessageListenerAdapter.this.dataDeferredSize)) {
 					int value;
 					while ((value = data.read()) >= 0) {
 						dfos.write(value);
 					}
 
-					for (Receiver rec : this.deliveries) {
+					for (final Receiver rec : this.deliveries) {
 						rec.deliver(dfos.getInputStream());
 					}
-				} finally {
-					dfos.close();
 				}
 			}
 		}
 
 		/** */
+		@Override
 		public void done() {
-			for (Receiver rec : this.deliveries) {
+			for (final Receiver rec : this.deliveries) {
 				rec.done();
 			}
 		}

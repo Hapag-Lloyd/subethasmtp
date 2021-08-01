@@ -27,14 +27,14 @@ abstract public class ThresholdingOutputStream extends OutputStream {
 
 	/**
 	 */
-	public ThresholdingOutputStream(OutputStream base, int thresholdBytes) {
+	public ThresholdingOutputStream(final OutputStream base, final int thresholdBytes) {
 		this.output = base;
 		this.threshold = thresholdBytes;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.io.OutputStream#close()
 	 */
 	@Override
@@ -44,7 +44,7 @@ abstract public class ThresholdingOutputStream extends OutputStream {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.io.OutputStream#flush()
 	 */
 	@Override
@@ -54,11 +54,11 @@ abstract public class ThresholdingOutputStream extends OutputStream {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.io.OutputStream#write(byte[], int, int)
 	 */
 	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
+	public void write(final byte[] b, final int off, final int len) throws IOException {
 		this.checkThreshold(len);
 
 		this.output.write(b, off, len);
@@ -68,11 +68,11 @@ abstract public class ThresholdingOutputStream extends OutputStream {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.io.OutputStream#write(byte[])
 	 */
 	@Override
-	public void write(byte[] b) throws IOException {
+	public void write(final byte[] b) throws IOException {
 		this.checkThreshold(b.length);
 
 		this.output.write(b);
@@ -82,11 +82,11 @@ abstract public class ThresholdingOutputStream extends OutputStream {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.io.OutputStream#write(int)
 	 */
 	@Override
-	public void write(int b) throws IOException {
+	public void write(final int b) throws IOException {
 		this.checkThreshold(1);
 
 		this.output.write(b);
@@ -97,8 +97,8 @@ abstract public class ThresholdingOutputStream extends OutputStream {
 	/**
 	 * Checks whether reading count bytes would cross the limit.
 	 */
-	protected void checkThreshold(int count) throws IOException {
-		int predicted = this.written + count;
+	protected void checkThreshold(final int count) throws IOException {
+		final int predicted = this.written + count;
 		if (!this.thresholdReached && predicted > this.threshold) {
 			this.thresholdReached(this.written, predicted);
 			this.thresholdReached = true;

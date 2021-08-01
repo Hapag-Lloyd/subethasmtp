@@ -29,7 +29,7 @@ public class DotUnstuffingInputStream extends FilterInputStream {
 	 */
 	protected int[] last = { -1, -1 };
 
-	public DotUnstuffingInputStream(InputStream in) {
+	public DotUnstuffingInputStream(final InputStream in) {
 		super(in);
 	}
 
@@ -59,12 +59,14 @@ public class DotUnstuffingInputStream extends FilterInputStream {
 	 * @return the number of bytes read
 	 */
 	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
+	public int read(final byte[] b, final int off, final int len) throws IOException {
 		if (b == null) {
 			throw new NullPointerException();
-		} else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+		}
+		if (off < 0 || off > b.length || len < 0 || off + len > b.length || off + len < 0) {
 			throw new IndexOutOfBoundsException();
-		} else if (len == 0) {
+		}
+		if (len == 0) {
 			return 0;
 		}
 

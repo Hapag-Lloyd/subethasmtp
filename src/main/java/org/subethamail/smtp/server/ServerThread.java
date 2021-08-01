@@ -57,7 +57,7 @@ class ServerThread extends Thread {
 		// messages
 		final int countOfConnectionPermits = server.getMaxConnections() + 10;
 		this.connectionPermits = new Semaphore(countOfConnectionPermits);
-		this.sessionThreads = new HashSet<Session>(countOfConnectionPermits * 4 / 3 + 1);
+		this.sessionThreads = new HashSet<>(countOfConnectionPermits * 4 / 3 + 1);
 	}
 
 	/**
@@ -193,7 +193,7 @@ class ServerThread extends Thread {
 		// which locks this instance.
 		List<Session> sessionsToBeClosed;
 		synchronized (this) {
-			sessionsToBeClosed = new ArrayList<Session>(sessionThreads);
+			sessionsToBeClosed = new ArrayList<>(sessionThreads);
 		}
 		for (final Session sessionThread : sessionsToBeClosed) {
 			sessionThread.quit();

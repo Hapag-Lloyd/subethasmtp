@@ -12,7 +12,7 @@ import org.subethamail.smtp.client.SMTPClient.Response;
 public class SMTPException extends IOException {
 	Response response;
 
-	public SMTPException(Response resp) {
+	public SMTPException(final Response resp) {
 		super(resp.toString());
 
 		this.response = resp;

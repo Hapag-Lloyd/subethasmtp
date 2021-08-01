@@ -18,7 +18,7 @@ public class NoopCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException {
+	public void execute(final String commandString, final Session sess) throws IOException {
 		sess.sendResponse("250 Ok");
 	}
 }

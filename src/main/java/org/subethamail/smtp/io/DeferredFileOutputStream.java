@@ -49,18 +49,18 @@ public class DeferredFileOutputStream extends ThresholdingOutputStream {
 	 * @param transitionSize is the number of bytes at which to convert from a byte
 	 *                       array to a real file.
 	 */
-	public DeferredFileOutputStream(int transitionSize) {
+	public DeferredFileOutputStream(final int transitionSize) {
 		super(new BetterByteArrayOutputStream(INITIAL_BUF_SIZE), transitionSize);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.subethamail.common.io.ThresholdingOutputStream#thresholdReached(int,
 	 * int)
 	 */
 	@Override
-	protected void thresholdReached(int current, int predicted) throws IOException {
+	protected void thresholdReached(final int current, final int predicted) throws IOException {
 		// Open a temp file, write the byte array version, and swap the
 		// output stream to the file version.
 
@@ -80,20 +80,19 @@ public class DeferredFileOutputStream extends ThresholdingOutputStream {
 	public InputStream getInputStream() throws IOException {
 		if (this.output instanceof BetterByteArrayOutputStream) {
 			return ((BetterByteArrayOutputStream) this.output).getInputStream();
-		} else {
-			if (!this.closed) {
-				this.output.flush();
-				this.output.close();
-				this.closed = true;
-			}
-
-			return new BufferedInputStream(new FileInputStream(this.outFile));
 		}
+		if (!this.closed) {
+			this.output.flush();
+			this.output.close();
+			this.closed = true;
+		}
+
+		return new BufferedInputStream(new FileInputStream(this.outFile));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.subethamail.common.io.ThresholdingOutputStream#close()
 	 */
 	@Override
@@ -104,6 +103,8 @@ public class DeferredFileOutputStream extends ThresholdingOutputStream {
 			this.closed = true;
 		}
 
-		if (this.outFile != null) this.outFile.delete();
+		if (this.outFile != null) {
+			this.outFile.delete();
+		}
 	}
 }

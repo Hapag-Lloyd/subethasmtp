@@ -25,27 +25,26 @@ public class Practice {
 	public static final int PORT = 2566;
 
 	/** */
-	public static void main(String[] args) throws Exception {
-		Wiser wiser = new Wiser();
+	public static void main(final String[] args) throws Exception {
+		final Wiser wiser = new Wiser();
 		wiser.setHostname("localhost");
 		wiser.setPort(PORT);
 
 		wiser.start();
 
 		String line;
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
 		do {
 			line = in.readLine();
 			line = line.trim();
 
-			if ("dump".equals(line));
-			wiser.dumpMessages(System.out);
-
-			if (line.startsWith("dump ")) {
+			if ("dump".equals(line)) {
+				wiser.dumpMessages(System.out);
+			} else if (line.startsWith("dump ")) {
 				line = line.substring("dump ".length());
-				File f = new File(line);
-				OutputStream out = new FileOutputStream(f);
+				final File f = new File(line);
+				final OutputStream out = new FileOutputStream(f);
 				wiser.dumpMessages(new PrintStream(out));
 				out.close();
 			}

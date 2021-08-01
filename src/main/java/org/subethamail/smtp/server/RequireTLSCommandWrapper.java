@@ -11,25 +11,30 @@ import org.subethamail.smtp.DropConnectionException;
  * @author Erik van Oosten
  */
 public class RequireTLSCommandWrapper implements Command {
-	private Command wrapped;
+	private final Command wrapped;
 
 	/**
 	 * @param wrapped the wrapped command (not null)
 	 */
-	public RequireTLSCommandWrapper(Command wrapped) {
+	public RequireTLSCommandWrapper(final Command wrapped) {
 		this.wrapped = wrapped;
 	}
 
-	public void execute(String commandString, Session sess) throws IOException, DropConnectionException {
-		if (!sess.getServer().getRequireTLS() || sess.isTLSStarted()) wrapped.execute(commandString, sess);
-		else
+	@Override
+	public void execute(final String commandString, final Session sess) throws IOException, DropConnectionException {
+		if (!sess.getServer().getRequireTLS() || sess.isTLSStarted()) {
+			wrapped.execute(commandString, sess);
+		} else {
 			sess.sendResponse("530 Must issue a STARTTLS command first");
+		}
 	}
 
+	@Override
 	public HelpMessage getHelp() throws CommandException {
 		return wrapped.getHelp();
 	}
 
+	@Override
 	public String getName() {
 		return wrapped.getName();
 	}

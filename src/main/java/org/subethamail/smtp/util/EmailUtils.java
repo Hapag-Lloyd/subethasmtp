@@ -10,17 +10,21 @@ public class EmailUtils {
 	/**
 	 * @return true if the string is a valid email address
 	 */
-	public static boolean isValidEmailAddress(String address) {
+	public static boolean isValidEmailAddress(final String address) {
 		// MAIL FROM: <>
-		if (address.length() == 0) return true;
+		if (address.length() == 0) {
+			return true;
+		}
 
 		boolean result = false;
 		try {
-			InternetAddress[] ia = InternetAddress.parse(address, true);
-			if (ia.length == 0) result = false;
-			else
+			final InternetAddress[] ia = InternetAddress.parse(address, true);
+			if (ia.length == 0) {
+				result = false;
+			} else {
 				result = true;
-		} catch (AddressException ae) {
+			}
+		} catch (final AddressException ae) {
 			result = false;
 		}
 		return result;
@@ -29,7 +33,7 @@ public class EmailUtils {
 	/**
 	 * Extracts the email address within a <> after a specified offset.
 	 */
-	public static String extractEmailAddress(String args, int offset) {
+	public static String extractEmailAddress(final String args, final int offset) {
 		String address = args.substring(offset).trim();
 		if (address.indexOf('<') == 0) {
 			address = address.substring(1, address.indexOf('>'));
@@ -39,7 +43,7 @@ public class EmailUtils {
 		}
 
 		// find space (e.g. SIZE argument)
-		int nextarg = address.indexOf(" ");
+		final int nextarg = address.indexOf(" ");
 		if (nextarg > -1) {
 			address = address.substring(0, nextarg).trim();
 		}
@@ -50,10 +54,11 @@ public class EmailUtils {
 	 * Normalize the domain-part to lowercase. If email address is missing an '@'
 	 * the email is returned as-is.
 	 */
-	public static String normalizeEmail(String email) {
-		int atIndex = email.indexOf('@');
-		if (atIndex < 0) return email;
-		else
-			return email.substring(0, atIndex) + email.substring(atIndex).toLowerCase();
+	public static String normalizeEmail(final String email) {
+		final int atIndex = email.indexOf('@');
+		if (atIndex < 0) {
+			return email;
+		}
+		return email.substring(0, atIndex) + email.substring(atIndex).toLowerCase();
 	}
 }

@@ -17,17 +17,17 @@ public interface MessageContext {
 	/**
 	 * @return the SMTPServer object.
 	 */
-	public SMTPServer getSMTPServer();
+	SMTPServer getSMTPServer();
 
 	/**
 	 * @return the IP address of the remote server.
 	 */
-	public SocketAddress getRemoteAddress();
+	SocketAddress getRemoteAddress();
 
 	/**
 	 * @return the handler instance that was used to authenticate.
 	 */
-	public AuthenticationHandler getAuthenticationHandler();
+	AuthenticationHandler getAuthenticationHandler();
 
 	/**
 	 * @return the host name or address literal the client supplied in the HELO or
@@ -35,7 +35,7 @@ public interface MessageContext {
 	 *         Note that SubEthaSMTP (along with some MTAs, but contrary to RFC
 	 *         5321) accept mail transactions without these commands.
 	 */
-	public String getHelo();
+	String getHelo();
 
 	/**
 	 * Returns the identity of the peer which was established as part of the TLS

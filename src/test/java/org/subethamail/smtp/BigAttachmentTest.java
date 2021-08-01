@@ -69,9 +69,9 @@ public class BigAttachmentTest {
 	protected void tearDown() throws Exception {
 		try {
 			this.server.stop();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
-		} ;
+		}
 	}
 
 	/** */
@@ -84,24 +84,24 @@ public class BigAttachmentTest {
 				"BigAttachmentTest: To complete this test you must change the BIGFILE_PATH var to point out a file on your disk !",
 				TO_CHANGE,
 				BIGFILE_PATH);
-		Properties props = System.getProperties();
+		final Properties props = System.getProperties();
 		props.setProperty("mail.smtp.host", "localhost");
 		props.setProperty("mail.smtp.port", SMTP_PORT + "");
-		Session session = Session.getInstance(props);
+		final Session session = Session.getInstance(props);
 
-		MimeMessage baseMsg = new MimeMessage(session);
-		MimeBodyPart bp1 = new MimeBodyPart();
+		final MimeMessage baseMsg = new MimeMessage(session);
+		final MimeBodyPart bp1 = new MimeBodyPart();
 		bp1.setHeader("Content-Type", "text/plain");
 		bp1.setContent("Hello World!!!", "text/plain; charset=\"ISO-8859-1\"");
 
 		// Attach the file
-		MimeBodyPart bp2 = new MimeBodyPart();
-		FileDataSource fileAttachment = new FileDataSource(BIGFILE_PATH);
-		DataHandler dh = new DataHandler(fileAttachment);
+		final MimeBodyPart bp2 = new MimeBodyPart();
+		final FileDataSource fileAttachment = new FileDataSource(BIGFILE_PATH);
+		final DataHandler dh = new DataHandler(fileAttachment);
 		bp2.setDataHandler(dh);
 		bp2.setFileName(fileAttachment.getName());
 
-		Multipart multipart = new MimeMultipart();
+		final Multipart multipart = new MimeMultipart();
 		multipart.addBodyPart(bp1);
 		multipart.addBodyPart(bp2);
 
@@ -112,7 +112,7 @@ public class BigAttachmentTest {
 		baseMsg.saveChanges();
 
 		log.debug("Send started");
-		Transport t = new SMTPTransport(session, new URLName("smtp://localhost:" + SMTP_PORT));
+		final Transport t = new SMTPTransport(session, new URLName("smtp://localhost:" + SMTP_PORT));
 		long started = System.currentTimeMillis();
 		t.connect();
 		t.sendMessage(baseMsg, new Address[] { new InternetAddress("success@subethamail.org") });
@@ -120,15 +120,15 @@ public class BigAttachmentTest {
 		started = System.currentTimeMillis() - started;
 		log.info("Elapsed ms = " + started);
 
-		WiserMessage msg = this.server.getMessages().get(0);
+		final WiserMessage msg = this.server.getMessages().get(0);
 
 		assertEquals(1, this.server.getMessages().size());
 		assertEquals("success@subethamail.org", msg.getEnvelopeReceiver());
 
-		File compareFile = File.createTempFile("attached", ".tmp");
+		final File compareFile = File.createTempFile("attached", ".tmp");
 		log.debug("Writing received attachment ...");
 
-		FileOutputStream fos = new FileOutputStream(compareFile);
+		final FileOutputStream fos = new FileOutputStream(compareFile);
 		((MimeMultipart) msg.getMimeMessage().getContent()).getBodyPart(1).getDataHandler().writeTo(fos);
 		fos.close();
 		log.debug("Checking integrity ...");
@@ -138,15 +138,15 @@ public class BigAttachmentTest {
 	}
 
 	/** */
-	private boolean checkIntegrity(File src, File dest) throws IOException, NoSuchAlgorithmException {
-		BufferedInputStream ins = new BufferedInputStream(new FileInputStream(src));
-		BufferedInputStream ind = new BufferedInputStream(new FileInputStream(dest));
-		MessageDigest md1 = MessageDigest.getInstance("MD5");
-		MessageDigest md2 = MessageDigest.getInstance("MD5");
+	private boolean checkIntegrity(final File src, final File dest) throws IOException, NoSuchAlgorithmException {
+		final BufferedInputStream ins = new BufferedInputStream(new FileInputStream(src));
+		final BufferedInputStream ind = new BufferedInputStream(new FileInputStream(dest));
+		final MessageDigest md1 = MessageDigest.getInstance("MD5");
+		final MessageDigest md2 = MessageDigest.getInstance("MD5");
 
 		int r = 0;
-		byte[] buf1 = new byte[BUFFER_SIZE];
-		byte[] buf2 = new byte[BUFFER_SIZE];
+		final byte[] buf1 = new byte[BUFFER_SIZE];
+		final byte[] buf2 = new byte[BUFFER_SIZE];
 
 		while (r != -1) {
 			r = ins.read(buf1);

@@ -17,7 +17,7 @@ public class VerifyCommand extends BaseCommand {
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException {
+	public void execute(final String commandString, final Session sess) throws IOException {
 		sess.sendResponse("502 VRFY command is disabled");
 	}
 }

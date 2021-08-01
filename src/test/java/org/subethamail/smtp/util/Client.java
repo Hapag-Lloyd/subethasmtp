@@ -23,11 +23,11 @@ public class Client {
 
 	/**
 	 * Establishes a connection to host and port.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws UnknownHostException
 	 */
-	public Client(String host, int port) throws UnknownHostException, IOException {
+	public Client(final String host, final int port) throws UnknownHostException, IOException {
 		this.socket = new Socket(host, port);
 		this.writer = new PrintWriter(this.socket.getOutputStream(), true);
 		this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
@@ -39,7 +39,7 @@ public class Client {
 	 *
 	 * @throws an exception if the method cannot send for any reason
 	 */
-	public void send(String msg) throws Exception {
+	public void send(final String msg) throws Exception {
 		// Force \r\n since println() behaves differently on different platforms
 		this.writer.print(msg + "\r\n");
 		this.writer.flush();
@@ -48,17 +48,21 @@ public class Client {
 	/**
 	 * Throws an exception if the response does not start with the specified string.
 	 */
-	public void expect(String expect) throws Exception {
-		String response = this.readResponse();
-		if (!response.startsWith(expect)) throw new Exception("Got: " + response + " Expected: " + expect);
+	public void expect(final String expect) throws Exception {
+		final String response = this.readResponse();
+		if (!response.startsWith(expect)) {
+			throw new Exception("Got: " + response + " Expected: " + expect);
+		}
 	}
 
 	/**
 	 * Throws an exception if the response does not contain the specified string.
 	 */
-	public void expectContains(String expect) throws Exception {
-		String response = this.readResponse();
-		if (!response.contains(expect)) throw new Exception("Got: " + response + " Expected to contain: " + expect);
+	public void expectContains(final String expect) throws Exception {
+		final String response = this.readResponse();
+		if (!response.contains(expect)) {
+			throw new Exception("Got: " + response + " Expected to contain: " + expect);
+		}
 	}
 
 	/**
@@ -66,11 +70,13 @@ public class Client {
 	 * included.
 	 */
 	protected String readResponse() throws Exception {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		boolean done = false;
 		while (!done) {
-			String line = this.reader.readLine();
-			if (line.charAt(3) != '-') done = true;
+			final String line = this.reader.readLine();
+			if (line.charAt(3) != '-') {
+				done = true;
+			}
 
 			builder.append(line);
 			builder.append('\n');
@@ -81,6 +87,8 @@ public class Client {
 
 	/** */
 	public void close() throws Exception {
-		if (!this.socket.isClosed()) this.socket.close();
+		if (!this.socket.isClosed()) {
+			this.socket.close();
+		}
 	}
 }

@@ -14,13 +14,13 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.wiser.Wiser;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * This class serves as a test case for both Wiser (since it is used internally
@@ -46,7 +46,7 @@ public class MessageContentTest extends TestCase {
 	protected Session session;
 
 	/** */
-	public MessageContentTest(String name) {
+	public MessageContentTest(final String name) {
 		super(name);
 	}
 
@@ -55,7 +55,7 @@ public class MessageContentTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		Properties props = new Properties();
+		final Properties props = new Properties();
 		props.setProperty("mail.smtp.host", "localhost");
 		props.setProperty("mail.smtp.port", Integer.toString(PORT));
 		this.session = Session.getInstance(props);
@@ -79,7 +79,7 @@ public class MessageContentTest extends TestCase {
 
 	/** */
 	public void testReceivedHeader() throws Exception {
-		MimeMessage message = new MimeMessage(this.session);
+		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.setFrom(new InternetAddress("someone@somewhereelse.com"));
 		message.setSubject("barf");
@@ -89,14 +89,14 @@ public class MessageContentTest extends TestCase {
 
 		assertEquals(1, this.wiser.getMessages().size());
 
-		String[] receivedHeaders = this.wiser.getMessages().get(0).getMimeMessage().getHeader("Received");
+		final String[] receivedHeaders = this.wiser.getMessages().get(0).getMimeMessage().getHeader("Received");
 
 		assertEquals(1, receivedHeaders.length);
 	}
 
 	/** */
 	public void testMultipleRecipients() throws Exception {
-		MimeMessage message = new MimeMessage(this.session);
+		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone2@anywhere.com"));
 		message.setFrom(new InternetAddress("someone@somewhereelse.com"));
@@ -110,7 +110,7 @@ public class MessageContentTest extends TestCase {
 
 	/** */
 	public void testLargeMessage() throws Exception {
-		MimeMessage message = new MimeMessage(this.session);
+		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone2@anywhere.com"));
 		message.setFrom(new InternetAddress("someone@somewhereelse.com"));
@@ -130,7 +130,7 @@ public class MessageContentTest extends TestCase {
 		// Beware editor/compiler character encoding issues; safest to put unicode
 		// escapes here
 
-		String body = "\u00a4uro ma\u00f1ana\r\n";
+		final String body = "\u00a4uro ma\u00f1ana\r\n";
 		this.testEightBitMessage(body, "UTF-8");
 
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
@@ -141,7 +141,7 @@ public class MessageContentTest extends TestCase {
 		// Beware editor/compiler character encoding issues; safest to put unicode
 		// escapes here
 
-		String body = "ma\u00f1ana\r\n"; // spanish ene (ie, n with diacritical tilde)
+		final String body = "ma\u00f1ana\r\n"; // spanish ene (ie, n with diacritical tilde)
 		this.testEightBitMessage(body, "ISO-8859-1");
 
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
@@ -152,7 +152,7 @@ public class MessageContentTest extends TestCase {
 		// Beware editor/compiler character encoding issues; safest to put unicode
 		// escapes here
 
-		String body = "\u0080uro\r\n"; // should be the euro symbol
+		final String body = "\u0080uro\r\n"; // should be the euro symbol
 		this.testEightBitMessage(body, "ISO-8859-15");
 
 		// String content =
@@ -166,8 +166,8 @@ public class MessageContentTest extends TestCase {
 	}
 
 	/** */
-	private void testEightBitMessage(String body, String charset) throws Exception {
-		MimeMessage message = new MimeMessage(this.session);
+	private void testEightBitMessage(final String body, final String charset) throws Exception {
+		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.setFrom(new InternetAddress("someone@somewhereelse.com"));
 		message.setSubject("hello");
@@ -179,7 +179,7 @@ public class MessageContentTest extends TestCase {
 
 	/** */
 	public void testIso2022JPEightBitMessage() throws Exception {
-		String body = "\u3042\u3044\u3046\u3048\u304a\r\n"; // some Japanese letters
+		final String body = "\u3042\u3044\u3046\u3048\u304a\r\n"; // some Japanese letters
 		this.testEightBitMessage(body, "iso-2022-jp");
 
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
@@ -187,10 +187,10 @@ public class MessageContentTest extends TestCase {
 
 	/** */
 	public void testBinaryEightBitMessage() throws Exception {
-		byte[] body = new byte[64];
+		final byte[] body = new byte[64];
 		new Random().nextBytes(body);
 
-		MimeMessage message = new MimeMessage(this.session);
+		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.setFrom(new InternetAddress("someone@somewhereelse.com"));
 		message.setSubject("hello");
@@ -199,9 +199,9 @@ public class MessageContentTest extends TestCase {
 
 		Transport.send(message);
 
-		InputStream in = this.wiser.getMessages().get(0).getMimeMessage().getInputStream();
-		ByteArrayOutputStream tmp = new ByteArrayOutputStream();
-		byte[] buf = new byte[64];
+		final InputStream in = this.wiser.getMessages().get(0).getMimeMessage().getInputStream();
+		final ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+		final byte[] buf = new byte[64];
 		int n;
 		while ((n = in.read(buf)) != -1) {
 			tmp.write(buf, 0, n);

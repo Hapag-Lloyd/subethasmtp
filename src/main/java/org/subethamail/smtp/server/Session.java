@@ -172,11 +172,11 @@ public class Session implements Runnable, MessageContext {
 			}
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
-			} else if (e instanceof Error) {
-				throw (Error) e;
-			} else {
-				throw new RuntimeException("Unexpected exception", e);
 			}
+			if (e instanceof Error) {
+				throw (Error) e;
+			}
+			throw new RuntimeException("Unexpected exception", e);
 		} finally {
 			this.closeConnection();
 			this.endMessageHandler();
@@ -302,7 +302,7 @@ public class Session implements Runnable, MessageContext {
 
 	/** Close the client socket if it is open */
 	public void closeSocket() throws IOException {
-		if ((this.socket != null) && this.socket.isBound() && !this.socket.isClosed()) {
+		if (this.socket != null && this.socket.isBound() && !this.socket.isClosed()) {
 			this.socket.close();
 		}
 	}

@@ -6,22 +6,20 @@ package org.subethamail.smtp.server;
 @SuppressWarnings("serial")
 public class InvalidCommandNameException extends CommandException {
 	/** */
-	public InvalidCommandNameException() {
-		super();
-	}
+	public InvalidCommandNameException() {}
 
 	/** */
-	public InvalidCommandNameException(String string) {
+	public InvalidCommandNameException(final String string) {
 		super(string);
 	}
 
 	/** */
-	public InvalidCommandNameException(String string, Throwable throwable) {
+	public InvalidCommandNameException(final String string, final Throwable throwable) {
 		super(string, throwable);
 	}
 
 	/** */
-	public InvalidCommandNameException(Throwable throwable) {
+	public InvalidCommandNameException(final Throwable throwable) {
 		super(throwable);
 	}
 }

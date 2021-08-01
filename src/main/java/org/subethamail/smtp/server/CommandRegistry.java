@@ -42,11 +42,17 @@ public enum CommandRegistry {
 	private Command command;
 
 	/** */
-	private CommandRegistry(Command cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired) {
-		if (checkForStartedTLSWhenRequired) this.command = new RequireTLSCommandWrapper(cmd);
-		else
+	CommandRegistry(final Command cmd,
+			final boolean checkForStartedTLSWhenRequired,
+			final boolean checkForAuthIfRequired) {
+		if (checkForStartedTLSWhenRequired) {
+			this.command = new RequireTLSCommandWrapper(cmd);
+		} else {
 			this.command = cmd;
-		if (checkForAuthIfRequired) this.command = new RequireAuthCommandWrapper(this.command);
+		}
+		if (checkForAuthIfRequired) {
+			this.command = new RequireAuthCommandWrapper(this.command);
+		}
 	}
 
 	/** */

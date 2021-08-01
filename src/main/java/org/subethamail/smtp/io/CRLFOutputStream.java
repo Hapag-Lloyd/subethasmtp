@@ -46,7 +46,7 @@ public class CRLFOutputStream extends FilterOutputStream {
 	 *
 	 * @param out the OutputStream to be wrapped
 	 */
-	public CRLFOutputStream(OutputStream out) {
+	public CRLFOutputStream(final OutputStream out) {
 		super(out);
 		this.statusLast = LAST_WAS_LF; // we already assume a CRLF at beginning
 										// (otherwise TOP would not work correctly
@@ -62,7 +62,7 @@ public class CRLFOutputStream extends FilterOutputStream {
 	 * @throws IOException if an error occurs writing the byte
 	 */
 	@Override
-	public void write(int b) throws IOException {
+	public void write(final int b) throws IOException {
 		switch (b) {
 		case '\r':
 			this.out.write('\r');
@@ -93,7 +93,7 @@ public class CRLFOutputStream extends FilterOutputStream {
 	 *
 	 * @see java.io.FilterOutputStream#write(byte[], int, int)
 	 */
-	protected void writeChunk(byte buffer[], int offset, int length) throws IOException {
+	protected void writeChunk(final byte buffer[], final int offset, final int length) throws IOException {
 		this.out.write(buffer, offset, length);
 	}
 
@@ -101,7 +101,7 @@ public class CRLFOutputStream extends FilterOutputStream {
 	 * @see java.io.FilterOutputStream#write(byte[], int, int)
 	 */
 	@Override
-	public synchronized void write(byte buffer[], int offset, int length) throws IOException {
+	public synchronized void write(final byte buffer[], final int offset, final int length) throws IOException {
 		/* optimized */
 		int lineStart = offset;
 		for (int i = offset; i < length + offset; i++) {

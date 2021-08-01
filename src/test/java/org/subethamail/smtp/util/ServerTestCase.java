@@ -1,10 +1,10 @@
 package org.subethamail.smtp.util;
 
-import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.wiser.Wiser;
+
+import junit.framework.TestCase;
 
 /**
  * A base class for testing the SMTP server at the raw protocol level. Handles
@@ -24,15 +24,10 @@ public abstract class ServerTestCase extends TestCase {
 	/**
 	 * Override the accept method in Wiser so we can test the accept method().
 	 */
-	public class TestWiser extends Wiser {
+	public static class TestWiser extends Wiser {
 		@Override
-		public boolean accept(String from, String recipient) {
-			if (recipient.equals("failure@subethamail.org")) {
-				return false;
-			} else if (recipient.equals("success@subethamail.org")) {
-				return true;
-			}
-			return true;
+		public boolean accept(final String from, final String recipient) {
+			return !recipient.equals("failure@subethamail.org");
 		}
 	}
 
@@ -43,7 +38,7 @@ public abstract class ServerTestCase extends TestCase {
 	protected Client c;
 
 	/** */
-	public ServerTestCase(String name) {
+	public ServerTestCase(final String name) {
 		super(name);
 	}
 
@@ -72,17 +67,17 @@ public abstract class ServerTestCase extends TestCase {
 	}
 
 	/** */
-	public void send(String msg) throws Exception {
+	public void send(final String msg) throws Exception {
 		this.c.send(msg);
 	}
 
 	/** */
-	public void expect(String msg) throws Exception {
+	public void expect(final String msg) throws Exception {
 		this.c.expect(msg);
 	}
 
 	/** */
-	public void expectContains(String msg) throws Exception {
+	public void expectContains(final String msg) throws Exception {
 		this.c.expectContains(msg);
 	}
 }
