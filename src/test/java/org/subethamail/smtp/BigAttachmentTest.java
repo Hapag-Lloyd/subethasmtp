@@ -37,18 +37,18 @@ import org.subethamail.wiser.WiserMessage;
 import com.sun.mail.smtp.SMTPTransport;
 
 /**
- * This class tests the transfer speed of emails that carry
- * attached files.
+ * This class tests the transfer speed of emails that carry attached files.
  *
  * @author De Oliveira Edouard &lt;doe_wanted@yahoo.fr&gt;
  */
 @Ignore("requires manual setup")
-public class BigAttachmentTest
-{
+public class BigAttachmentTest {
 	private final static Logger log = LoggerFactory.getLogger(BigAttachmentTest.class);
 
 	private final static int SMTP_PORT = 1081;
+
 	private final static String TO_CHANGE = "<path>/<your_bigfile.ext>";
+
 	private final static int BUFFER_SIZE = 32768;
 
 	// Set the full path name of the big file to use for the test.
@@ -58,8 +58,7 @@ public class BigAttachmentTest
 
 	/** */
 	@Before
-	protected void setUp() throws Exception
-	{
+	protected void setUp() throws Exception {
 		this.server = new Wiser();
 		this.server.setPort(SMTP_PORT);
 		this.server.start();
@@ -67,28 +66,27 @@ public class BigAttachmentTest
 
 	/** */
 	@After
-	protected void tearDown() throws Exception
-	{
-		try
-		{
+	protected void tearDown() throws Exception {
+		try {
 			this.server.stop();
-		} catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
-		};
+		} ;
 	}
 
 	/** */
-	public void testAttachments() throws Exception
-	{
-		if (BIGFILE_PATH.equals(TO_CHANGE))
-		{
-			log.error("BigAttachmentTest: To complete this test you must change the BIGFILE_PATH var to point out a file on your disk !");
+	public void testAttachments() throws Exception {
+		if (BIGFILE_PATH.equals(TO_CHANGE)) {
+			log.error(
+					"BigAttachmentTest: To complete this test you must change the BIGFILE_PATH var to point out a file on your disk !");
 		}
-		assertNotSame("BigAttachmentTest: To complete this test you must change the BIGFILE_PATH var to point out a file on your disk !", TO_CHANGE, BIGFILE_PATH);
+		assertNotSame(
+				"BigAttachmentTest: To complete this test you must change the BIGFILE_PATH var to point out a file on your disk !",
+				TO_CHANGE,
+				BIGFILE_PATH);
 		Properties props = System.getProperties();
 		props.setProperty("mail.smtp.host", "localhost");
-		props.setProperty("mail.smtp.port", SMTP_PORT+"");
+		props.setProperty("mail.smtp.port", SMTP_PORT + "");
 		Session session = Session.getInstance(props);
 
 		MimeMessage baseMsg = new MimeMessage(session);
@@ -108,21 +106,19 @@ public class BigAttachmentTest
 		multipart.addBodyPart(bp2);
 
 		baseMsg.setFrom(new InternetAddress("Ted <ted@home.com>"));
-		baseMsg.setRecipient(Message.RecipientType.TO, new InternetAddress(
-				"success@subethamail.org"));
+		baseMsg.setRecipient(Message.RecipientType.TO, new InternetAddress("success@subethamail.org"));
 		baseMsg.setSubject("Test Big attached file message");
 		baseMsg.setContent(multipart);
 		baseMsg.saveChanges();
 
 		log.debug("Send started");
-		Transport t = new SMTPTransport(session, new URLName("smtp://localhost:"+SMTP_PORT));
+		Transport t = new SMTPTransport(session, new URLName("smtp://localhost:" + SMTP_PORT));
 		long started = System.currentTimeMillis();
 		t.connect();
-		t.sendMessage(baseMsg, new Address[] {new InternetAddress(
-				"success@subethamail.org")});
+		t.sendMessage(baseMsg, new Address[] { new InternetAddress("success@subethamail.org") });
 		t.close();
 		started = System.currentTimeMillis() - started;
-		log.info("Elapsed ms = "+started);
+		log.info("Elapsed ms = " + started);
 
 		WiserMessage msg = this.server.getMessages().get(0);
 
@@ -142,8 +138,7 @@ public class BigAttachmentTest
 	}
 
 	/** */
-	private boolean checkIntegrity(File src, File dest) throws IOException, NoSuchAlgorithmException
-	{
+	private boolean checkIntegrity(File src, File dest) throws IOException, NoSuchAlgorithmException {
 		BufferedInputStream ins = new BufferedInputStream(new FileInputStream(src));
 		BufferedInputStream ind = new BufferedInputStream(new FileInputStream(dest));
 		MessageDigest md1 = MessageDigest.getInstance("MD5");
@@ -153,8 +148,7 @@ public class BigAttachmentTest
 		byte[] buf1 = new byte[BUFFER_SIZE];
 		byte[] buf2 = new byte[BUFFER_SIZE];
 
-		while (r !=-1)
-		{
+		while (r != -1) {
 			r = ins.read(buf1);
 			ind.read(buf2);
 

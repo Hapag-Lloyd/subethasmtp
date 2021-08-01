@@ -10,18 +10,15 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class QuitCommand extends BaseCommand
-{
+public class QuitCommand extends BaseCommand {
 	/** */
-	public QuitCommand()
-	{
+	public QuitCommand() {
 		super("QUIT", "Exit the SMTP session.");
 	}
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException
-	{
+	public void execute(String commandString, Session sess) throws IOException {
 		sess.sendResponse("221 Bye");
 		sess.quit();
 	}

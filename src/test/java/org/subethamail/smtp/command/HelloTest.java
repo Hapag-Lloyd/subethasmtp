@@ -2,22 +2,17 @@ package org.subethamail.smtp.command;
 
 import org.subethamail.smtp.util.ServerTestCase;
 
-
-
 /**
  * @author Jeff Schnitzer
  */
-public class HelloTest extends ServerTestCase
-{
+public class HelloTest extends ServerTestCase {
 	/** */
-	public HelloTest(String name)
-	{
+	public HelloTest(String name) {
 		super(name);
 	}
 
 	/** */
-	public void testHelloCommand() throws Exception
-	{
+	public void testHelloCommand() throws Exception {
 		this.expect("220");
 
 		this.send("HELO");
@@ -36,8 +31,7 @@ public class HelloTest extends ServerTestCase
 	}
 
 	/** */
-	public void testHelloReset() throws Exception
-	{
+	public void testHelloReset() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -54,12 +48,11 @@ public class HelloTest extends ServerTestCase
 	}
 
 	/** */
-	public void testEhloSize() throws Exception
-	{
-	    this.wiser.getServer().setMaxMessageSize(1000);
-	    this.expect("220");
+	public void testEhloSize() throws Exception {
+		this.wiser.getServer().setMaxMessageSize(1000);
+		this.expect("220");
 
-	    this.send("EHLO foo.com");
-	    this.expectContains("250-SIZE 1000");
+		this.send("EHLO foo.com");
+		this.expectContains("250-SIZE 1000");
 	}
 }

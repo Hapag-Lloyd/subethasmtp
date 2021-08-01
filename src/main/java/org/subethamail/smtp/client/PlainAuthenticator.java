@@ -17,19 +17,19 @@ import org.subethamail.smtp.util.Base64;
  */
 public class PlainAuthenticator implements Authenticator {
 	private final String user;
+
 	private final String password;
+
 	private final SmartClient smartClient;
 
-	public PlainAuthenticator(SmartClient smartClient, String user,
-			String password) {
+	public PlainAuthenticator(SmartClient smartClient, String user, String password) {
 		this.smartClient = smartClient;
 		this.user = user;
 		this.password = password;
 	}
 
 	@Override
-	public void authenticate() throws SMTPException,
-			AuthenticationNotSupportedException, IOException {
+	public void authenticate() throws SMTPException, AuthenticationNotSupportedException, IOException {
 		checkAuthPlainSupport();
 
 		String initialClientResponse = constructInitialClientResponse();
@@ -39,32 +39,29 @@ public class PlainAuthenticator implements Authenticator {
 	/**
 	 * Checks if the server supports this mechanism.
 	 * 
-	 * @throws AuthenticationNotSupportedException
-	 *             if the server does not support this mechanism or
-	 *             authentication at all.
+	 * @throws AuthenticationNotSupportedException if the server does not support
+	 *                                             this mechanism or authentication
+	 *                                             at all.
 	 */
-	private void checkAuthPlainSupport()
-			throws AuthenticationNotSupportedException {
+	private void checkAuthPlainSupport() throws AuthenticationNotSupportedException {
 		String mechanismsString = smartClient.getExtensions().get("AUTH");
 		if (mechanismsString == null) {
-			throw new AuthenticationNotSupportedException(
-					"Cannot authenticate, because the AUTH extension is "
-							+ "not supported by the server. Maybe the server expects "
-							+ "TLS first");
+			throw new AuthenticationNotSupportedException("Cannot authenticate, because the AUTH extension is "
+					+ "not supported by the server. Maybe the server expects "
+					+ "TLS first");
 		}
 		Set<String> mechanisms = parseMechanismsList(mechanismsString);
 		if (!mechanisms.contains("PLAIN")) {
-			throw new AuthenticationNotSupportedException(
-					"Cannot authenticate, because the PLAIN mechanism is "
-							+ "not supported by the server. Maybe the server expects "
-							+ "TLS first");
+			throw new AuthenticationNotSupportedException("Cannot authenticate, because the PLAIN mechanism is "
+					+ "not supported by the server. Maybe the server expects "
+					+ "TLS first");
 		}
 	}
 
 	/**
 	 * Parses the EHLO parameter list of the SMTP AUTH extension keyword.
 	 * 
-	 * @return the set of SASL mechanism names 
+	 * @return the set of SASL mechanism names
 	 */
 	private Set<String> parseMechanismsList(String authParameters) {
 		String[] mechanisms = authParameters.split(" ");

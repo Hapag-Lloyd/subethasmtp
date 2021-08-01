@@ -5,17 +5,14 @@ import org.subethamail.smtp.util.ServerTestCase;
 /**
  * @author Jon Stevens
  */
-public class DataTest extends ServerTestCase
-{
+public class DataTest extends ServerTestCase {
 	/** */
-	public DataTest(String name)
-	{
+	public DataTest(String name) {
 		super(name);
 	}
 
 	/** */
-	public void testNeedMail() throws Exception
-	{
+	public void testNeedMail() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -26,8 +23,7 @@ public class DataTest extends ServerTestCase
 	}
 
 	/** */
-	public void testNeedRcpt() throws Exception
-	{
+	public void testNeedRcpt() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -41,8 +37,7 @@ public class DataTest extends ServerTestCase
 	}
 
 	/** */
-	public void testData() throws Exception
-	{
+	public void testData() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -59,8 +54,7 @@ public class DataTest extends ServerTestCase
 	}
 
 	/** */
-	public void testRsetAfterData() throws Exception
-	{
+	public void testRsetAfterData() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");

@@ -23,8 +23,8 @@ import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.io.CRLFTerminatedReader;
 
 /**
- * The thread that handles a connection. This class passes most of it's responsibilities off to the
- * CommandHandler.
+ * The thread that handles a connection. This class passes most of it's
+ * responsibilities off to the CommandHandler.
  *
  * @author Jon Stevens
  * @author Jeff Schnitzer
@@ -36,19 +36,21 @@ public class Session implements Runnable, MessageContext {
 	private final SMTPServer server;
 
 	/**
-	 * A link to our parent server thread, which must be notified when this connection is finished.
+	 * A link to our parent server thread, which must be notified when this
+	 * connection is finished.
 	 */
 	private final ServerThread serverThread;
 
 	/**
-	 * Saved SLF4J mapped diagnostic context of the parent thread. The parent thread is the one
-	 * which calls the constructor. MDC is usually inherited by new threads, but this mechanism does
-	 * not work with executors.
+	 * Saved SLF4J mapped diagnostic context of the parent thread. The parent thread
+	 * is the one which calls the constructor. MDC is usually inherited by new
+	 * threads, but this mechanism does not work with executors.
 	 */
 	private final Map<String, String> parentLoggingMdcContext = MDC.getCopyOfContextMap();
 
 	/**
-	 * Uniquely identifies this session within an extended time period, useful for logging.
+	 * Uniquely identifies this session within an extended time period, useful for
+	 * logging.
 	 */
 	private String sessionId;
 
@@ -57,41 +59,47 @@ public class Session implements Runnable, MessageContext {
 
 	/** I/O to the client */
 	private Socket socket;
+
 	private InputStream input;
+
 	private CRLFTerminatedReader reader;
+
 	private PrintWriter writer;
 
 	/** Might exist if the client has successfully authenticated */
 	private AuthenticationHandler authenticationHandler;
 
 	/**
-	 * It exists if a mail transaction is in progress (from the MAIL command up to the end of the
-	 * DATA command).
+	 * It exists if a mail transaction is in progress (from the MAIL command up to
+	 * the end of the DATA command).
 	 */
 	private MessageHandler messageHandler;
 
 	/** Some state information */
 	private String helo;
+
 	private int recipientCount;
+
 	/**
-	 * The recipient address in the first accepted RCPT command, but only if there is exactly one
-	 * such accepted recipient. If there is no accepted recipient yet, or if there are more than
-	 * one, then this value is null. This information is useful in the construction of the FOR
-	 * clause of the Received header.
+	 * The recipient address in the first accepted RCPT command, but only if there
+	 * is exactly one such accepted recipient. If there is no accepted recipient
+	 * yet, or if there are more than one, then this value is null. This information
+	 * is useful in the construction of the FOR clause of the Received header.
 	 */
 	private String singleRecipient;
 
 	/**
-	 * If the client told us the size of the message, this is the value. If they didn't, the value
-	 * will be 0.
+	 * If the client told us the size of the message, this is the value. If they
+	 * didn't, the value will be 0.
 	 */
 	private int declaredMessageSize = 0;
 
 	/** Some more state information */
 	private boolean tlsStarted;
+
 	private Certificate[] tlsPeerCertificates;
 
-	private   boolean updateThreadName = true;
+	private boolean updateThreadName = true;
 
 	/**
 	 * Creates the Runnable Session object.
@@ -115,7 +123,8 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * The thread for each session runs on this and shuts down when the quitting member goes true.
+	 * The thread for each session runs on this and shuts down when the quitting
+	 * member goes true.
 	 */
 	@Override
 	public void run() {
@@ -125,7 +134,8 @@ public class Session implements Runnable, MessageContext {
 		final String originalName;
 		if (updateThreadName) {
 			originalName = Thread.currentThread().getName();
-			Thread.currentThread().setName(Session.class.getName() + "-" + socket.getInetAddress() + ":" + socket.getPort());
+			Thread.currentThread()
+					.setName(Session.class.getName() + "-" + socket.getInetAddress() + ":" + socket.getPort());
 		} else {
 			originalName = null;
 		}
@@ -134,11 +144,9 @@ public class Session implements Runnable, MessageContext {
 			final InetAddress remoteInetAddress = this.getRemoteAddress().getAddress();
 			remoteInetAddress.getHostName(); // Causes future toString() to print the name too
 
-			log
-			.debug(
-				"SMTP connection from {}, new connection count: {}",
-				remoteInetAddress,
-				this.serverThread.getNumberOfConnections());
+			log.debug("SMTP connection from {}, new connection count: {}",
+					remoteInetAddress,
+					this.serverThread.getNumberOfConnections());
 		}
 
 		try {
@@ -149,8 +157,7 @@ public class Session implements Runnable, MessageContext {
 					// Send a temporary failure back so that the server will try to resend
 					// the message later.
 					this.sendResponse("421 4.4.0 Problem attempting to execute commands. Please try again later.");
-				} catch (final IOException e) {
-				}
+				} catch (final IOException e) {}
 
 				if (log.isWarnEnabled()) {
 					log.warn("Exception during SMTP transaction", e1);
@@ -182,9 +189,10 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * Sends the welcome message and starts receiving and processing client commands. It quits when
-	 * {@link #quitting} becomes true or when it can be noticed or at least assumed that the client
-	 * no longer sends valid commands, for example on timeout.
+	 * Sends the welcome message and starts receiving and processing client
+	 * commands. It quits when {@link #quitting} becomes true or when it can be
+	 * noticed or at least assumed that the client no longer sends valid commands,
+	 * for example on timeout.
 	 *
 	 * @throws IOException if sending to or receiving from the client fails.
 	 */
@@ -231,8 +239,9 @@ public class Session implements Runnable, MessageContext {
 				this.sendResponse("421 Timeout waiting for data from client.");
 				return;
 			} catch (final CRLFTerminatedReader.TerminationException te) {
-				final String msg = "501 Syntax error at character position " + te.position()
-				+ ". CR and LF must be CRLF paired.  See RFC 2821 #2.7.1.";
+				final String msg = "501 Syntax error at character position "
+						+ te.position()
+						+ ". CR and LF must be CRLF paired.  See RFC 2821 #2.7.1.";
 
 				log.debug(msg);
 				this.sendResponse(msg);
@@ -252,7 +261,8 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * Close reader, writer, and socket, logging exceptions but otherwise ignoring them
+	 * Close reader, writer, and socket, logging exceptions but otherwise ignoring
+	 * them
 	 */
 	private void closeConnection() {
 		try {
@@ -268,8 +278,9 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * Initializes our reader, writer, and the i/o filter chains based on the specified socket. This
-	 * is called internally when we startup and when (if) SSL is started.
+	 * Initializes our reader, writer, and the i/o filter chains based on the
+	 * specified socket. This is called internally when we startup and when (if) SSL
+	 * is started.
 	 */
 	public void setSocket(final Socket socket) throws IOException {
 		this.socket = socket;
@@ -321,8 +332,8 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * Returns an identifier of the session which is reasonably unique within an extended time
-	 * period.
+	 * Returns an identifier of the session which is reasonably unique within an
+	 * extended time period.
 	 */
 	public String getSessionId() {
 		return sessionId;
@@ -384,8 +395,8 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * Returns the first accepted recipient if there is exactly one accepted recipient, otherwise it
-	 * returns null.
+	 * Returns the first accepted recipient if there is exactly one accepted
+	 * recipient, otherwise it returns null.
 	 */
 	public String getSingleRecipient() {
 		return singleRecipient;
@@ -403,8 +414,9 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * This is called by the AuthCommand when a session is successfully authenticated. The handler
-	 * will be an object created by the AuthenticationHandlerFactory.
+	 * This is called by the AuthCommand when a session is successfully
+	 * authenticated. The handler will be an object created by the
+	 * AuthenticationHandlerFactory.
 	 */
 	public void setAuthenticationHandler(final AuthenticationHandler handler) {
 		this.authenticationHandler = handler;
@@ -437,20 +449,21 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * Returns true if a mail transaction is started, i.e. a MAIL command is received, and the
-	 * transaction is not yet completed or aborted. A transaction is successfully completed after
-	 * the message content is received and accepted at the end of the DATA command.
+	 * Returns true if a mail transaction is started, i.e. a MAIL command is
+	 * received, and the transaction is not yet completed or aborted. A transaction
+	 * is successfully completed after the message content is received and accepted
+	 * at the end of the DATA command.
 	 */
 	public boolean isMailTransactionInProgress() {
 		return this.messageHandler != null;
 	}
 
 	/**
-	 * Stops the mail transaction if it in progress and resets all state related to mail
-	 * transactions.
+	 * Stops the mail transaction if it in progress and resets all state related to
+	 * mail transactions.
 	 * <p>
-	 * Note: Some state is associated with each particular message (senders, recipients, the message
-	 * handler).<br>
+	 * Note: Some state is associated with each particular message (senders,
+	 * recipients, the message handler).<br>
 	 * Some state is not; seeing hello, TLS, authentication.
 	 */
 	public void resetMailTransaction() {
@@ -479,8 +492,8 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	/**
-	 * Reset the SMTP protocol to the initial state, which is the state after a server issues a 220
-	 * service ready greeting.
+	 * Reset the SMTP protocol to the initial state, which is the state after a
+	 * server issues a 220 service ready greeting.
 	 */
 	public void resetSmtpProtocol() {
 		resetMailTransaction();

@@ -6,12 +6,9 @@ import org.subethamail.smtp.util.ServerTestCase;
 /**
  * @author Erik van Oosten
  */
-public class RequireTlsTest extends ServerTestCase
-{
-
+public class RequireTlsTest extends ServerTestCase {
 	/** */
-	public RequireTlsTest(String name)
-	{
+	public RequireTlsTest(String name) {
 		super(name);
 	}
 
@@ -21,8 +18,7 @@ public class RequireTlsTest extends ServerTestCase
 	 * @see org.subethamail.smtp.ServerTestCase#setUp()
 	 */
 	@Override
-	protected void setUp() throws Exception
-	{
+	protected void setUp() throws Exception {
 		this.wiser = new TestWiser();
 		this.wiser.setHostname("localhost");
 		this.wiser.setPort(PORT);
@@ -38,14 +34,12 @@ public class RequireTlsTest extends ServerTestCase
 	 * @see org.subethamail.smtp.ServerTestCase#tearDown()
 	 */
 	@Override
-	protected void tearDown() throws Exception
-	{
+	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
 
 	/** */
-	public void testNeedSTARTTLS() throws Exception
-	{
+	public void testNeedSTARTTLS() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -66,5 +60,4 @@ public class RequireTlsTest extends ServerTestCase
 		this.send("QUIT");
 		this.expect("221 Bye");
 	}
-
 }

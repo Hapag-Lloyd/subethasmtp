@@ -15,64 +15,56 @@ import org.subethamail.smtp.DropConnectionException;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
-abstract public class BaseCommand implements Command
-{
+abstract public class BaseCommand implements Command {
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(BaseCommand.class);
 
 	/** Name of the command, ie HELO */
 	private String name;
-	/** The help message for this command*/
+
+	/** The help message for this command */
 	private HelpMessage helpMsg;
 
 	/** */
-	protected BaseCommand(String name, String help)
-	{
+	protected BaseCommand(String name, String help) {
 		this.name = name;
 		this.helpMsg = new HelpMessage(name, help);
 	}
 
 	/** */
-	protected BaseCommand(String name, String help, String argumentDescription)
-	{
+	protected BaseCommand(String name, String help, String argumentDescription) {
 		this.name = name;
-		this.helpMsg =  new HelpMessage(name, help, argumentDescription);
+		this.helpMsg = new HelpMessage(name, help, argumentDescription);
 	}
 
 	/**
-	 * This is the main method that you need to override in order to implement a command.
+	 * This is the main method that you need to override in order to implement a
+	 * command.
 	 */
-	abstract public void execute(String commandString, Session context)
-			throws IOException, DropConnectionException;
+	abstract public void execute(String commandString, Session context) throws IOException, DropConnectionException;
 
 	/** */
-	public HelpMessage getHelp()
-	{
+	public HelpMessage getHelp() {
 		return this.helpMsg;
 	}
 
 	/** */
-	public String getName()
-	{
+	public String getName() {
 		return this.name;
 	}
 
 	/** */
-	protected String getArgPredicate(String commandString)
-	{
-		if (commandString == null || commandString.length() < 4)
-			return "";
+	protected String getArgPredicate(String commandString) {
+		if (commandString == null || commandString.length() < 4) return "";
 
 		return commandString.substring(4).trim();
 	}
 
 	/** */
-	protected String[] getArgs(String commandString)
-	{
+	protected String[] getArgs(String commandString) {
 		List<String> strings = new ArrayList<String>();
 		StringTokenizer stringTokenizer = new StringTokenizer(commandString);
-		while (stringTokenizer.hasMoreTokens())
-		{
+		while (stringTokenizer.hasMoreTokens()) {
 			strings.add(stringTokenizer.nextToken());
 		}
 

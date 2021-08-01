@@ -14,40 +14,32 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Scott Hernandez
  */
-public class HelpCommand extends BaseCommand
-{
+public class HelpCommand extends BaseCommand {
 	/** */
-	public HelpCommand()
-	{
+	public HelpCommand() {
 		super("HELP",
 				"The HELP command gives help info about the topic specified.\n"
-					+ "For a list of topics, type HELP by itself.",
+						+ "For a list of topics, type HELP by itself.",
 				"[ <topic> ]");
 	}
 
 	/** */
 	@Override
-	public void execute(String commandString, Session context) throws IOException
-	{
+	public void execute(String commandString, Session context) throws IOException {
 		String args = this.getArgPredicate(commandString);
-		if ("".equals(args))
-		{
+		if ("".equals(args)) {
 			context.sendResponse(this.getCommandMessage(context.getServer()));
 			return;
 		}
-		try
-		{
+		try {
 			context.sendResponse(context.getServer().getCommandHandler().getHelp(args).toOutputString());
-		}
-		catch (CommandException e)
-		{
+		} catch (CommandException e) {
 			context.sendResponse("504 HELP topic \"" + args + "\" unknown.");
 		}
 	}
 
 	/** */
-	private String getCommandMessage(SMTPServer server)
-	{
+	private String getCommandMessage(SMTPServer server) {
 		return "214-"
 				+ server.getSoftwareName()
 				+ " on "
@@ -60,13 +52,11 @@ public class HelpCommand extends BaseCommand
 	}
 
 	/** */
-	protected String getFormattedTopicList(SMTPServer server)
-	{
+	protected String getFormattedTopicList(SMTPServer server) {
 		StringBuilder sb = new StringBuilder();
-		for (String key : server.getCommandHandler().getVerbs())
-	    {
-	    	sb.append("214-     " + key + "\r\n");
-	    }
+		for (String key : server.getCommandHandler().getVerbs()) {
+			sb.append("214-     " + key + "\r\n");
+		}
 		return sb.toString();
 	}
 }

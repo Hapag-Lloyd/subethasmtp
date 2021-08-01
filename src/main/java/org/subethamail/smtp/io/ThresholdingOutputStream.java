@@ -1,6 +1,5 @@
 /*
- * $Id$
- * $URL$
+ * $Id$ $URL$
  */
 package org.subethamail.smtp.io;
 
@@ -8,14 +7,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * This is an OutputStream wrapper which takes notice when a
- * threshold (number of bytes) is about to be written.  This can
- * be used to limit output data, swap writers, etc.
+ * This is an OutputStream wrapper which takes notice when a threshold (number
+ * of bytes) is about to be written. This can be used to limit output data, swap
+ * writers, etc.
  *
  * @author Jeff Schnitzer
  */
-abstract public class ThresholdingOutputStream extends OutputStream
-{
+abstract public class ThresholdingOutputStream extends OutputStream {
 	/** */
 	protected OutputStream output;
 
@@ -29,38 +27,38 @@ abstract public class ThresholdingOutputStream extends OutputStream
 
 	/**
 	 */
-	public ThresholdingOutputStream(OutputStream base, int thresholdBytes)
-	{
+	public ThresholdingOutputStream(OutputStream base, int thresholdBytes) {
 		this.output = base;
 		this.threshold = thresholdBytes;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.OutputStream#close()
 	 */
 	@Override
-	public void close() throws IOException
-	{
+	public void close() throws IOException {
 		this.output.close();
 	}
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.OutputStream#flush()
 	 */
 	@Override
-	public void flush() throws IOException
-	{
+	public void flush() throws IOException {
 		this.output.flush();
 	}
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.OutputStream#write(byte[], int, int)
 	 */
 	@Override
-	public void write(byte[] b, int off, int len) throws IOException
-	{
+	public void write(byte[] b, int off, int len) throws IOException {
 		this.checkThreshold(len);
 
 		this.output.write(b, off, len);
@@ -68,13 +66,13 @@ abstract public class ThresholdingOutputStream extends OutputStream
 		this.written += len;
 	}
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.OutputStream#write(byte[])
 	 */
 	@Override
-	public void write(byte[] b) throws IOException
-	{
+	public void write(byte[] b) throws IOException {
 		this.checkThreshold(b.length);
 
 		this.output.write(b);
@@ -82,13 +80,13 @@ abstract public class ThresholdingOutputStream extends OutputStream
 		this.written += b.length;
 	}
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.OutputStream#write(int)
 	 */
 	@Override
-	public void write(int b) throws IOException
-	{
+	public void write(int b) throws IOException {
 		this.checkThreshold(1);
 
 		this.output.write(b);
@@ -99,11 +97,9 @@ abstract public class ThresholdingOutputStream extends OutputStream
 	/**
 	 * Checks whether reading count bytes would cross the limit.
 	 */
-	protected void checkThreshold(int count) throws IOException
-	{
+	protected void checkThreshold(int count) throws IOException {
 		int predicted = this.written + count;
-		if (!this.thresholdReached && predicted > this.threshold)
-		{
+		if (!this.thresholdReached && predicted > this.threshold) {
 			this.thresholdReached(this.written, predicted);
 			this.thresholdReached = true;
 		}
@@ -112,17 +108,16 @@ abstract public class ThresholdingOutputStream extends OutputStream
 	/**
 	 * @return the current threshold value.
 	 */
-	public int getThreshold()
-	{
+	public int getThreshold() {
 		return this.threshold;
 	}
 
 	/**
-	 * Called when the threshold is about to be exceeded.  This isn't
-	 * exact; it's called whenever a write would occur that would
-	 * cross the amount. Once it is called, it isn't called again.
+	 * Called when the threshold is about to be exceeded. This isn't exact; it's
+	 * called whenever a write would occur that would cross the amount. Once it is
+	 * called, it isn't called again.
 	 *
-	 * @param current is the current number of bytes that have been written
+	 * @param current   is the current number of bytes that have been written
 	 * @param predicted is the total number after the write completes
 	 */
 	abstract protected void thresholdReached(int current, int predicted) throws IOException;

@@ -20,44 +20,46 @@ import org.subethamail.smtp.MessageHandlerFactory;
 import org.subethamail.smtp.Version;
 
 /**
- * Main SMTPServer class.  Construct this object, set the
- * hostName, port, and bind address if you wish to override the
- * defaults, and call start().
+ * Main SMTPServer class. Construct this object, set the hostName, port, and
+ * bind address if you wish to override the defaults, and call start().
  *
- * This class starts opens a ServerSocket and creates a new
- * instance of the ConnectionHandler class when a new connection
- * comes in.  The ConnectionHandler then parses the incoming SMTP
- * stream and hands off the processing to the CommandHandler which
- * will execute the appropriate SMTP command class.
+ * This class starts opens a ServerSocket and creates a new instance of the
+ * ConnectionHandler class when a new connection comes in. The ConnectionHandler
+ * then parses the incoming SMTP stream and hands off the processing to the
+ * CommandHandler which will execute the appropriate SMTP command class.
  *
- * To use this class, construct a server with your implementation
- * of the MessageHandlerFactory.  This provides low-level callbacks
- * at various phases of the SMTP exchange.  For a higher-level
- * but more limited interface, you can pass in a
- * org.subethamail.smtp.helper.SimpleMessageListenerAdapter.
+ * To use this class, construct a server with your implementation of the
+ * MessageHandlerFactory. This provides low-level callbacks at various phases of
+ * the SMTP exchange. For a higher-level but more limited interface, you can
+ * pass in a org.subethamail.smtp.helper.SimpleMessageListenerAdapter.
  *
- * By default, no authentication methods are offered.  To use
- * authentication, set an AuthenticationHandlerFactory.
+ * By default, no authentication methods are offered. To use authentication, set
+ * an AuthenticationHandlerFactory.
  *
  * @author Jon Stevens
  * @author Ian McFarland &lt;ian@neo.com&gt;
  * @author Jeff Schnitzer
  */
-public class SMTPServer
-{
+public class SMTPServer {
 	private final static Logger log = LoggerFactory.getLogger(SMTPServer.class);
 
 	/** Hostname used if we can't find one */
 	private final static String UNKNOWN_HOSTNAME = "localhost";
 
-	private InetAddress bindAddress = null;	// default to all interfaces
-	private int port = 25;	// default to 25
-	private String hostName;	// defaults to a lookup of the local address
+	private InetAddress bindAddress = null; // default to all interfaces
+
+	private int port = 25; // default to 25
+
+	private String hostName; // defaults to a lookup of the local address
+
 	private int backlog = 50;
+
 	private String softwareName = "SubEthaSMTP " + Version.getSpecification();
 
 	private MessageHandlerFactory messageHandlerFactory;
+
 	private AuthenticationHandlerFactory authenticationHandlerFactory;
+
 	private ExecutorService executorService;
 
 	private final CommandHandler commandHandler;
@@ -65,25 +67,31 @@ public class SMTPServer
 	/** The thread listening on the server socket. */
 	@GuardedBy("this")
 	private ServerThread serverThread;
+
 	private boolean updateThreadName = true;
 
 	/**
-	 * True if this SMTPServer was started. It remains true even if the
-	 * SMTPServer has been stopped since. It is used to prevent restarting this
-	 * object. Even if it was shutdown properly, it cannot be restarted, because
-	 * the contained thread pool object itself cannot be restarted.
+	 * True if this SMTPServer was started. It remains true even if the SMTPServer
+	 * has been stopped since. It is used to prevent restarting this object. Even if
+	 * it was shutdown properly, it cannot be restarted, because the contained
+	 * thread pool object itself cannot be restarted.
 	 **/
 	@GuardedBy("this")
 	private boolean started = false;
 
 	/** If true, TLS is enabled */
 	private boolean enableTLS = false;
+
 	/** If true, TLS is not announced; ignored if enableTLS=false */
 	private boolean hideTLS = false;
+
 	/** If true, a TLS handshake is required; ignored if enableTLS=false */
 	private boolean requireTLS = false;
-	/** If true, this server will accept no mail until auth succeeded;
-	 * ignored if no AuthenticationHandlerFactory has been set*/
+
+	/**
+	 * If true, this server will accept no mail until auth succeeded; ignored if no
+	 * AuthenticationHandlerFactory has been set
+	 */
 	private boolean requireAuth = false;
 
 	/** If true, no Received headers will be inserted */
@@ -102,16 +110,18 @@ public class SMTPServer
 	private int connectionTimeout = 1000 * 60 * 1;
 
 	/**
-	 * The maximal number of recipients that this server accepts per message delivery request.
+	 * The maximal number of recipients that this server accepts per message
+	 * delivery request.
 	 */
 	private int maxRecipients = 1000;
 
 	/**
-	 * The maximum size of a message that the server will accept. This value is advertised
-	 * during the EHLO phase if it is larger than 0. If the message size specified by the client
-	 * during the MAIL phase, the message will be rejected at that time. (RFC 1870)
-	 * Default is 0.  Note this doesn't actually enforce any limits on the message being
-	 * read; you must do that yourself when reading data.
+	 * The maximum size of a message that the server will accept. This value is
+	 * advertised during the EHLO phase if it is larger than 0. If the message size
+	 * specified by the client during the MAIL phase, the message will be rejected
+	 * at that time. (RFC 1870) Default is 0. Note this doesn't actually enforce any
+	 * limits on the message being read; you must do that yourself when reading
+	 * data.
 	 */
 	private int maxMessageSize = 0;
 
@@ -120,41 +130,39 @@ public class SMTPServer
 	/**
 	 * Simple constructor.
 	 */
-	public SMTPServer(final MessageHandlerFactory handlerFactory)
-	{
+	public SMTPServer(final MessageHandlerFactory handlerFactory) {
 		this(handlerFactory, null, null);
 	}
 
 	/**
 	 * Constructor with {@link AuthenticationHandlerFactory}.
 	 */
-	public SMTPServer(final MessageHandlerFactory handlerFactory, final AuthenticationHandlerFactory authHandlerFact)
-	{
+	public SMTPServer(final MessageHandlerFactory handlerFactory, final AuthenticationHandlerFactory authHandlerFact) {
 		this(handlerFactory, authHandlerFact, null);
 	}
 
 	/**
 	 * Complex constructor.
 	 *
-	 * @param authHandlerFact
-	 *            the {@link AuthenticationHandlerFactory} which performs
-	 *            authentication in the SMTP AUTH command. If null,
-	 *            authentication is not supported. Note that setting an
-	 *            authentication handler does not enforce authentication, it
-	 *            only makes authentication possible. Enforcing authentication
-	 *            is the responsibility of the client application, which usually
-	 *            enforces it only selectively. Use
-	 *            {@link Session#isAuthenticated} to check whether the client
-	 *            was authenticated in the session.
-	 * @param executorService
-	 *            the ExecutorService which will handle client connections, one
-	 *            task per connection. The SMTPServer will shut down this
-	 *            ExecutorService when the SMTPServer itself stops. If null, a
-	 *            default one is created by
-	 *            {@link Executors#newCachedThreadPool()}.
+	 * @param authHandlerFact the {@link AuthenticationHandlerFactory} which
+	 *                        performs authentication in the SMTP AUTH command. If
+	 *                        null, authentication is not supported. Note that
+	 *                        setting an authentication handler does not enforce
+	 *                        authentication, it only makes authentication possible.
+	 *                        Enforcing authentication is the responsibility of the
+	 *                        client application, which usually enforces it only
+	 *                        selectively. Use {@link Session#isAuthenticated} to
+	 *                        check whether the client was authenticated in the
+	 *                        session.
+	 * @param executorService the ExecutorService which will handle client
+	 *                        connections, one task per connection. The SMTPServer
+	 *                        will shut down this ExecutorService when the
+	 *                        SMTPServer itself stops. If null, a default one is
+	 *                        created by {@link Executors#newCachedThreadPool()}.
 	 */
-	public SMTPServer(final MessageHandlerFactory msgHandlerFact, final AuthenticationHandlerFactory authHandlerFact, final ExecutorService executorService)
-	{
+	public SMTPServer(final MessageHandlerFactory msgHandlerFact,
+			final AuthenticationHandlerFactory authHandlerFact,
+			final ExecutorService executorService) {
 		this.messageHandlerFactory = msgHandlerFact;
 		this.authenticationHandlerFactory = authHandlerFact;
 
@@ -164,12 +172,9 @@ public class SMTPServer
 			this.executorService = Executors.newCachedThreadPool();
 		}
 
-		try
-		{
+		try {
 			this.hostName = InetAddress.getLocalHost().getCanonicalHostName();
-		}
-		catch (final UnknownHostException e)
-		{
+		} catch (final UnknownHostException e) {
 			this.hostName = UNKNOWN_HOSTNAME;
 		}
 
@@ -177,8 +182,7 @@ public class SMTPServer
 	}
 
 	/** @return the host name that will be reported to SMTP clients */
-	public String getHostName()
-	{
+	public String getHostName() {
 		if (this.hostName == null) {
 			return UNKNOWN_HOSTNAME;
 		} else {
@@ -187,49 +191,42 @@ public class SMTPServer
 	}
 
 	/** The host name that will be reported to SMTP clients */
-	public void setHostName(final String hostName)
-	{
+	public void setHostName(final String hostName) {
 		this.hostName = hostName;
 	}
 
 	/** null means all interfaces */
-	public InetAddress getBindAddress()
-	{
+	public InetAddress getBindAddress() {
 		return this.bindAddress;
 	}
 
 	/** null means all interfaces */
-	public void setBindAddress(final InetAddress bindAddress)
-	{
+	public void setBindAddress(final InetAddress bindAddress) {
 		this.bindAddress = bindAddress;
 	}
 
 	/** */
-	public int getPort()
-	{
+	public int getPort() {
 		return this.port;
 	}
 
 	/** */
-	public void setPort(final int port)
-	{
+	public void setPort(final int port) {
 		this.port = port;
 	}
 
 	/**
-	 * The string reported to the public as the software running here.  Defaults
-	 * to SubEthaSTP and the version number.
+	 * The string reported to the public as the software running here. Defaults to
+	 * SubEthaSTP and the version number.
 	 */
-	public String getSoftwareName()
-	{
+	public String getSoftwareName() {
 		return this.softwareName;
 	}
 
 	/**
 	 * Changes the publicly reported software information.
 	 */
-	public void setSoftwareName(final String value)
-	{
+	public void setSoftwareName(final String value) {
 		this.softwareName = value;
 	}
 
@@ -243,61 +240,52 @@ public class SMTPServer
 	/**
 	 * Is the server running after start() has been called?
 	 */
-	public synchronized boolean isRunning()
-	{
+	public synchronized boolean isRunning() {
 		return this.serverThread != null;
 	}
 
 	/**
 	 * The backlog is the Socket backlog.
 	 *
-	 * The backlog argument must be a positive value greater than 0.
-	 * If the value passed if equal or less than 0, then the default value will be assumed.
+	 * The backlog argument must be a positive value greater than 0. If the value
+	 * passed if equal or less than 0, then the default value will be assumed.
 	 *
 	 * @return the backlog
 	 */
-	public int getBacklog()
-	{
+	public int getBacklog() {
 		return this.backlog;
 	}
 
 	/**
 	 * The backlog is the Socket backlog.
 	 *
-	 * The backlog argument must be a positive value greater than 0.
-	 * If the value passed if equal or less than 0, then the default value will be assumed.
+	 * The backlog argument must be a positive value greater than 0. If the value
+	 * passed if equal or less than 0, then the default value will be assumed.
 	 */
-	public void setBacklog(final int backlog)
-	{
+	public void setBacklog(final int backlog) {
 		this.backlog = backlog;
 	}
 
 	/**
-	 * Call this method to get things rolling after instantiating the
-	 * SMTPServer.
+	 * Call this method to get things rolling after instantiating the SMTPServer.
 	 * <p>
 	 * An SMTPServer which has been shut down, must not be reused.
 	 */
-	public synchronized void start()
-	{
+	public synchronized void start() {
 		if (log.isInfoEnabled()) {
 			log.info("SMTP server {} starting", getDisplayableLocalSocketAddress());
 		}
 
 		if (this.started) {
-			throw new IllegalStateException(
-				"SMTPServer can only be started once. "
-						+ "Restarting is not allowed even after a proper shutdown.");
+			throw new IllegalStateException("SMTPServer can only be started once. "
+					+ "Restarting is not allowed even after a proper shutdown.");
 		}
 
 		// Create our server socket here.
 		ServerSocket serverSocket;
-		try
-		{
+		try {
 			serverSocket = this.createServerSocket();
-		}
-		catch (final Exception e)
-		{
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 
@@ -310,8 +298,7 @@ public class SMTPServer
 	/**
 	 * Shut things down gracefully.
 	 */
-	public synchronized void stop()
-	{
+	public synchronized void stop() {
 		log.info("SMTP server {} stopping...", getDisplayableLocalSocketAddress());
 		if (this.serverThread == null) {
 			return;
@@ -324,29 +311,24 @@ public class SMTPServer
 	}
 
 	/**
-	 * Override this method if you want to create your own server sockets.
-	 * You must return a bound ServerSocket instance
+	 * Override this method if you want to create your own server sockets. You must
+	 * return a bound ServerSocket instance
 	 *
 	 * @throws IOException
 	 */
-	protected ServerSocket createServerSocket() throws IOException
-	{
+	protected ServerSocket createServerSocket() throws IOException {
 		InetSocketAddress isa;
 
-		if (this.bindAddress == null)
-		{
+		if (this.bindAddress == null) {
 			isa = new InetSocketAddress(this.port);
-		}
-		else
-		{
+		} else {
 			isa = new InetSocketAddress(this.bindAddress, this.port);
 		}
 
 		final ServerSocket serverSocket = new ServerSocket();
 		serverSocket.bind(isa, this.backlog);
 
-		if (this.port == 0)
-		{
+		if (this.port == 0) {
 			this.port = serverSocket.getLocalPort();
 		}
 
@@ -354,18 +336,18 @@ public class SMTPServer
 	}
 
 	/**
-	 * Create a SSL socket that wraps the existing socket. This method
-	 * is called after the client issued the STARTTLS command.
+	 * Create a SSL socket that wraps the existing socket. This method is called
+	 * after the client issued the STARTTLS command.
 	 * <p>
-	 * Subclasses may override this method to configure the key stores, enabled protocols/
-	 * cipher suites, enforce client authentication, etc.
+	 * Subclasses may override this method to configure the key stores, enabled
+	 * protocols/ cipher suites, enforce client authentication, etc.
 	 *
-	 * @param socket the existing socket as created by {@link #createServerSocket()} (not null)
+	 * @param socket the existing socket as created by {@link #createServerSocket()}
+	 *               (not null)
 	 * @return a SSLSocket
 	 * @throws IOException when creating the socket failed
 	 */
-	public SSLSocket createSSLSocket(final Socket socket) throws IOException
-	{
+	public SSLSocket createSSLSocket(final Socket socket) throws IOException {
 		final SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
 		final InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
 		final SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
@@ -379,53 +361,47 @@ public class SMTPServer
 		return s;
 	}
 
-	public String getDisplayableLocalSocketAddress()
-	{
+	public String getDisplayableLocalSocketAddress() {
 		return (this.bindAddress == null ? "*" : this.bindAddress) + ":" + this.port;
 	}
 
 	/**
 	 * @return the factory for message handlers, cannot be null
 	 */
-	public MessageHandlerFactory getMessageHandlerFactory()
-	{
+	public MessageHandlerFactory getMessageHandlerFactory() {
 		return this.messageHandlerFactory;
 	}
 
 	/** */
-	public void setMessageHandlerFactory(final MessageHandlerFactory fact)
-	{
+	public void setMessageHandlerFactory(final MessageHandlerFactory fact) {
 		this.messageHandlerFactory = fact;
 	}
 
 	/**
-	 * @return the factory for auth handlers, or null if no such factory has been set.
+	 * @return the factory for auth handlers, or null if no such factory has been
+	 *         set.
 	 */
-	public AuthenticationHandlerFactory getAuthenticationHandlerFactory()
-	{
+	public AuthenticationHandlerFactory getAuthenticationHandlerFactory() {
 		return this.authenticationHandlerFactory;
 	}
 
 	/** */
-	public void setAuthenticationHandlerFactory(final AuthenticationHandlerFactory fact)
-	{
+	public void setAuthenticationHandlerFactory(final AuthenticationHandlerFactory fact) {
 		this.authenticationHandlerFactory = fact;
 	}
 
 	/**
-	 * The CommandHandler manages handling the SMTP commands
-	 * such as QUIT, MAIL, RCPT, DATA, etc.
+	 * The CommandHandler manages handling the SMTP commands such as QUIT, MAIL,
+	 * RCPT, DATA, etc.
 	 *
 	 * @return An instance of CommandHandler
 	 */
-	public CommandHandler getCommandHandler()
-	{
+	public CommandHandler getCommandHandler() {
 		return this.commandHandler;
 	}
 
 	/** */
-	public int getMaxConnections()
-	{
+	public int getMaxConnections() {
 		return this.maxConnections;
 	}
 
@@ -434,71 +410,65 @@ public class SMTPServer
 	 *
 	 * @param maxConnections
 	 */
-	public void setMaxConnections(final int maxConnections)
-	{
+	public void setMaxConnections(final int maxConnections) {
 		if (this.isRunning()) {
-			throw new RuntimeException("Server is already running. It isn't possible to set the maxConnections. Please stop the server first.");
+			throw new RuntimeException(
+					"Server is already running. It isn't possible to set the maxConnections. Please stop the server first.");
 		}
 
 		this.maxConnections = maxConnections;
 	}
 
 	/** */
-	public int getConnectionTimeout()
-	{
+	public int getConnectionTimeout() {
 		return this.connectionTimeout;
 	}
 
 	/**
-	 * Set the number of milliseconds that the server will wait for
-	 * client input.  Sometime after this period expires, an client will
-	 * be rejected and the connection closed.
+	 * Set the number of milliseconds that the server will wait for client input.
+	 * Sometime after this period expires, an client will be rejected and the
+	 * connection closed.
 	 */
-	public void setConnectionTimeout(final int connectionTimeout)
-	{
+	public void setConnectionTimeout(final int connectionTimeout) {
 		this.connectionTimeout = connectionTimeout;
 	}
 
-	public int getMaxRecipients()
-	{
+	public int getMaxRecipients() {
 		return this.maxRecipients;
 	}
 
 	/**
-	 * Set the maximum number of recipients allowed for each message.
-	 * A value of -1 means "unlimited".
+	 * Set the maximum number of recipients allowed for each message. A value of -1
+	 * means "unlimited".
 	 */
-	public void setMaxRecipients(final int maxRecipients)
-	{
+	public void setMaxRecipients(final int maxRecipients) {
 		this.maxRecipients = maxRecipients;
 	}
 
 	/**
 	 * If set to true, TLS will be supported.
 	 * <p>
-	 * The minimal JSSE configuration necessary for a working TLS support on
-	 * Oracle JRE 6:
+	 * The minimal JSSE configuration necessary for a working TLS support on Oracle
+	 * JRE 6:
 	 * <ul>
-	 * <li>javax.net.ssl.keyStore system property must refer to a file
-	 * containing a JKS keystore with the private key.
-	 * <li>javax.net.ssl.keyStorePassword system property must specify the
-	 * keystore password.
+	 * <li>javax.net.ssl.keyStore system property must refer to a file containing a
+	 * JKS keystore with the private key.
+	 * <li>javax.net.ssl.keyStorePassword system property must specify the keystore
+	 * password.
 	 * </ul>
 	 * <p>
 	 * Up to SubEthaSMTP 3.1.5 the default was true, i.e. TLS was enabled.
 	 *
-	 * @see <a
-	 *      href="http://blog.jteam.nl/2009/11/10/securing-connections-with-tls/">Securing
+	 * @see <a href=
+	 *      "http://blog.jteam.nl/2009/11/10/securing-connections-with-tls/">Securing
 	 *      Connections with TLS</a>
 	 */
-	public void setEnableTLS(final boolean enableTLS)
-	{
+	public void setEnableTLS(final boolean enableTLS) {
 		this.enableTLS = enableTLS;
 	}
 
 	/** */
-	public boolean getEnableTLS()
-	{
+	public boolean getEnableTLS() {
 		return enableTLS;
 	}
 
@@ -506,8 +476,7 @@ public class SMTPServer
 	 * @deprecated use {@link #enableTLS}
 	 */
 	@Deprecated
-	public boolean getDisableTLS()
-	{
+	public boolean getDisableTLS() {
 		return !this.enableTLS;
 	}
 
@@ -515,39 +484,34 @@ public class SMTPServer
 	 * @deprecated use {@link #setEnableTLS(boolean)}
 	 */
 	@Deprecated
-	public void setDisableTLS(final boolean value)
-	{
+	public void setDisableTLS(final boolean value) {
 		this.enableTLS = !value;
 	}
 
 	/** */
-	public boolean getHideTLS()
-	{
+	public boolean getHideTLS() {
 		return this.hideTLS;
 	}
 
 	/**
-	 * If set to true, TLS will not be advertised in the EHLO string.
-	 * Default is false; true implied when disableTLS=true.
+	 * If set to true, TLS will not be advertised in the EHLO string. Default is
+	 * false; true implied when disableTLS=true.
 	 */
-	public void setHideTLS(final boolean value)
-	{
+	public void setHideTLS(final boolean value) {
 		this.hideTLS = value;
 	}
 
 	/** */
-	public boolean getRequireTLS()
-	{
+	public boolean getRequireTLS() {
 		return this.requireTLS;
 	}
 
 	/**
-	 * @param requireTLS true to require a TLS handshake,
-	 *   false to allow operation with or without TLS.
-	 *   Default is false; ignored when disableTLS=true.
+	 * @param requireTLS true to require a TLS handshake, false to allow operation
+	 *                   with or without TLS. Default is false; ignored when
+	 *                   disableTLS=true.
 	 */
-	public void setRequireTLS(final boolean requireTLS)
-	{
+	public void setRequireTLS(final boolean requireTLS) {
 		this.requireTLS = requireTLS;
 	}
 
@@ -557,10 +521,10 @@ public class SMTPServer
 	}
 
 	/**
-	 * @param requireAuth true for mandatory smtp authentication, i.e. no mail
-	 *                    mail be accepted until authentication succeeds.
-	 *                    Don't forget to set AuthenticationHandlerFactory to allow
-	 *                    client authentication. Defaults to false.
+	 * @param requireAuth true for mandatory smtp authentication, i.e. no mail mail
+	 *                    be accepted until authentication succeeds. Don't forget to
+	 *                    set AuthenticationHandlerFactory to allow client
+	 *                    authentication. Defaults to false.
 	 */
 	public void setRequireAuth(final boolean requireAuth) {
 		this.requireAuth = requireAuth;
@@ -569,32 +533,27 @@ public class SMTPServer
 	/**
 	 * @return the maxMessageSize
 	 */
-	public int getMaxMessageSize()
-	{
+	public int getMaxMessageSize() {
 		return maxMessageSize;
 	}
 
 	/**
-	 * @param maxMessageSize
-	 *            the maxMessageSize to set
+	 * @param maxMessageSize the maxMessageSize to set
 	 */
-	public void setMaxMessageSize(final int maxMessageSize)
-	{
+	public void setMaxMessageSize(final int maxMessageSize) {
 		this.maxMessageSize = maxMessageSize;
 	}
 
 	/** */
-	public boolean getDisableReceivedHeaders()
-	{
+	public boolean getDisableReceivedHeaders() {
 		return disableReceivedHeaders;
 	}
 
 	/**
-	 * @param disableReceivedHeaders
-	 *            false to include Received headers. Default is false.
+	 * @param disableReceivedHeaders false to include Received headers. Default is
+	 *                               false.
 	 */
-	public void setDisableReceivedHeaders(final boolean disableReceivedHeaders)
-	{
+	public void setDisableReceivedHeaders(final boolean disableReceivedHeaders) {
 		this.disableReceivedHeaders = disableReceivedHeaders;
 	}
 
@@ -604,8 +563,8 @@ public class SMTPServer
 	}
 
 	/**
-	 * Sets the {@link SessionIdFactory} which will allocate a unique identifier
-	 * for each mail sessions. If not set, a reasonable default will be used.
+	 * Sets the {@link SessionIdFactory} which will allocate a unique identifier for
+	 * each mail sessions. If not set, a reasonable default will be used.
 	 */
 	public void setSessionIdFactory(final SessionIdFactory sessionIdFactory) {
 		this.sessionIdFactory = sessionIdFactory;
@@ -614,6 +573,7 @@ public class SMTPServer
 	public boolean isUpdateThreadName() {
 		return updateThreadName;
 	}
+
 	public void setUpdateThreadName(final boolean updateThreadName) {
 		this.updateThreadName = updateThreadName;
 	}

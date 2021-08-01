@@ -1,6 +1,7 @@
 /*
- * $Id$
- * $Source: /cvsroot/Similarity4/src/java/com/similarity/mbean/BindStatisticsManagerMBean.java,v $
+ * $Id$ $Source:
+ * /cvsroot/Similarity4/src/java/com/similarity/mbean/BindStatisticsManagerMBean
+ * .java,v $
  */
 package org.subethamail.smtp;
 
@@ -13,17 +14,14 @@ import java.io.IOException;
  * @author Jeff Schnitzer
  */
 @SuppressWarnings("serial")
-public class TooMuchDataException extends IOException
-{
+public class TooMuchDataException extends IOException {
 	/** */
-	public TooMuchDataException()
-	{
+	public TooMuchDataException() {
 		super();
 	}
 
 	/** */
-	public TooMuchDataException(String message)
-	{
+	public TooMuchDataException(String message) {
 		super(message);
 	}
 }

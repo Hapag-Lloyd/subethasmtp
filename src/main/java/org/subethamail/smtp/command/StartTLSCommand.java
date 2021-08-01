@@ -18,37 +18,30 @@ import org.subethamail.smtp.server.Session;
  * @author Michael Wildpaner &lt;mike@wildpaner.com&gt;
  * @author Jeff Schnitzer
  */
-public class StartTLSCommand extends BaseCommand
-{
+public class StartTLSCommand extends BaseCommand {
 	private final static Logger log = LoggerFactory.getLogger(StartTLSCommand.class);
 
 	/** */
-	public StartTLSCommand()
-	{
+	public StartTLSCommand() {
 		super("STARTTLS", "The starttls command");
 	}
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException
-	{
-		if (!commandString.trim().toUpperCase(Locale.ENGLISH).equals(this.getName()))
-		{
+	public void execute(String commandString, Session sess) throws IOException {
+		if (!commandString.trim().toUpperCase(Locale.ENGLISH).equals(this.getName())) {
 			sess.sendResponse("501 Syntax error (no parameters allowed)");
 			return;
 		}
 
-		if (!sess.getServer().getEnableTLS())
-		{
+		if (!sess.getServer().getEnableTLS()) {
 			sess.sendResponse("454 TLS not supported");
 			return;
 		}
 
-		try
-		{
+		try {
 			Socket socket = sess.getSocket();
-			if (socket instanceof SSLSocket)
-			{
+			if (socket instanceof SSLSocket) {
 				sess.sendResponse("454 TLS not available due to temporary reason: TLS already active");
 				return;
 			}
@@ -63,29 +56,21 @@ public class StartTLSCommand extends BaseCommand
 			sess.resetSmtpProtocol(); // clean state
 			sess.setTlsStarted(true);
 
-			if (s.getNeedClientAuth())
-			{
-				try
-				{
+			if (s.getNeedClientAuth()) {
+				try {
 					Certificate[] peerCertificates = s.getSession().getPeerCertificates();
 					sess.setTlsPeerCertificates(peerCertificates);
-				}
-				catch (SSLPeerUnverifiedException e)
-				{
+				} catch (SSLPeerUnverifiedException e) {
 					// IGNORE, just leave the certificate chain null
 				}
 			}
-		}
-		catch (SSLHandshakeException ex)
-		{
+		} catch (SSLHandshakeException ex) {
 			// "no cipher suites in common" is common and puts a lot of crap in the logs.
 			// This will at least limit it to a single WARN line and not a whole stacktrace.
 			// Unfortunately it might catch some other types of SSLHandshakeException (if
 			// in fact other types exist), but oh well.
 			log.warn("startTLS() failed: " + ex);
-		}
-		catch (IOException ex)
-		{
+		} catch (IOException ex) {
 			log.warn("startTLS() failed: " + ex.getMessage(), ex);
 		}
 	}

@@ -23,18 +23,16 @@ import org.slf4j.LoggerFactory;
 import org.subethamail.wiser.Wiser;
 
 /**
- * This class serves as a test case for both Wiser (since it is used
- * internally here) as well as harder to reach code within the SMTP
- * server that tests a roundtrip message through the DATA portion
- * of the SMTP spec.
+ * This class serves as a test case for both Wiser (since it is used internally
+ * here) as well as harder to reach code within the SMTP server that tests a
+ * roundtrip message through the DATA portion of the SMTP spec.
  *
  * @author Jon Stevens
  * @author Jeff Schnitzer
  * @author De Oliveira Edouard &lt;doe_wanted@yahoo.fr&gt;
  * @author Ville Skyttä (contributed some encoding tests)
  */
-public class MessageContentTest extends TestCase
-{
+public class MessageContentTest extends TestCase {
 	/** */
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(MessageContentTest.class);
@@ -44,15 +42,17 @@ public class MessageContentTest extends TestCase
 
 	/** */
 	protected Wiser wiser;
+
 	protected Session session;
 
 	/** */
-	public MessageContentTest(String name) { super(name); }
+	public MessageContentTest(String name) {
+		super(name);
+	}
 
 	/** */
 	@Override
-	protected void setUp() throws Exception
-	{
+	protected void setUp() throws Exception {
 		super.setUp();
 
 		Properties props = new Properties();
@@ -68,8 +68,7 @@ public class MessageContentTest extends TestCase
 
 	/** */
 	@Override
-	protected void tearDown() throws Exception
-	{
+	protected void tearDown() throws Exception {
 		this.wiser.stop();
 		this.wiser = null;
 
@@ -79,8 +78,7 @@ public class MessageContentTest extends TestCase
 	}
 
 	/** */
-	public void testReceivedHeader() throws Exception
-	{
+	public void testReceivedHeader() throws Exception {
 		MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.setFrom(new InternetAddress("someone@somewhereelse.com"));
@@ -97,8 +95,7 @@ public class MessageContentTest extends TestCase
 	}
 
 	/** */
-	public void testMultipleRecipients() throws Exception
-	{
+	public void testMultipleRecipients() throws Exception {
 		MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone2@anywhere.com"));
@@ -112,8 +109,7 @@ public class MessageContentTest extends TestCase
 	}
 
 	/** */
-	public void testLargeMessage() throws Exception
-	{
+	public void testLargeMessage() throws Exception {
 		MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone2@anywhere.com"));
@@ -129,11 +125,10 @@ public class MessageContentTest extends TestCase
 		assertEquals("barf", this.wiser.getMessages().get(1).getMimeMessage().getSubject());
 	}
 
-
 	/** */
-	public void testUtf8EightBitMessage() throws Exception
-	{
-		// Beware editor/compiler character encoding issues; safest to put unicode escapes here
+	public void testUtf8EightBitMessage() throws Exception {
+		// Beware editor/compiler character encoding issues; safest to put unicode
+		// escapes here
 
 		String body = "\u00a4uro ma\u00f1ana\r\n";
 		this.testEightBitMessage(body, "UTF-8");
@@ -142,36 +137,36 @@ public class MessageContentTest extends TestCase
 	}
 
 	/** */
-	public void testIso88591EightBitMessage() throws Exception
-	{
-		// Beware editor/compiler character encoding issues; safest to put unicode escapes here
+	public void testIso88591EightBitMessage() throws Exception {
+		// Beware editor/compiler character encoding issues; safest to put unicode
+		// escapes here
 
-		String body = "ma\u00f1ana\r\n";	// spanish ene (ie, n with diacritical tilde)
+		String body = "ma\u00f1ana\r\n"; // spanish ene (ie, n with diacritical tilde)
 		this.testEightBitMessage(body, "ISO-8859-1");
 
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
 	}
 
 	/** */
-	public void testIso885915EightBitMessage() throws Exception
-	{
-		// Beware editor/compiler character encoding issues; safest to put unicode escapes here
+	public void testIso885915EightBitMessage() throws Exception {
+		// Beware editor/compiler character encoding issues; safest to put unicode
+		// escapes here
 
 		String body = "\u0080uro\r\n"; // should be the euro symbol
 		this.testEightBitMessage(body, "ISO-8859-15");
 
-//		String content = (String)this.wiser.getMessages().get(0).getMimeMessage().getContent();
-//		for (int i=0; i<content.length(); i++)
-//		{
-//			log.info("Char is:  " + Integer.toString(content.codePointAt(i), 16));
-//		}
+		// String content =
+		// (String)this.wiser.getMessages().get(0).getMimeMessage().getContent();
+		// for (int i=0; i<content.length(); i++)
+		// {
+		// log.info("Char is: " + Integer.toString(content.codePointAt(i), 16));
+		// }
 
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
 	}
 
 	/** */
-	private void testEightBitMessage(String body, String charset) throws Exception
-	{
+	private void testEightBitMessage(String body, String charset) throws Exception {
 		MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
 		message.setFrom(new InternetAddress("someone@somewhereelse.com"));
@@ -183,8 +178,7 @@ public class MessageContentTest extends TestCase
 	}
 
 	/** */
-	public void testIso2022JPEightBitMessage() throws Exception
-  	{
+	public void testIso2022JPEightBitMessage() throws Exception {
 		String body = "\u3042\u3044\u3046\u3048\u304a\r\n"; // some Japanese letters
 		this.testEightBitMessage(body, "iso-2022-jp");
 
@@ -192,8 +186,7 @@ public class MessageContentTest extends TestCase
 	}
 
 	/** */
-	public void testBinaryEightBitMessage() throws Exception
-	{
+	public void testBinaryEightBitMessage() throws Exception {
 		byte[] body = new byte[64];
 		new Random().nextBytes(body);
 
@@ -210,8 +203,7 @@ public class MessageContentTest extends TestCase
 		ByteArrayOutputStream tmp = new ByteArrayOutputStream();
 		byte[] buf = new byte[64];
 		int n;
-		while ((n = in.read(buf)) != -1)
-		{
+		while ((n = in.read(buf)) != -1) {
 			tmp.write(buf, 0, n);
 		}
 		in.close();
@@ -220,8 +212,7 @@ public class MessageContentTest extends TestCase
 	}
 
 	/** */
-	public static Test suite()
-	{
+	public static Test suite() {
 		return new TestSuite(MessageContentTest.class);
 	}
 }

@@ -35,14 +35,8 @@ public class ReceivedHeaderStreamTest extends TestCase {
 		final int BUF_SIZE = 10000;
 		final int offset = 10;
 		final ByteArrayInputStream in = new ByteArrayInputStream("hello world".getBytes());
-		try (ReceivedHeaderStream hdrIS = new ReceivedHeaderStream(
-			in,
-			"ehlo",
-			InetAddress.getLocalHost(),
-			"foo",
-			null,
-			"123",
-			null)) {
+		try (ReceivedHeaderStream hdrIS
+				= new ReceivedHeaderStream(in, "ehlo", InetAddress.getLocalHost(), "foo", null, "123", null)) {
 			final byte[] buf = new byte[BUF_SIZE];
 			final int len = hdrIS.read(buf, offset, BUF_SIZE - offset);
 

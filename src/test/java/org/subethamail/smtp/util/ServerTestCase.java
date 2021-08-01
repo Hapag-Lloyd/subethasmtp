@@ -7,14 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.subethamail.wiser.Wiser;
 
 /**
- * A base class for testing the SMTP server at the raw protocol level.
- * Handles setting up and tearing down of the server.
+ * A base class for testing the SMTP server at the raw protocol level. Handles
+ * setting up and tearing down of the server.
  *
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public abstract class ServerTestCase extends TestCase
-{
+public abstract class ServerTestCase extends TestCase {
 	/** */
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(ServerTestCase.class);
@@ -23,20 +22,14 @@ public abstract class ServerTestCase extends TestCase
 	public static final int PORT = 2566;
 
 	/**
-	 * Override the accept method in Wiser so we can test
-	 * the accept method().
+	 * Override the accept method in Wiser so we can test the accept method().
 	 */
-	public class TestWiser extends Wiser
-	{
+	public class TestWiser extends Wiser {
 		@Override
-		public boolean accept(String from, String recipient)
-		{
-			if (recipient.equals("failure@subethamail.org"))
-			{
+		public boolean accept(String from, String recipient) {
+			if (recipient.equals("failure@subethamail.org")) {
 				return false;
-			}
-			else if (recipient.equals("success@subethamail.org"))
-			{
+			} else if (recipient.equals("success@subethamail.org")) {
 				return true;
 			}
 			return true;
@@ -50,15 +43,13 @@ public abstract class ServerTestCase extends TestCase
 	protected Client c;
 
 	/** */
-	public ServerTestCase(String name)
-	{
+	public ServerTestCase(String name) {
 		super(name);
 	}
 
 	/** */
 	@Override
-	protected void setUp() throws Exception
-	{
+	protected void setUp() throws Exception {
 		super.setUp();
 
 		this.wiser = new TestWiser();
@@ -71,8 +62,7 @@ public abstract class ServerTestCase extends TestCase
 
 	/** */
 	@Override
-	protected void tearDown() throws Exception
-	{
+	protected void tearDown() throws Exception {
 		this.wiser.stop();
 		this.wiser = null;
 
@@ -82,20 +72,17 @@ public abstract class ServerTestCase extends TestCase
 	}
 
 	/** */
-	public void send(String msg) throws Exception
-	{
+	public void send(String msg) throws Exception {
 		this.c.send(msg);
 	}
 
 	/** */
-	public void expect(String msg) throws Exception
-	{
+	public void expect(String msg) throws Exception {
 		this.c.expect(msg);
 	}
 
 	/** */
-	public void expectContains(String msg) throws Exception
-	{
+	public void expectContains(String msg) throws Exception {
 		this.c.expectContains(msg);
 	}
 }

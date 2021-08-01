@@ -17,7 +17,7 @@ public class TimeoutTest {
 	public static final int PORT = 2566;
 
 	/** */
-	//@Test
+	// @Test
 	public void testTimeout() throws Exception {
 		final Wiser wiser = new Wiser();
 		wiser.setPort(PORT);
@@ -36,5 +36,4 @@ public class TimeoutTest {
 			wiser.stop();
 		}
 	}
-
 }

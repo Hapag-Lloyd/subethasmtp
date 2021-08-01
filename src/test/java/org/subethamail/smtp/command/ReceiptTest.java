@@ -5,17 +5,14 @@ import org.subethamail.smtp.util.ServerTestCase;
 /**
  * @author Jon Stevens
  */
-public class ReceiptTest extends ServerTestCase
-{
+public class ReceiptTest extends ServerTestCase {
 	/** */
-	public ReceiptTest(String name)
-	{
+	public ReceiptTest(String name) {
 		super(name);
 	}
 
 	/** */
-	public void testReceiptBeforeMail() throws Exception
-	{
+	public void testReceiptBeforeMail() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -26,8 +23,7 @@ public class ReceiptTest extends ServerTestCase
 	}
 
 	/** */
-	public void testReceiptErrorInParams() throws Exception
-	{
+	public void testReceiptErrorInParams() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -41,8 +37,7 @@ public class ReceiptTest extends ServerTestCase
 	}
 
 	/** */
-	public void testReceiptAccept() throws Exception
-	{
+	public void testReceiptAccept() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -59,8 +54,7 @@ public class ReceiptTest extends ServerTestCase
 	}
 
 	/** */
-	public void testReceiptNoWhiteSpace() throws Exception
-	{
+	public void testReceiptNoWhiteSpace() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");

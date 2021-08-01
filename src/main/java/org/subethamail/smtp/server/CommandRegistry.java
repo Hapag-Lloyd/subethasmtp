@@ -24,8 +24,7 @@ import org.subethamail.smtp.command.VerifyCommand;
  *
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
  */
-public enum CommandRegistry
-{
+public enum CommandRegistry {
 	AUTH(new AuthCommand(), true, false),
 	DATA(new DataCommand(), true, true),
 	EHLO(new EhloCommand(), false, false),
@@ -43,19 +42,15 @@ public enum CommandRegistry
 	private Command command;
 
 	/** */
-	private CommandRegistry(Command cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired)
-	{
-		if (checkForStartedTLSWhenRequired)
-			this.command = new RequireTLSCommandWrapper(cmd);
+	private CommandRegistry(Command cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired) {
+		if (checkForStartedTLSWhenRequired) this.command = new RequireTLSCommandWrapper(cmd);
 		else
 			this.command = cmd;
-        if (checkForAuthIfRequired)
-            this.command = new RequireAuthCommandWrapper(this.command);
+		if (checkForAuthIfRequired) this.command = new RequireAuthCommandWrapper(this.command);
 	}
 
 	/** */
-	public Command getCommand()
-	{
+	public Command getCommand() {
 		return this.command;
 	}
 }

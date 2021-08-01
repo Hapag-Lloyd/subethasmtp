@@ -10,18 +10,15 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class NoopCommand extends BaseCommand
-{
+public class NoopCommand extends BaseCommand {
 	/** */
-	public NoopCommand()
-	{
+	public NoopCommand() {
 		super("NOOP", "The noop command");
 	}
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess) throws IOException
-	{
+	public void execute(String commandString, Session sess) throws IOException {
 		sess.sendResponse("250 Ok");
 	}
 }

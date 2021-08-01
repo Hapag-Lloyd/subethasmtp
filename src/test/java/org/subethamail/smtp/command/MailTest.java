@@ -5,17 +5,14 @@ import org.subethamail.smtp.util.ServerTestCase;
 /**
  * @author Jon Stevens
  */
-public class MailTest extends ServerTestCase
-{
+public class MailTest extends ServerTestCase {
 	/** */
-	public MailTest(String name)
-	{
+	public MailTest(String name) {
 		super(name);
 	}
 
 	/** */
-	public void testMailNoHello() throws Exception
-	{
+	public void testMailNoHello() throws Exception {
 		this.expect("220");
 
 		this.send("MAIL FROM: test@example.com");
@@ -23,8 +20,7 @@ public class MailTest extends ServerTestCase
 	}
 
 	/** */
-	public void testAlreadySpecified() throws Exception
-	{
+	public void testAlreadySpecified() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -38,13 +34,12 @@ public class MailTest extends ServerTestCase
 	}
 
 	/** */
-	public void testInvalidSenders() throws Exception
-	{
+	public void testInvalidSenders() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
 		this.expect("250");
-		
+
 		// added <> because without them "lkjk" is a parameter
 		// to the MAIL command. (Postfix responds accordingly)
 		this.send("MAIL FROM: <test@lkjsd lkjk>");
@@ -52,8 +47,7 @@ public class MailTest extends ServerTestCase
 	}
 
 	/** */
-	public void testMalformedMailCommand() throws Exception
-	{
+	public void testMalformedMailCommand() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -64,8 +58,7 @@ public class MailTest extends ServerTestCase
 	}
 
 	/** */
-	public void testEmptyFromCommand() throws Exception
-	{
+	public void testEmptyFromCommand() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -76,8 +69,7 @@ public class MailTest extends ServerTestCase
 	}
 
 	/** */
-	public void testEmptyEmailFromCommand() throws Exception
-	{
+	public void testEmptyEmailFromCommand() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -88,8 +80,7 @@ public class MailTest extends ServerTestCase
 	}
 
 	/** */
-	public void testMailWithoutWhitespace() throws Exception
-	{
+	public void testMailWithoutWhitespace() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");
@@ -98,45 +89,40 @@ public class MailTest extends ServerTestCase
 		this.send("MAIL FROM:<validuser@subethamail.org>");
 		this.expect("250 Ok");
 	}
-	
+
 	/** */
-	public void testSize() throws Exception
-	{
-	    this.wiser.getServer().setMaxMessageSize(1000);
-	    this.expect("220");
+	public void testSize() throws Exception {
+		this.wiser.getServer().setMaxMessageSize(1000);
+		this.expect("220");
 
-	    this.send("EHLO foo.com");
-	    this.expectContains("250-SIZE 1000");
+		this.send("EHLO foo.com");
+		this.expectContains("250-SIZE 1000");
 
-	    this.send("MAIL FROM:<validuser@subethamail.org> SIZE=100");
-	    this.expect("250 Ok");
+		this.send("MAIL FROM:<validuser@subethamail.org> SIZE=100");
+		this.expect("250 Ok");
 	}
 
 	/** */
-	public void testSizeWithoutSize() throws Exception
-	{
-	    this.wiser.getServer().setMaxMessageSize(1000);
-	    this.expect("220");
+	public void testSizeWithoutSize() throws Exception {
+		this.wiser.getServer().setMaxMessageSize(1000);
+		this.expect("220");
 
-	    this.send("EHLO foo.com");
-	    this.expectContains("250-SIZE 1000");
+		this.send("EHLO foo.com");
+		this.expectContains("250-SIZE 1000");
 
-	    this.send("MAIL FROM:<validuser@subethamail.org>");
-	    this.expect("250 Ok");
+		this.send("MAIL FROM:<validuser@subethamail.org>");
+		this.expect("250 Ok");
 	}
 
 	/** */
-	public void testSizeTooLarge() throws Exception
-	{
-	    this.wiser.getServer().setMaxMessageSize(1000);
-	    this.expect("220");
+	public void testSizeTooLarge() throws Exception {
+		this.wiser.getServer().setMaxMessageSize(1000);
+		this.expect("220");
 
-	    this.send("EHLO foo.com");
-	    this.expectContains("250-SIZE 1000");
+		this.send("EHLO foo.com");
+		this.expectContains("250-SIZE 1000");
 
-	    this.send("MAIL FROM:<validuser@subethamail.org> SIZE=1001");
-	    this.expect("552");
+		this.send("MAIL FROM:<validuser@subethamail.org> SIZE=1001");
+		this.expect("552");
 	}
-
 }
-

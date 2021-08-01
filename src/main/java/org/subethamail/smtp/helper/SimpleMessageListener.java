@@ -1,6 +1,5 @@
 /*
- * $Id$
- * $URL$
+ * $Id$ $URL$
  */
 package org.subethamail.smtp.helper;
 
@@ -19,13 +18,12 @@ import org.subethamail.smtp.TooMuchDataException;
  *
  * @author Jeff Schnitzer
  */
-public interface SimpleMessageListener
-{
+public interface SimpleMessageListener {
 	/**
-	 * Called once for every RCPT TO during a SMTP exchange.  Each accepted recipient
+	 * Called once for every RCPT TO during a SMTP exchange. Each accepted recipient
 	 * will result in a separate deliver() call later.
 	 *
-	 * @param from is a rfc822-compliant email address.
+	 * @param from      is a rfc822-compliant email address.
 	 * @param recipient is a rfc822-compliant email address.
 	 *
 	 * @return true if the listener wants delivery of the message, false if the
@@ -37,15 +35,15 @@ public interface SimpleMessageListener
 	 * When message data arrives, this method will be called for every recipient
 	 * this listener accepted.
 	 *
-	 * @param from is the envelope sender in rfc822 form
+	 * @param from      is the envelope sender in rfc822 form
 	 * @param recipient will be an accepted recipient in rfc822 form
-	 * @param data will be the smtp data stream, stripped of any extra '.' chars.  The
-	 * 			data stream is only valid for the duration of this call.
+	 * @param data      will be the smtp data stream, stripped of any extra '.'
+	 *                  chars. The data stream is only valid for the duration of
+	 *                  this call.
 	 *
-	 * @throws TooMuchDataException if the listener can't handle that much data.
-	 *         An error will be reported to the client.
-	 * @throws IOException if there is an IO error reading the input data.
+	 * @throws TooMuchDataException if the listener can't handle that much data. An
+	 *                              error will be reported to the client.
+	 * @throws IOException          if there is an IO error reading the input data.
 	 */
-	public void deliver(String from, String recipient, InputStream data)
-			throws TooMuchDataException, IOException;
+	public void deliver(String from, String recipient, InputStream data) throws TooMuchDataException, IOException;
 }

@@ -15,17 +15,14 @@ import org.subethamail.smtp.server.Session;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
-public class AuthCommand extends BaseCommand
-{
-
+public class AuthCommand extends BaseCommand {
 	public static final String VERB = "AUTH";
+
 	public static final String AUTH_CANCEL_COMMAND = "*";
 
 	/** Creates a new instance of AuthCommand */
-	public AuthCommand()
-	{
-		super(
-				VERB,
+	public AuthCommand() {
+		super(VERB,
 				"Authentication service",
 				VERB
 						+ " <mechanism> [initial-response] \n"
@@ -35,19 +32,15 @@ public class AuthCommand extends BaseCommand
 
 	/** */
 	@Override
-	public void execute(String commandString, Session sess)
-			throws IOException
-	{
-		if (sess.isAuthenticated())
-		{
+	public void execute(String commandString, Session sess) throws IOException {
+		if (sess.isAuthenticated()) {
 			sess.sendResponse("503 Refusing any other AUTH command.");
 			return;
 		}
 
 		AuthenticationHandlerFactory authFactory = sess.getServer().getAuthenticationHandlerFactory();
 
-		if (authFactory == null)
-		{
+		if (authFactory == null) {
 			sess.sendResponse("502 Authentication not supported");
 			return;
 		}
@@ -56,46 +49,37 @@ public class AuthCommand extends BaseCommand
 
 		String[] args = this.getArgs(commandString);
 		// Let's check the command syntax
-		if (args.length < 2)
-		{
+		if (args.length < 2) {
 			sess.sendResponse("501 Syntax: " + VERB + " mechanism [initial-response]");
 			return;
 		}
 
 		// Let's check if we support the required authentication mechanism
 		String mechanism = args[1];
-		if (!authFactory.getAuthenticationMechanisms().contains(mechanism.toUpperCase(Locale.ENGLISH)))
-		{
+		if (!authFactory.getAuthenticationMechanisms().contains(mechanism.toUpperCase(Locale.ENGLISH))) {
 			sess.sendResponse("504 The requested authentication mechanism is not supported");
 			return;
 		}
 		// OK, let's go trough the authentication process.
-		try
-		{
+		try {
 			// The authentication process may require a series of challenge-responses
 			CRLFTerminatedReader reader = sess.getReader();
 
 			String response = authHandler.auth(commandString);
-			if (response != null)
-			{
+			if (response != null) {
 				// challenge-response iteration
 				sess.sendResponse(response);
 			}
 
-			while (response != null)
-			{
+			while (response != null) {
 				String clientInput = reader.readLine();
-				if (clientInput.trim().equals(AUTH_CANCEL_COMMAND))
-				{
+				if (clientInput.trim().equals(AUTH_CANCEL_COMMAND)) {
 					// RFC 2554 explicitly states this:
 					sess.sendResponse("501 Authentication canceled by client.");
 					return;
-				}
-				else
-				{
+				} else {
 					response = authHandler.auth(clientInput);
-					if (response != null)
-					{
+					if (response != null) {
 						// challenge-response iteration
 						sess.sendResponse(response);
 					}
@@ -104,9 +88,7 @@ public class AuthCommand extends BaseCommand
 
 			sess.sendResponse("235 Authentication successful.");
 			sess.setAuthenticationHandler(authHandler);
-		}
-		catch (RejectException authFailed)
-		{
+		} catch (RejectException authFailed) {
 			sess.sendResponse(authFailed.getErrorResponse());
 		}
 	}

@@ -9,17 +9,16 @@ import org.subethamail.smtp.client.SMTPClient.Response;
  * indicates an error via the status code.
  */
 @SuppressWarnings("serial")
-public class SMTPException extends IOException
-{
+public class SMTPException extends IOException {
 	Response response;
 
-	public SMTPException(Response resp)
-	{
+	public SMTPException(Response resp) {
 		super(resp.toString());
 
 		this.response = resp;
 	}
 
-	public Response getResponse() { return this.response; }
-
+	public Response getResponse() {
+		return this.response;
+	}
 }

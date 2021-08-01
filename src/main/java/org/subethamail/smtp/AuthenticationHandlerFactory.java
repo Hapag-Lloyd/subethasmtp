@@ -8,13 +8,15 @@ import java.util.List;
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
  * @author Jeff Schnitzer
  */
-public interface AuthenticationHandlerFactory
-{
+public interface AuthenticationHandlerFactory {
 	/**
-	 * If your handler supports RFC 2554 at some degree, then it must return all the supported mechanisms here. <br>
-	 * The order you use to populate the list will be preserved in the output of the EHLO command. <br>
+	 * If your handler supports RFC 2554 at some degree, then it must return all the
+	 * supported mechanisms here. <br>
+	 * The order you use to populate the list will be preserved in the output of the
+	 * EHLO command. <br>
 	 *
-	 * @return the supported authentication mechanisms as List, names are in upper case.
+	 * @return the supported authentication mechanisms as List, names are in upper
+	 *         case.
 	 */
 	public List<String> getAuthenticationMechanisms();
 
@@ -22,5 +24,4 @@ public interface AuthenticationHandlerFactory
 	 * Create a fresh instance of your handler.
 	 */
 	public AuthenticationHandler create();
-
 }

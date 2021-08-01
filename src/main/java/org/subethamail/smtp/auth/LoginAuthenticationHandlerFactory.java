@@ -24,14 +24,13 @@ import org.subethamail.smtp.util.TextUtils;
  * 
  * @see <a href="http://tools.ietf.org/html/draft-murchison-sasl-login-00">The
  *      LOGIN SASL Mechanism</a>
- * @see <a
- *      href="http://download.microsoft.com/download/5/d/d/5dd33fdf-91f5-496d-9884-0a0b0ee698bb/%5BMS-XLOGIN%5D.pdf">[MS-XLOGIN]</a>
+ * @see <a href=
+ *      "http://download.microsoft.com/download/5/d/d/5dd33fdf-91f5-496d-9884-0a0b0ee698bb/%5BMS-XLOGIN%5D.pdf">[MS-XLOGIN]</a>
  * 
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
  * @author Jeff Schnitzer
  */
-public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory
-{
+public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory {
 	static List<String> MECHANISMS = new ArrayList<String>(1);
 	static {
 		MECHANISMS.add("LOGIN");
@@ -40,97 +39,76 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 	private UsernamePasswordValidator helper;
 
 	/** */
-	public LoginAuthenticationHandlerFactory(UsernamePasswordValidator helper)
-	{
+	public LoginAuthenticationHandlerFactory(UsernamePasswordValidator helper) {
 		this.helper = helper;
 	}
 
 	/** */
-	public List<String> getAuthenticationMechanisms()
-	{
+	public List<String> getAuthenticationMechanisms() {
 		return MECHANISMS;
 	}
 
 	/** */
-	public AuthenticationHandler create()
-	{
+	public AuthenticationHandler create() {
 		return new Handler();
 	}
 
 	/**
 	 */
-	class Handler implements AuthenticationHandler
-	{
+	class Handler implements AuthenticationHandler {
 		private String username;
+
 		private String password;
 
 		@Override
-		public String auth(String clientInput) throws RejectException
-		{
+		public String auth(String clientInput) throws RejectException {
 			StringTokenizer stk = new StringTokenizer(clientInput);
 			String token = stk.nextToken();
-			if (token.trim().equalsIgnoreCase("AUTH"))
-			{
-				if (!stk.nextToken().trim().equalsIgnoreCase("LOGIN"))
-				{
+			if (token.trim().equalsIgnoreCase("AUTH")) {
+				if (!stk.nextToken().trim().equalsIgnoreCase("LOGIN")) {
 					// Mechanism mismatch
 					throw new RejectException(504, "AUTH mechanism mismatch");
 				}
 
-				if (stk.hasMoreTokens())
-				{
+				if (stk.hasMoreTokens()) {
 					// The client submitted an initial response, which should be
 					// the username.
 					// .Net's built in System.Net.Mail.SmtpClient sends its
 					// authentication this way (and this way only).
 					byte[] decoded = Base64.decode(stk.nextToken());
-					if (decoded == null)
-						throw new RejectException(501, /*5.5.4*/
-								"Invalid command argument, not a valid Base64 string"); 
+					if (decoded == null) throw new RejectException(501, /* 5.5.4 */
+							"Invalid command argument, not a valid Base64 string");
 					username = TextUtils.getStringUtf8(decoded);
 
-					return "334 "
-							+ Base64.encodeToString(
-									TextUtils.getAsciiBytes("Password:"),
-									false);
+					return "334 " + Base64.encodeToString(TextUtils.getAsciiBytes("Password:"), false);
 				} else {
-					return "334 "
-							+ Base64.encodeToString(
-									TextUtils.getAsciiBytes("Username:"), false);
+					return "334 " + Base64.encodeToString(TextUtils.getAsciiBytes("Username:"), false);
 				}
 			}
 
-			if (this.username == null)
-			{
+			if (this.username == null) {
 				byte[] decoded = Base64.decode(clientInput);
-				if (decoded == null)
-				{
-					throw new RejectException(501, /*5.5.4*/
+				if (decoded == null) {
+					throw new RejectException(501, /* 5.5.4 */
 							"Invalid command argument, not a valid Base64 string");
 				}
 
 				this.username = TextUtils.getStringUtf8(decoded);
 
-				return "334 "
-						+ Base64.encodeToString(
-								TextUtils.getAsciiBytes("Password:"), false);
+				return "334 " + Base64.encodeToString(TextUtils.getAsciiBytes("Password:"), false);
 			}
 
 			byte[] decoded = Base64.decode(clientInput);
-			if (decoded == null)
-			{
-				throw new RejectException(501, /*5.5.4*/
+			if (decoded == null) {
+				throw new RejectException(501, /* 5.5.4 */
 						"Invalid command argument, not a valid Base64 string");
 			}
 
 			this.password = TextUtils.getStringUtf8(decoded);
-			try
-			{
+			try {
 				LoginAuthenticationHandlerFactory.this.helper.login(this.username, this.password);
-			}
-			catch (LoginFailedException lfe)
-			{
-				throw new RejectException(535, /*5.7.8*/
+			} catch (LoginFailedException lfe) {
+				throw new RejectException(535, /* 5.7.8 */
 						"Authentication credentials invalid");
 			}
 
@@ -138,8 +116,7 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 		}
 
 		/* */
-		public Object getIdentity()
-		{
+		public Object getIdentity() {
 			return this.username;
 		}
 	}

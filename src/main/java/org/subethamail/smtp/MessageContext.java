@@ -1,6 +1,5 @@
 /*
- * $Id$
- * $URL$
+ * $Id$ $URL$
  */
 package org.subethamail.smtp;
 
@@ -14,8 +13,7 @@ import org.subethamail.smtp.server.SMTPServer;
  *
  * @author Jeff Schnitzer
  */
-public interface MessageContext
-{
+public interface MessageContext {
 	/**
 	 * @return the SMTPServer object.
 	 */
@@ -32,25 +30,27 @@ public interface MessageContext
 	public AuthenticationHandler getAuthenticationHandler();
 
 	/**
-	 * @return the host name or address literal the client supplied in the HELO
-	 *         or EHLO command, or null if neither of these commands were
-	 *         received yet. Note that SubEthaSMTP (along with some MTAs, but
-	 *         contrary to RFC 5321) accept mail transactions without these
-	 *         commands.
+	 * @return the host name or address literal the client supplied in the HELO or
+	 *         EHLO command, or null if neither of these commands were received yet.
+	 *         Note that SubEthaSMTP (along with some MTAs, but contrary to RFC
+	 *         5321) accept mail transactions without these commands.
 	 */
 	public String getHelo();
 
 	/**
-	 * Returns the identity of the peer which was established as part of the TLS handshake
-	 * as defined by {@link javax.net.ssl.SSLSession#getPeerCertificates()}.
+	 * Returns the identity of the peer which was established as part of the TLS
+	 * handshake as defined by
+	 * {@link javax.net.ssl.SSLSession#getPeerCertificates()}.
 	 * <p/>
-	 * In order to get this information, override {@link SMTPServer#createSSLSocket(java.net.Socket)} and call
-	 * {@link javax.net.ssl.SSLSocket#setNeedClientAuth(boolean) setNeedClientAuth(true)} on the created socket.
+	 * In order to get this information, override
+	 * {@link SMTPServer#createSSLSocket(java.net.Socket)} and call
+	 * {@link javax.net.ssl.SSLSocket#setNeedClientAuth(boolean)
+	 * setNeedClientAuth(true)} on the created socket.
 	 *
-	 * @return an ordered array of peer certificates, with the peer's own certificate first followed
-	 *         by any certificate authorities, or null when no such information is available
+	 * @return an ordered array of peer certificates, with the peer's own
+	 *         certificate first followed by any certificate authorities, or null
+	 *         when no such information is available
 	 * @see javax.net.ssl.SSLSession#getPeerCertificates()
 	 */
 	Certificate[] getTlsPeerCertificates();
-
 }

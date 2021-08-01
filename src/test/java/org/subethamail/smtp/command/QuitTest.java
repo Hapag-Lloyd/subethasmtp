@@ -5,17 +5,14 @@ import org.subethamail.smtp.util.ServerTestCase;
 /**
  * @author Jon Stevens
  */
-public class QuitTest extends ServerTestCase
-{
+public class QuitTest extends ServerTestCase {
 	/** */
-	public QuitTest(String name)
-	{
+	public QuitTest(String name) {
 		super(name);
 	}
 
 	/** */
-	public void testQuit() throws Exception
-	{
+	public void testQuit() throws Exception {
 		this.expect("220");
 
 		this.send("HELO foo.com");

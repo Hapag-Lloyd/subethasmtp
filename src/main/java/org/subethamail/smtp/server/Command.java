@@ -10,11 +10,9 @@ import org.subethamail.smtp.DropConnectionException;
  * @author Jon Stevens
  * @author Scott Hernandez
  */
-public interface Command
-{
+public interface Command {
 	/** */
-	public void execute(String commandString, Session sess) throws IOException, 
-			DropConnectionException;
+	public void execute(String commandString, Session sess) throws IOException, DropConnectionException;
 
 	/** */
 	public HelpMessage getHelp() throws CommandException;

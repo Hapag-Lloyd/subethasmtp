@@ -20,8 +20,8 @@ import mockit.Expectations;
 import mockit.Mocked;
 
 /**
- * This class tests whether the event handler methods defined in MessageHandler are called at the
- * appropriate times and in good order.
+ * This class tests whether the event handler methods defined in MessageHandler
+ * are called at the appropriate times and in good order.
  */
 public class MessageHandlerTest {
 	@Mocked
@@ -47,9 +47,8 @@ public class MessageHandlerTest {
 		smtpServer.stop();
 	}
 
-	//	@Test
+	// @Test
 	public void testCompletedMailTransaction() throws Exception {
-
 		new Expectations() {
 			{
 				messageHandlerFactory.create((MessageContext) any);
@@ -72,9 +71,8 @@ public class MessageHandlerTest {
 		smtpServer.stop(); // wait for the server to catch up
 	}
 
-	//	@Test
+	// @Test
 	public void testDisconnectImmediately() throws Exception {
-
 		new Expectations() {
 			{
 				messageHandlerFactory.create((MessageContext) any);
@@ -87,9 +85,8 @@ public class MessageHandlerTest {
 		smtpServer.stop(); // wait for the server to catch up
 	}
 
-	//	@Test
+	// @Test
 	public void testAbortedMailTransaction() throws Exception {
-
 		new Expectations() {
 			{
 				messageHandlerFactory.create((MessageContext) any);
@@ -106,9 +103,8 @@ public class MessageHandlerTest {
 		smtpServer.stop(); // wait for the server to catch up
 	}
 
-	//	@Test
+	// @Test
 	public void testTwoMailsInOneSession() throws Exception {
-
 		new Expectations() {
 			{
 				messageHandlerFactory.create((MessageContext) any);
@@ -149,12 +145,13 @@ public class MessageHandlerTest {
 	}
 
 	/**
-	 * Test for issue 56: rejecting a Mail From causes IllegalStateException in the next Mail From
-	 * attempt.
+	 * Test for issue 56: rejecting a Mail From causes IllegalStateException in the
+	 * next Mail From attempt.
 	 *
-	 * @see <a href=http://code.google.com/p/subethasmtp/issues/detail?id=56>Issue 56</a>
+	 * @see <a href=http://code.google.com/p/subethasmtp/issues/detail?id=56>Issue
+	 *      56</a>
 	 */
-	//	@Test
+	// @Test
 	public void testMailFromRejectedFirst() throws IOException, MessagingException {
 		new Expectations() {
 			{
@@ -187,7 +184,5 @@ public class MessageHandlerTest {
 		client.quit();
 
 		smtpServer.stop(); // wait for the server to catch up
-
 	}
-
 }
