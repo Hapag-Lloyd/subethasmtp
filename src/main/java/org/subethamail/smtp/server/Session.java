@@ -106,7 +106,7 @@ public class Session implements Runnable, MessageContext {
 	 *
 	 * @param server a link to our parent
 	 * @param socket is the socket to the client
-	 * @throws IOException
+	 * @throws IOException on IO error
 	 */
 	public Session(final SMTPServer server, final ServerThread serverThread, final Socket socket) throws IOException {
 		this.server = server;

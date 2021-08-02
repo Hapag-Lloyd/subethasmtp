@@ -311,7 +311,7 @@ public class SMTPServer {
 	 * Override this method if you want to create your own server sockets. You must
 	 * return a bound ServerSocket instance
 	 *
-	 * @throws IOException
+	 * @throws IOException on IO error
 	 */
 	protected ServerSocket createServerSocket() throws IOException {
 		InetSocketAddress isa;
@@ -402,7 +402,7 @@ public class SMTPServer {
 	/**
 	 * Set's the maximum number of connections this server instance will accept.
 	 *
-	 * @param maxConnections
+	 * @param maxConnections the maximum number of connections to accept
 	 */
 	public void setMaxConnections(final int maxConnections) {
 		if (this.isRunning()) {

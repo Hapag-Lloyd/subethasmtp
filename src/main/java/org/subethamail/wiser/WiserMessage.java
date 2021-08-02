@@ -34,7 +34,7 @@ public class WiserMessage {
 	/**
 	 * Generate a JavaMail MimeMessage.
 	 *
-	 * @throws MessagingException
+	 * @throws MessagingException on messaging error
 	 */
 	public MimeMessage getMimeMessage() throws MessagingException {
 		return new MimeMessage(this.wiser.getSession(), new ByteArrayInputStream(this.messageData));

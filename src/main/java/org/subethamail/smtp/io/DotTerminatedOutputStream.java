@@ -51,7 +51,7 @@ public class DotTerminatedOutputStream extends FilterOutputStream {
 	 * Writes ". CR LF" to the wrapped stream, but prefixes it with another CR LF
 	 * sequence if it is missing from the end.
 	 *
-	 * @throws IOException
+	 * @throws IOException on IO error
 	 */
 	public void writeTerminatingSequence() throws IOException {
 		if (lastBytes[0] == '\r' && lastBytes[1] == '\n') {

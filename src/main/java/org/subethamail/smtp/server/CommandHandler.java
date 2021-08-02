@@ -89,7 +89,7 @@ public class CommandHandler {
 
 	/**
 	 * @return the HelpMessage object for the given command name (verb)
-	 * @throws CommandException
+	 * @throws CommandException on command error
 	 */
 	public HelpMessage getHelp(final String command) throws CommandException {
 		return this.getCommandFromString(command).getHelp();
