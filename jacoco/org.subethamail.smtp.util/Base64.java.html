@@ -1,0 +1,711 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Base64.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.util</a> &gt; <span class="el_source">Base64.java</span></div><h1>Base64.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.util;
+
+import java.util.Arrays;
+
+/**
+ * A very fast and memory efficient class to encode and decode to and from
+ * BASE64 in full accordance with RFC 2045.&lt;br&gt;
+ * &lt;br&gt;
+ * On Windows XP sp1 with 1.4.2_04 and later ;), this encoder and decoder is
+ * about 10 times faster on small arrays (10 - 1000 bytes) and 2-3 times as fast
+ * on larger arrays (10000 - 1000000 bytes) compared to
+ * &lt;code&gt;sun.misc.Encoder()/Decoder()&lt;/code&gt;.&lt;br&gt;
+ * &lt;br&gt;
+ *
+ * On byte arrays the encoder is about 20% faster than Jakarta Commons Base64
+ * Codec for encode and about 50% faster for decoding large arrays. This
+ * implementation is about twice as fast on very small arrays (&amp;lt; 30 bytes).
+ * If source/destination is a &lt;code&gt;String&lt;/code&gt; this version is about three
+ * times as fast due to the fact that the Commons Codec result has to be recoded
+ * to a &lt;code&gt;String&lt;/code&gt; from &lt;code&gt;byte[]&lt;/code&gt;, which is very
+ * expensive.&lt;br&gt;
+ * &lt;br&gt;
+ *
+ * This encode/decode algorithm doesn't create any temporary arrays as many
+ * other codecs do, it only allocates the resulting array. This produces less
+ * garbage and it is possible to handle arrays twice as large as algorithms that
+ * create a temporary array. (E.g. Jakarta Commons Codec). It is unknown whether
+ * Sun's &lt;code&gt;sun.misc.Encoder()/Decoder()&lt;/code&gt; produce temporary arrays but
+ * since performance is quite low it probably does.&lt;br&gt;
+ * &lt;br&gt;
+ *
+ * The encoder produces the same output as the Sun one except that the Sun's
+ * encoder appends a trailing line separator if the last character isn't a pad.
+ * Unclear why but it only adds to the length and is probably a side effect.
+ * Both are in conformance with RFC 2045 though.&lt;br&gt;
+ * Commons codec seem to always att a trailing line separator.&lt;br&gt;
+ * &lt;br&gt;
+ *
+ * &lt;b&gt;Note!&lt;/b&gt; The encode/decode method pairs (types) come in three versions
+ * with the &lt;b&gt;exact&lt;/b&gt; same algorithm and thus a lot of code redundancy. This
+ * is to not create any temporary arrays for transcoding to/from different
+ * format types. The methods not used can simply be commented out.&lt;br&gt;
+ * &lt;br&gt;
+ *
+ * There is also a &quot;fast&quot; version of all decode methods that works the same way
+ * as the normal ones, but har a few demands on the decoded input. Normally
+ * though, these fast verions should be used if the source if the input is known
+ * and it hasn't bee tampered with.&lt;br&gt;
+ * &lt;br&gt;
+ *
+ * If you find the code useful or you find a bug, please send me a note at
+ * base64 @ miginfocom . com.
+ *
+ * Licence (BSD): ==============
+ *
+ * Copyright (c) 2004, Mikael Grev, MiG InfoCom AB. (base64 @ miginfocom . com)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. Neither the name of the MiG InfoCom AB nor the names
+ * of its contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @version 2.2
+ * @author Mikael Grev Date: 2004-aug-02 Time: 11:31:11
+ */
+
+<span class="nc" id="L85">public class Base64 {</span>
+<span class="nc" id="L86">	private static final char[] CA = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;.toCharArray();</span>
+
+<span class="nc" id="L88">	private static final int[] IA = new int[256];</span>
+	static {
+<span class="nc" id="L90">		Arrays.fill(IA, -1);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		for (int i = 0, iS = CA.length; i &lt; iS; i++) {</span>
+<span class="nc" id="L92">			IA[CA[i]] = i;</span>
+		}
+<span class="nc" id="L94">		IA['='] = 0;</span>
+<span class="nc" id="L95">	}</span>
+
+	// ****************************************************************************************
+	// * char[] version
+	// ****************************************************************************************
+
+	/**
+	 * Encodes a raw byte array into a BASE64 &lt;code&gt;char[]&lt;/code&gt; representation i
+	 * accordance with RFC 2045.
+	 *
+	 * @param sArr    The bytes to convert. If &lt;code&gt;null&lt;/code&gt; or length 0 an
+	 *                empty array will be returned.
+	 * @param lineSep Optional &quot;\r\n&quot; after 76 characters, unless end of file.&lt;br&gt;
+	 *                No line separator will be in breach of RFC 2045 which
+	 *                specifies max 76 per line but will be a little faster.
+	 * @return A BASE64 encoded array. Never &lt;code&gt;null&lt;/code&gt;.
+	 */
+	public final static char[] encodeToChar(final byte[] sArr, final boolean lineSep) {
+		// Check special case
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		final int sLen = sArr != null ? sArr.length : 0;</span>
+<span class="nc bnc" id="L115" title="All 4 branches missed.">		if (sLen == 0 || sArr == null) {</span>
+<span class="nc" id="L116">			return new char[0];</span>
+		}
+
+<span class="nc" id="L119">		final int eLen = sLen / 3 * 3; // Length of even 24-bits.</span>
+<span class="nc" id="L120">		final int cCnt = (sLen - 1) / 3 + 1 &lt;&lt; 2; // Returned character count</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		final int dLen = cCnt + (lineSep ? (cCnt - 1) / 76 &lt;&lt; 1 : 0); // Length of returned array</span>
+<span class="nc" id="L122">		final char[] dArr = new char[dLen];</span>
+
+		// Encode even 24-bits
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		for (int s = 0, d = 0, cc = 0; s &lt; eLen;) {</span>
+			// Copy next three bytes into lower 24 bits of int, paying attension to sign.
+<span class="nc" id="L127">			final int i = (sArr[s++] &amp; 0xff) &lt;&lt; 16 | (sArr[s++] &amp; 0xff) &lt;&lt; 8 | sArr[s++] &amp; 0xff;</span>
+
+			// Encode the int into four chars
+<span class="nc" id="L130">			dArr[d] = CA[i &gt;&gt;&gt; 18 &amp; 0x3f];</span>
+<span class="nc" id="L131">			d++;</span>
+<span class="nc" id="L132">			dArr[d] = CA[i &gt;&gt;&gt; 12 &amp; 0x3f];</span>
+<span class="nc" id="L133">			d++;</span>
+<span class="nc" id="L134">			dArr[d] = CA[i &gt;&gt;&gt; 6 &amp; 0x3f];</span>
+<span class="nc" id="L135">			d++;</span>
+<span class="nc" id="L136">			dArr[d] = CA[i &amp; 0x3f];</span>
+<span class="nc" id="L137">			d++;</span>
+
+			// Add optional line separator
+<span class="nc bnc" id="L140" title="All 6 branches missed.">			if (lineSep &amp;&amp; ++cc == 19 &amp;&amp; d &lt; dLen - 2) {</span>
+<span class="nc" id="L141">				dArr[d++] = '\r';</span>
+<span class="nc" id="L142">				dArr[d++] = '\n';</span>
+<span class="nc" id="L143">				cc = 0;</span>
+			}
+<span class="nc" id="L145">		}</span>
+
+		// Pad and encode last bits if source isn't even 24 bits.
+<span class="nc" id="L148">		final int left = sLen - eLen; // 0 - 2.</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">		if (left &gt; 0) {</span>
+			// Prepare the int
+<span class="nc bnc" id="L151" title="All 2 branches missed.">			final int i = (sArr[eLen] &amp; 0xff) &lt;&lt; 10 | (left == 2 ? (sArr[sLen - 1] &amp; 0xff) &lt;&lt; 2 : 0);</span>
+
+			// Set last four chars
+<span class="nc" id="L154">			dArr[dLen - 4] = CA[i &gt;&gt; 12];</span>
+<span class="nc" id="L155">			dArr[dLen - 3] = CA[i &gt;&gt;&gt; 6 &amp; 0x3f];</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			dArr[dLen - 2] = left == 2 ? CA[i &amp; 0x3f] : '=';</span>
+<span class="nc" id="L157">			dArr[dLen - 1] = '=';</span>
+		}
+<span class="nc" id="L159">		return dArr;</span>
+	}
+
+	/**
+	 * Decodes a BASE64 encoded char array. All illegal characters will be ignored
+	 * and can handle both arrays with and without line separators.
+	 *
+	 * @param sArr The source array. &lt;code&gt;null&lt;/code&gt; or length 0 will return an
+	 *             empty array.
+	 * @return The decoded array of bytes. May be of length 0. Will be
+	 *         &lt;code&gt;null&lt;/code&gt; if the legal characters (including '=') isn't
+	 *         divideable by 4. (I.e. definitely corrupted).
+	 */
+	public final static byte[] decode(final char[] sArr) {
+		// Check special case
+<span class="nc bnc" id="L174" title="All 2 branches missed.">		final int sLen = sArr != null ? sArr.length : 0;</span>
+<span class="nc bnc" id="L175" title="All 4 branches missed.">		if (sLen == 0 || sArr == null) {</span>
+<span class="nc" id="L176">			return new byte[0];</span>
+		}
+
+		// Count illegal characters (including '\r', '\n') to know what size the
+		// returned array will be,
+		// so we don't have to reallocate &amp; copy it later.
+<span class="nc" id="L182">		int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a</span>
+						// bonus...)
+<span class="nc bnc" id="L184" title="All 2 branches missed.">		for (int i = 0; i &lt; sLen; i++) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			if (IA[sArr[i]] &lt; 0) {</span>
+<span class="nc" id="L186">				sepCnt++;</span>
+			}
+		}
+
+		// Check so that legal chars (including '=') are evenly divideable by 4 as
+		// specified in RFC 2045.
+<span class="nc bnc" id="L192" title="All 2 branches missed.">		if ((sLen - sepCnt) % 4 != 0) {</span>
+<span class="nc" id="L193">			return null;</span>
+		}
+
+<span class="nc" id="L196">		int pad = 0;</span>
+<span class="nc bnc" id="L197" title="All 4 branches missed.">		for (int i = sLen; i &gt; 1 &amp;&amp; IA[sArr[--i]] &lt;= 0;) {</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">			if (sArr[i] == '=') {</span>
+<span class="nc" id="L199">				pad++;</span>
+			}
+		}
+
+<span class="nc" id="L203">		final int len = ((sLen - sepCnt) * 6 &gt;&gt; 3) - pad;</span>
+
+<span class="nc" id="L205">		final byte[] dArr = new byte[len]; // Preallocate byte[] of exact length</span>
+
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		for (int s = 0, d = 0; d &lt; len;) {</span>
+			// Assemble three bytes into an int from four &quot;valid&quot; characters.
+<span class="nc" id="L209">			int i = 0;</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">			for (int j = 0; j &lt; 4; j++) { // j only increased if a valid char was found.</span>
+<span class="nc" id="L211">				final int c = IA[sArr[s]];</span>
+<span class="nc" id="L212">				s++;</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">				if (c &gt;= 0) {</span>
+<span class="nc" id="L214">					i |= c &lt;&lt; 18 - j * 6;</span>
+				} else {
+<span class="nc" id="L216">					j--;</span>
+				}
+			}
+			// Add the bytes
+<span class="nc" id="L220">			dArr[d] = (byte) (i &gt;&gt; 16);</span>
+<span class="nc" id="L221">			d++;</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			if (d &lt; len) {</span>
+<span class="nc" id="L223">				dArr[d] = (byte) (i &gt;&gt; 8);</span>
+<span class="nc" id="L224">				d++;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">				if (d &lt; len) {</span>
+<span class="nc" id="L226">					dArr[d] = (byte) i;</span>
+<span class="nc" id="L227">					d++;</span>
+				}
+			}
+<span class="nc" id="L230">		}</span>
+<span class="nc" id="L231">		return dArr;</span>
+	}
+
+	/**
+	 * Decodes a BASE64 encoded char array that is known to be resonably well
+	 * formatted. The method is about twice as fast as {@link #decode(char[])}. The
+	 * preconditions are:&lt;br&gt;
+	 * + The array must have a line length of 76 chars OR no line separators at all
+	 * (one line).&lt;br&gt;
+	 * + Line separator must be &quot;\r\n&quot;, as specified in RFC 2045 + The array must
+	 * not contain illegal characters within the encoded string&lt;br&gt;
+	 * + The array CAN have illegal characters at the beginning and end, those will
+	 * be dealt with appropriately.&lt;br&gt;
+	 *
+	 * @param sArr The source array. Length 0 will return an empty array.
+	 *             &lt;code&gt;null&lt;/code&gt; will throw an exception.
+	 * @return The decoded array of bytes. May be of length 0.
+	 */
+	public final static byte[] decodeFast(final char[] sArr) {
+		// Check special case
+<span class="nc" id="L251">		final int sLen = sArr.length;</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">		if (sLen == 0) {</span>
+<span class="nc" id="L253">			return new byte[0];</span>
+		}
+
+<span class="nc" id="L256">		int sIx = 0, eIx = sLen - 1; // Start and end index after trimming.</span>
+
+		// Trim illegal chars from start
+<span class="nc bnc" id="L259" title="All 4 branches missed.">		while (sIx &lt; eIx &amp;&amp; IA[sArr[sIx]] &lt; 0) {</span>
+<span class="nc" id="L260">			sIx++;</span>
+		}
+
+		// Trim illegal chars from end
+<span class="nc bnc" id="L264" title="All 4 branches missed.">		while (eIx &gt; 0 &amp;&amp; IA[sArr[eIx]] &lt; 0) {</span>
+<span class="nc" id="L265">			eIx--;</span>
+		}
+
+		// get the padding count (=) (0, 1 or 2)
+<span class="nc bnc" id="L269" title="All 4 branches missed.">		final int pad = sArr[eIx] == '=' ? sArr[eIx - 1] == '=' ? 2 : 1 : 0; // Count '=' at end.</span>
+<span class="nc" id="L270">		final int cCnt = eIx - sIx + 1; // Content count including possible separators</span>
+<span class="nc bnc" id="L271" title="All 4 branches missed.">		final int sepCnt = sLen &gt; 76 ? (sArr[76] == '\r' ? cCnt / 78 : 0) &lt;&lt; 1 : 0;</span>
+
+<span class="nc" id="L273">		final int len = ((cCnt - sepCnt) * 6 &gt;&gt; 3) - pad; // The number of decoded bytes</span>
+<span class="nc" id="L274">		final byte[] dArr = new byte[len]; // Preallocate byte[] of exact length</span>
+
+		// Decode all but the last 0 - 2 bytes.
+<span class="nc" id="L277">		int d = 0;</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">		for (int cc = 0, eLen = len / 3 * 3; d &lt; eLen;) {</span>
+			// Assemble three bytes into an int from four &quot;valid&quot; characters.
+<span class="nc" id="L280">			final int i = IA[sArr[sIx++]] &lt;&lt; 18 | IA[sArr[sIx++]] &lt;&lt; 12 | IA[sArr[sIx++]] &lt;&lt; 6 | IA[sArr[sIx++]];</span>
+
+			// Add the bytes
+<span class="nc" id="L283">			dArr[d] = (byte) (i &gt;&gt; 16);</span>
+<span class="nc" id="L284">			d++;</span>
+<span class="nc" id="L285">			dArr[d] = (byte) (i &gt;&gt; 8);</span>
+<span class="nc" id="L286">			d++;</span>
+<span class="nc" id="L287">			dArr[d] = (byte) i;</span>
+<span class="nc" id="L288">			d++;</span>
+
+			// If line separator, jump over it.
+<span class="nc bnc" id="L291" title="All 4 branches missed.">			if (sepCnt &gt; 0 &amp;&amp; ++cc == 19) {</span>
+<span class="nc" id="L292">				sIx += 2;</span>
+<span class="nc" id="L293">				cc = 0;</span>
+			}
+<span class="nc" id="L295">		}</span>
+
+<span class="nc bnc" id="L297" title="All 2 branches missed.">		if (d &lt; len) {</span>
+			// Decode last 1-3 bytes (incl '=') into 1-3 bytes
+<span class="nc" id="L299">			int i = 0;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">			for (int j = 0; sIx &lt;= eIx - pad; j++) {</span>
+<span class="nc" id="L301">				i |= IA[sArr[sIx]] &lt;&lt; 18 - j * 6;</span>
+<span class="nc" id="L302">				sIx++;</span>
+			}
+
+<span class="nc bnc" id="L305" title="All 2 branches missed.">			for (int r = 16; d &lt; len; r -= 8) {</span>
+<span class="nc" id="L306">				dArr[d] = (byte) (i &gt;&gt; r);</span>
+<span class="nc" id="L307">				d++;</span>
+			}
+		}
+
+<span class="nc" id="L311">		return dArr;</span>
+	}
+
+	// ****************************************************************************************
+	// * byte[] version
+	// ****************************************************************************************
+
+	/**
+	 * Encodes a raw byte array into a BASE64 &lt;code&gt;byte[]&lt;/code&gt; representation i
+	 * accordance with RFC 2045.
+	 *
+	 * @param sArr    The bytes to convert. If &lt;code&gt;null&lt;/code&gt; or length 0 an
+	 *                empty array will be returned.
+	 * @param lineSep Optional &quot;\r\n&quot; after 76 characters, unless end of file.&lt;br&gt;
+	 *                No line separator will be in breach of RFC 2045 which
+	 *                specifies max 76 per line but will be a little faster.
+	 * @return A BASE64 encoded array. Never &lt;code&gt;null&lt;/code&gt;.
+	 */
+	public final static byte[] encodeToByte(final byte[] sArr, final boolean lineSep) {
+		// Check special case
+<span class="nc bnc" id="L331" title="All 2 branches missed.">		final int sLen = sArr != null ? sArr.length : 0;</span>
+<span class="nc bnc" id="L332" title="All 4 branches missed.">		if (sLen == 0 || sArr == null) {</span>
+<span class="nc" id="L333">			return new byte[0];</span>
+		}
+
+<span class="nc" id="L336">		final int eLen = sLen / 3 * 3; // Length of even 24-bits.</span>
+<span class="nc" id="L337">		final int cCnt = (sLen - 1) / 3 + 1 &lt;&lt; 2; // Returned character count</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">		final int dLen = cCnt + (lineSep ? (cCnt - 1) / 76 &lt;&lt; 1 : 0); // Length of returned array</span>
+<span class="nc" id="L339">		final byte[] dArr = new byte[dLen];</span>
+
+		// Encode even 24-bits
+<span class="nc bnc" id="L342" title="All 2 branches missed.">		for (int s = 0, d = 0, cc = 0; s &lt; eLen;) {</span>
+			// Copy next three bytes into lower 24 bits of int, paying attension to sign.
+<span class="nc" id="L344">			final int i = (sArr[s++] &amp; 0xff) &lt;&lt; 16 | (sArr[s++] &amp; 0xff) &lt;&lt; 8 | sArr[s++] &amp; 0xff;</span>
+
+			// Encode the int into four chars
+<span class="nc" id="L347">			dArr[d] = (byte) CA[i &gt;&gt;&gt; 18 &amp; 0x3f];</span>
+<span class="nc" id="L348">			d++;</span>
+<span class="nc" id="L349">			dArr[d] = (byte) CA[i &gt;&gt;&gt; 12 &amp; 0x3f];</span>
+<span class="nc" id="L350">			d++;</span>
+<span class="nc" id="L351">			dArr[d] = (byte) CA[i &gt;&gt;&gt; 6 &amp; 0x3f];</span>
+<span class="nc" id="L352">			d++;</span>
+<span class="nc" id="L353">			dArr[d] = (byte) CA[i &amp; 0x3f];</span>
+<span class="nc" id="L354">			d++;</span>
+
+			// Add optional line separator
+<span class="nc bnc" id="L357" title="All 6 branches missed.">			if (lineSep &amp;&amp; ++cc == 19 &amp;&amp; d &lt; dLen - 2) {</span>
+<span class="nc" id="L358">				dArr[d++] = '\r';</span>
+<span class="nc" id="L359">				dArr[d++] = '\n';</span>
+<span class="nc" id="L360">				cc = 0;</span>
+			}
+<span class="nc" id="L362">		}</span>
+
+		// Pad and encode last bits if source isn't an even 24 bits.
+<span class="nc" id="L365">		final int left = sLen - eLen; // 0 - 2.</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">		if (left &gt; 0) {</span>
+			// Prepare the int
+<span class="nc bnc" id="L368" title="All 2 branches missed.">			final int i = (sArr[eLen] &amp; 0xff) &lt;&lt; 10 | (left == 2 ? (sArr[sLen - 1] &amp; 0xff) &lt;&lt; 2 : 0);</span>
+
+			// Set last four chars
+<span class="nc" id="L371">			dArr[dLen - 4] = (byte) CA[i &gt;&gt; 12];</span>
+<span class="nc" id="L372">			dArr[dLen - 3] = (byte) CA[i &gt;&gt;&gt; 6 &amp; 0x3f];</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">			dArr[dLen - 2] = left == 2 ? (byte) CA[i &amp; 0x3f] : (byte) '=';</span>
+<span class="nc" id="L374">			dArr[dLen - 1] = '=';</span>
+		}
+<span class="nc" id="L376">		return dArr;</span>
+	}
+
+	/**
+	 * Decodes a BASE64 encoded byte array. All illegal characters will be ignored
+	 * and can handle both arrays with and without line separators.
+	 *
+	 * @param sArr The source array. Length 0 will return an empty array.
+	 *             &lt;code&gt;null&lt;/code&gt; will throw an exception.
+	 * @return The decoded array of bytes. May be of length 0. Will be
+	 *         &lt;code&gt;null&lt;/code&gt; if the legal characters (including '=') isn't
+	 *         divideable by 4. (I.e. definitely corrupted).
+	 */
+	public final static byte[] decode(final byte[] sArr) {
+		// Check special case
+<span class="nc" id="L391">		final int sLen = sArr.length;</span>
+
+		// Count illegal characters (including '\r', '\n') to know what size the
+		// returned array will be,
+		// so we don't have to reallocate &amp; copy it later.
+<span class="nc" id="L396">		int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a</span>
+						// bonus...)
+<span class="nc bnc" id="L398" title="All 2 branches missed.">		for (int i = 0; i &lt; sLen; i++) {</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">			if (IA[sArr[i] &amp; 0xff] &lt; 0) {</span>
+<span class="nc" id="L400">				sepCnt++;</span>
+			}
+		}
+
+		// Check so that legal chars (including '=') are evenly divideable by 4 as
+		// specified in RFC 2045.
+<span class="nc bnc" id="L406" title="All 2 branches missed.">		if ((sLen - sepCnt) % 4 != 0) {</span>
+<span class="nc" id="L407">			return null;</span>
+		}
+
+<span class="nc" id="L410">		int pad = 0;</span>
+<span class="nc bnc" id="L411" title="All 4 branches missed.">		for (int i = sLen; i &gt; 1 &amp;&amp; IA[sArr[--i] &amp; 0xff] &lt;= 0;) {</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">			if (sArr[i] == '=') {</span>
+<span class="nc" id="L413">				pad++;</span>
+			}
+		}
+
+<span class="nc" id="L417">		final int len = ((sLen - sepCnt) * 6 &gt;&gt; 3) - pad;</span>
+
+<span class="nc" id="L419">		final byte[] dArr = new byte[len]; // Preallocate byte[] of exact length</span>
+
+<span class="nc bnc" id="L421" title="All 2 branches missed.">		for (int s = 0, d = 0; d &lt; len;) {</span>
+			// Assemble three bytes into an int from four &quot;valid&quot; characters.
+<span class="nc" id="L423">			int i = 0;</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">			for (int j = 0; j &lt; 4; j++) { // j only increased if a valid char was found.</span>
+<span class="nc" id="L425">				final int c = IA[sArr[s] &amp; 0xff];</span>
+<span class="nc" id="L426">				s++;</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">				if (c &gt;= 0) {</span>
+<span class="nc" id="L428">					i |= c &lt;&lt; 18 - j * 6;</span>
+				} else {
+<span class="nc" id="L430">					j--;</span>
+				}
+			}
+
+			// Add the bytes
+<span class="nc" id="L435">			dArr[d] = (byte) (i &gt;&gt; 16);</span>
+<span class="nc" id="L436">			d++;</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">			if (d &lt; len) {</span>
+<span class="nc" id="L438">				dArr[d] = (byte) (i &gt;&gt; 8);</span>
+<span class="nc" id="L439">				d++;</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">				if (d &lt; len) {</span>
+<span class="nc" id="L441">					dArr[d] = (byte) i;</span>
+<span class="nc" id="L442">					d++;</span>
+				}
+			}
+<span class="nc" id="L445">		}</span>
+
+<span class="nc" id="L447">		return dArr;</span>
+	}
+
+	/**
+	 * Decodes a BASE64 encoded byte array that is known to be resonably well
+	 * formatted. The method is about twice as fast as {@link #decode(byte[])}. The
+	 * preconditions are:&lt;br&gt;
+	 * + The array must have a line length of 76 chars OR no line separators at all
+	 * (one line).&lt;br&gt;
+	 * + Line separator must be &quot;\r\n&quot;, as specified in RFC 2045 + The array must
+	 * not contain illegal characters within the encoded string&lt;br&gt;
+	 * + The array CAN have illegal characters at the beginning and end, those will
+	 * be dealt with appropriately.&lt;br&gt;
+	 *
+	 * @param sArr The source array. Length 0 will return an empty array.
+	 *             &lt;code&gt;null&lt;/code&gt; will throw an exception.
+	 * @return The decoded array of bytes. May be of length 0.
+	 */
+	public final static byte[] decodeFast(final byte[] sArr) {
+		// Check special case
+<span class="nc" id="L467">		final int sLen = sArr.length;</span>
+<span class="nc bnc" id="L468" title="All 2 branches missed.">		if (sLen == 0) {</span>
+<span class="nc" id="L469">			return new byte[0];</span>
+		}
+
+<span class="nc" id="L472">		int sIx = 0, eIx = sLen - 1; // Start and end index after trimming.</span>
+
+		// Trim illegal chars from start
+<span class="nc bnc" id="L475" title="All 4 branches missed.">		while (sIx &lt; eIx &amp;&amp; IA[sArr[sIx] &amp; 0xff] &lt; 0) {</span>
+<span class="nc" id="L476">			sIx++;</span>
+		}
+
+		// Trim illegal chars from end
+<span class="nc bnc" id="L480" title="All 4 branches missed.">		while (eIx &gt; 0 &amp;&amp; IA[sArr[eIx] &amp; 0xff] &lt; 0) {</span>
+<span class="nc" id="L481">			eIx--;</span>
+		}
+
+		// get the padding count (=) (0, 1 or 2)
+<span class="nc bnc" id="L485" title="All 4 branches missed.">		final int pad = sArr[eIx] == '=' ? sArr[eIx - 1] == '=' ? 2 : 1 : 0; // Count '=' at end.</span>
+<span class="nc" id="L486">		final int cCnt = eIx - sIx + 1; // Content count including possible separators</span>
+<span class="nc bnc" id="L487" title="All 4 branches missed.">		final int sepCnt = sLen &gt; 76 ? (sArr[76] == '\r' ? cCnt / 78 : 0) &lt;&lt; 1 : 0;</span>
+
+<span class="nc" id="L489">		final int len = ((cCnt - sepCnt) * 6 &gt;&gt; 3) - pad; // The number of decoded bytes</span>
+<span class="nc" id="L490">		final byte[] dArr = new byte[len]; // Preallocate byte[] of exact length</span>
+
+		// Decode all but the last 0 - 2 bytes.
+<span class="nc" id="L493">		int d = 0;</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">		for (int cc = 0, eLen = len / 3 * 3; d &lt; eLen;) {</span>
+			// Assemble three bytes into an int from four &quot;valid&quot; characters.
+<span class="nc" id="L496">			final int i = IA[sArr[sIx++]] &lt;&lt; 18 | IA[sArr[sIx++]] &lt;&lt; 12 | IA[sArr[sIx++]] &lt;&lt; 6 | IA[sArr[sIx++]];</span>
+
+			// Add the bytes
+<span class="nc" id="L499">			dArr[d] = (byte) (i &gt;&gt; 16);</span>
+<span class="nc" id="L500">			d++;</span>
+<span class="nc" id="L501">			dArr[d] = (byte) (i &gt;&gt; 8);</span>
+<span class="nc" id="L502">			d++;</span>
+<span class="nc" id="L503">			dArr[d] = (byte) i;</span>
+<span class="nc" id="L504">			d++;</span>
+
+			// If line separator, jump over it.
+<span class="nc bnc" id="L507" title="All 4 branches missed.">			if (sepCnt &gt; 0 &amp;&amp; ++cc == 19) {</span>
+<span class="nc" id="L508">				sIx += 2;</span>
+<span class="nc" id="L509">				cc = 0;</span>
+			}
+<span class="nc" id="L511">		}</span>
+
+<span class="nc bnc" id="L513" title="All 2 branches missed.">		if (d &lt; len) {</span>
+			// Decode last 1-3 bytes (incl '=') into 1-3 bytes
+<span class="nc" id="L515">			int i = 0;</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">			for (int j = 0; sIx &lt;= eIx - pad; j++) {</span>
+<span class="nc" id="L517">				i |= IA[sArr[sIx]] &lt;&lt; 18 - j * 6;</span>
+<span class="nc" id="L518">				sIx++;</span>
+			}
+
+<span class="nc bnc" id="L521" title="All 2 branches missed.">			for (int r = 16; d &lt; len; r -= 8) {</span>
+<span class="nc" id="L522">				dArr[d] = (byte) (i &gt;&gt; r);</span>
+<span class="nc" id="L523">				d++;</span>
+			}
+		}
+
+<span class="nc" id="L527">		return dArr;</span>
+	}
+
+	// ****************************************************************************************
+	// * String version
+	// ****************************************************************************************
+
+	/**
+	 * Encodes a raw byte array into a BASE64 &lt;code&gt;String&lt;/code&gt; representation i
+	 * accordance with RFC 2045.
+	 *
+	 * @param sArr    The bytes to convert. If &lt;code&gt;null&lt;/code&gt; or length 0 an
+	 *                empty array will be returned.
+	 * @param lineSep Optional &quot;\r\n&quot; after 76 characters, unless end of file.&lt;br&gt;
+	 *                No line separator will be in breach of RFC 2045 which
+	 *                specifies max 76 per line but will be a little faster.
+	 * @return A BASE64 encoded array. Never &lt;code&gt;null&lt;/code&gt;.
+	 */
+	public final static String encodeToString(final byte[] sArr, final boolean lineSep) {
+		// Reuse char[] since we can't create a String incrementally anyway and
+		// StringBuffer/Builder would be slower.
+<span class="nc" id="L548">		return new String(encodeToChar(sArr, lineSep));</span>
+	}
+
+	/**
+	 * Decodes a BASE64 encoded &lt;code&gt;String&lt;/code&gt;. All illegal characters will be
+	 * ignored and can handle both strings with and without line separators.&lt;br&gt;
+	 * &lt;b&gt;Note!&lt;/b&gt; It can be up to about 2x the speed to call
+	 * &lt;code&gt;decode(str.toCharArray())&lt;/code&gt; instead. That will create a temporary
+	 * array though. This version will use &lt;code&gt;str.charAt(i)&lt;/code&gt; to iterate the
+	 * string.
+	 *
+	 * @param str The source string. &lt;code&gt;null&lt;/code&gt; or length 0 will return an
+	 *            empty array.
+	 * @return The decoded array of bytes. May be of length 0. Will be
+	 *         &lt;code&gt;null&lt;/code&gt; if the legal characters (including '=') isn't
+	 *         divideable by 4. (I.e. definitely corrupted).
+	 */
+	public final static byte[] decode(final String str) {
+		// Check special case
+<span class="nc bnc" id="L567" title="All 2 branches missed.">		final int sLen = str != null ? str.length() : 0;</span>
+<span class="nc bnc" id="L568" title="All 4 branches missed.">		if (sLen == 0 || str == null) {</span>
+<span class="nc" id="L569">			return new byte[0];</span>
+		}
+
+		// Count illegal characters (including '\r', '\n') to know what size the
+		// returned array will be,
+		// so we don't have to reallocate &amp; copy it later.
+<span class="nc" id="L575">		int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a</span>
+						// bonus...)
+<span class="nc bnc" id="L577" title="All 2 branches missed.">		for (int i = 0; i &lt; sLen; i++) {</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">			if (IA[str.charAt(i)] &lt; 0) {</span>
+<span class="nc" id="L579">				sepCnt++;</span>
+			}
+		}
+
+		// Check so that legal chars (including '=') are evenly divideable by 4 as
+		// specified in RFC 2045.
+<span class="nc bnc" id="L585" title="All 2 branches missed.">		if ((sLen - sepCnt) % 4 != 0) {</span>
+<span class="nc" id="L586">			return null;</span>
+		}
+
+		// Count '=' at end
+<span class="nc" id="L590">		int pad = 0;</span>
+<span class="nc bnc" id="L591" title="All 4 branches missed.">		for (int i = sLen; i &gt; 1 &amp;&amp; IA[str.charAt(--i)] &lt;= 0;) {</span>
+<span class="nc bnc" id="L592" title="All 2 branches missed.">			if (str.charAt(i) == '=') {</span>
+<span class="nc" id="L593">				pad++;</span>
+			}
+		}
+
+<span class="nc" id="L597">		final int len = ((sLen - sepCnt) * 6 &gt;&gt; 3) - pad;</span>
+
+<span class="nc" id="L599">		final byte[] dArr = new byte[len]; // Preallocate byte[] of exact length</span>
+
+<span class="nc bnc" id="L601" title="All 2 branches missed.">		for (int s = 0, d = 0; d &lt; len;) {</span>
+			// Assemble three bytes into an int from four &quot;valid&quot; characters.
+<span class="nc" id="L603">			int i = 0;</span>
+<span class="nc bnc" id="L604" title="All 2 branches missed.">			for (int j = 0; j &lt; 4; j++) { // j only increased if a valid char was found.</span>
+<span class="nc" id="L605">				final int c = IA[str.charAt(s)];</span>
+<span class="nc" id="L606">				s++;</span>
+<span class="nc bnc" id="L607" title="All 2 branches missed.">				if (c &gt;= 0) {</span>
+<span class="nc" id="L608">					i |= c &lt;&lt; 18 - j * 6;</span>
+				} else {
+<span class="nc" id="L610">					j--;</span>
+				}
+			}
+			// Add the bytes
+<span class="nc" id="L614">			dArr[d] = (byte) (i &gt;&gt; 16);</span>
+<span class="nc" id="L615">			d++;</span>
+<span class="nc bnc" id="L616" title="All 2 branches missed.">			if (d &lt; len) {</span>
+<span class="nc" id="L617">				dArr[d] = (byte) (i &gt;&gt; 8);</span>
+<span class="nc" id="L618">				d++;</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">				if (d &lt; len) {</span>
+<span class="nc" id="L620">					dArr[d] = (byte) i;</span>
+<span class="nc" id="L621">					d++;</span>
+				}
+			}
+<span class="nc" id="L624">		}</span>
+<span class="nc" id="L625">		return dArr;</span>
+	}
+
+	/**
+	 * Decodes a BASE64 encoded string that is known to be resonably well formatted.
+	 * The method is about twice as fast as {@link #decode(String)}. The
+	 * preconditions are:&lt;br&gt;
+	 * + The array must have a line length of 76 chars OR no line separators at all
+	 * (one line).&lt;br&gt;
+	 * + Line separator must be &quot;\r\n&quot;, as specified in RFC 2045 + The array must
+	 * not contain illegal characters within the encoded string&lt;br&gt;
+	 * + The array CAN have illegal characters at the beginning and end, those will
+	 * be dealt with appropriately.&lt;br&gt;
+	 *
+	 * @param s The source string. Length 0 will return an empty array.
+	 *          &lt;code&gt;null&lt;/code&gt; will throw an exception.
+	 * @return The decoded array of bytes. May be of length 0.
+	 */
+	public final static byte[] decodeFast(final String s) {
+		// Check special case
+<span class="nc" id="L645">		final int sLen = s.length();</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">		if (sLen == 0) {</span>
+<span class="nc" id="L647">			return new byte[0];</span>
+		}
+
+<span class="nc" id="L650">		int sIx = 0, eIx = sLen - 1; // Start and end index after trimming.</span>
+
+		// Trim illegal chars from start
+<span class="nc bnc" id="L653" title="All 4 branches missed.">		while (sIx &lt; eIx &amp;&amp; IA[s.charAt(sIx) &amp; 0xff] &lt; 0) {</span>
+<span class="nc" id="L654">			sIx++;</span>
+		}
+
+		// Trim illegal chars from end
+<span class="nc bnc" id="L658" title="All 4 branches missed.">		while (eIx &gt; 0 &amp;&amp; IA[s.charAt(eIx) &amp; 0xff] &lt; 0) {</span>
+<span class="nc" id="L659">			eIx--;</span>
+		}
+
+		// get the padding count (=) (0, 1 or 2)
+<span class="nc bnc" id="L663" title="All 4 branches missed.">		final int pad = s.charAt(eIx) == '=' ? s.charAt(eIx - 1) == '=' ? 2 : 1 : 0; // Count '=' at end.</span>
+<span class="nc" id="L664">		final int cCnt = eIx - sIx + 1; // Content count including possible separators</span>
+<span class="nc bnc" id="L665" title="All 4 branches missed.">		final int sepCnt = sLen &gt; 76 ? (s.charAt(76) == '\r' ? cCnt / 78 : 0) &lt;&lt; 1 : 0;</span>
+
+<span class="nc" id="L667">		final int len = ((cCnt - sepCnt) * 6 &gt;&gt; 3) - pad; // The number of decoded bytes</span>
+<span class="nc" id="L668">		final byte[] dArr = new byte[len]; // Preallocate byte[] of exact length</span>
+
+		// Decode all but the last 0 - 2 bytes.
+<span class="nc" id="L671">		int d = 0;</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">		for (int cc = 0, eLen = len / 3 * 3; d &lt; eLen;) {</span>
+			// Assemble three bytes into an int from four &quot;valid&quot; characters.
+<span class="nc" id="L674">			final int i = IA[s.charAt(sIx++)] &lt;&lt; 18</span>
+<span class="nc" id="L675">					| IA[s.charAt(sIx++)] &lt;&lt; 12</span>
+<span class="nc" id="L676">					| IA[s.charAt(sIx++)] &lt;&lt; 6</span>
+<span class="nc" id="L677">					| IA[s.charAt(sIx++)];</span>
+
+			// Add the bytes
+<span class="nc" id="L680">			dArr[d] = (byte) (i &gt;&gt; 16);</span>
+<span class="nc" id="L681">			d++;</span>
+<span class="nc" id="L682">			dArr[d] = (byte) (i &gt;&gt; 8);</span>
+<span class="nc" id="L683">			d++;</span>
+<span class="nc" id="L684">			dArr[d] = (byte) i;</span>
+<span class="nc" id="L685">			d++;</span>
+
+			// If line separator, jump over it.
+<span class="nc bnc" id="L688" title="All 4 branches missed.">			if (sepCnt &gt; 0 &amp;&amp; ++cc == 19) {</span>
+<span class="nc" id="L689">				sIx += 2;</span>
+<span class="nc" id="L690">				cc = 0;</span>
+			}
+<span class="nc" id="L692">		}</span>
+
+<span class="nc bnc" id="L694" title="All 2 branches missed.">		if (d &lt; len) {</span>
+			// Decode last 1-3 bytes (incl '=') into 1-3 bytes
+<span class="nc" id="L696">			int i = 0;</span>
+<span class="nc bnc" id="L697" title="All 2 branches missed.">			for (int j = 0; sIx &lt;= eIx - pad; j++) {</span>
+<span class="nc" id="L698">				i |= IA[s.charAt(sIx)] &lt;&lt; 18 - j * 6;</span>
+<span class="nc" id="L699">				sIx++;</span>
+			}
+
+<span class="nc bnc" id="L702" title="All 2 branches missed.">			for (int r = 16; d &lt; len; r -= 8) {</span>
+<span class="nc" id="L703">				dArr[d] = (byte) (i &gt;&gt; r);</span>
+<span class="nc" id="L704">				d++;</span>
+			}
+		}
+
+<span class="nc" id="L708">		return dArr;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

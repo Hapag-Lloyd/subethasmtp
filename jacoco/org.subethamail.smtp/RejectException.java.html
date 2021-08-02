@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RejectException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp</a> &gt; <span class="el_source">RejectException.java</span></div><h1>RejectException.java</h1><pre class="source lang-java linenums">/*
+ * $Id$ $Source:
+ * /cvsroot/Similarity4/src/java/com/similarity/mbean/BindStatisticsManagerMBean
+ * .java,v $
+ */
+package org.subethamail.smtp;
+
+/**
+ * Thrown to reject an SMTP command with a specific code.
+ *
+ * @author Jeff Schnitzer
+ */
+@SuppressWarnings(&quot;serial&quot;)
+public class RejectException extends RuntimeException {
+	int code;
+
+	public RejectException() {
+<span class="nc" id="L18">		this(&quot;Transaction failed&quot;);</span>
+<span class="nc" id="L19">	}</span>
+
+	public RejectException(final String message) {
+<span class="nc" id="L22">		this(554, message);</span>
+<span class="nc" id="L23">	}</span>
+
+	public RejectException(final int code, final String message) {
+<span class="nc" id="L26">		super(message);</span>
+
+<span class="nc" id="L28">		this.code = code;</span>
+<span class="nc" id="L29">	}</span>
+
+	public int getCode() {
+<span class="nc" id="L32">		return this.code;</span>
+	}
+
+	public String getErrorResponse() {
+<span class="nc" id="L36">		return this.code + &quot; &quot; + this.getMessage();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

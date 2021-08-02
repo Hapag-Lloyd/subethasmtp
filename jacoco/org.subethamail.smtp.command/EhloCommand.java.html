@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EhloCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.command</a> &gt; <span class="el_source">EhloCommand.java</span></div><h1>EhloCommand.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.command;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.subethamail.smtp.AuthenticationHandlerFactory;
+import org.subethamail.smtp.server.BaseCommand;
+import org.subethamail.smtp.server.Session;
+import org.subethamail.smtp.util.TextUtils;
+
+/**
+ * @author Ian McFarland &amp;lt;ian@neo.com&amp;gt;
+ * @author Jon Stevens
+ * @author Jeff Schnitzer
+ * @author Scott Hernandez
+ */
+public class EhloCommand extends BaseCommand {
+	public EhloCommand() {
+<span class="nc" id="L19">		super(&quot;EHLO&quot;, &quot;Introduce yourself.&quot;, &quot;&lt;hostname&gt;&quot;);</span>
+<span class="nc" id="L20">	}</span>
+
+	@Override
+	public void execute(final String commandString, final Session sess) throws IOException {
+<span class="nc" id="L24">		final String[] args = this.getArgs(commandString);</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">		if (args.length &lt; 2) {</span>
+<span class="nc" id="L26">			sess.sendResponse(&quot;501 Syntax: EHLO hostname&quot;);</span>
+<span class="nc" id="L27">			return;</span>
+		}
+
+<span class="nc" id="L30">		sess.resetMailTransaction();</span>
+<span class="nc" id="L31">		sess.setHelo(args[1]);</span>
+
+		// postfix returns...
+		// 250-server.host.name
+		// 250-PIPELINING
+		// 250-SIZE 10240000
+		// 250-ETRN
+		// 250 8BITMIME
+
+		// Once upon a time this code tracked whether or not HELO/EHLO has been seen
+		// already and gave an error msg. However, this is stupid and pointless.
+		// Postfix doesn't care, so we won't either. If you want more, read:
+		// http://homepages.tesco.net/J.deBoynePollard/FGA/smtp-avoid-helo.html
+
+<span class="nc" id="L45">		final StringBuilder response = new StringBuilder();</span>
+
+<span class="nc" id="L47">		response.append(&quot;250-&quot;);</span>
+<span class="nc" id="L48">		response.append(sess.getServer().getHostName());</span>
+<span class="nc" id="L49">		response.append(&quot;\r\n&quot; + &quot;250-8BITMIME&quot;);</span>
+
+<span class="nc" id="L51">		final int maxSize = sess.getServer().getMaxMessageSize();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		if (maxSize &gt; 0) {</span>
+<span class="nc" id="L53">			response.append(&quot;\r\n&quot; + &quot;250-SIZE &quot;);</span>
+<span class="nc" id="L54">			response.append(maxSize);</span>
+		}
+
+		// Enabling / Hiding TLS is a server setting
+<span class="nc bnc" id="L58" title="All 4 branches missed.">		if (sess.getServer().getEnableTLS() &amp;&amp; !sess.getServer().getHideTLS()) {</span>
+<span class="nc" id="L59">			response.append(&quot;\r\n&quot; + &quot;250-STARTTLS&quot;);</span>
+		}
+
+		// Check to see if we support authentication
+<span class="nc" id="L63">		final AuthenticationHandlerFactory authFact = sess.getServer().getAuthenticationHandlerFactory();</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		if (authFact != null) {</span>
+<span class="nc" id="L65">			final List&lt;String&gt; supportedMechanisms = authFact.getAuthenticationMechanisms();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">			if (!supportedMechanisms.isEmpty()) {</span>
+<span class="nc" id="L67">				response.append(&quot;\r\n&quot; + &quot;250-&quot; + AuthCommand.VERB + &quot; &quot;);</span>
+<span class="nc" id="L68">				response.append(TextUtils.joinTogether(supportedMechanisms, &quot; &quot;));</span>
+			}
+		}
+
+<span class="nc" id="L72">		response.append(&quot;\r\n&quot; + &quot;250 Ok&quot;);</span>
+
+<span class="nc" id="L74">		sess.sendResponse(response.toString());</span>
+<span class="nc" id="L75">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

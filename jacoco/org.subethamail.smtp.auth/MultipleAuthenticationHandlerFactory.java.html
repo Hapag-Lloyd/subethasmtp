@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MultipleAuthenticationHandlerFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.auth</a> &gt; <span class="el_source">MultipleAuthenticationHandlerFactory.java</span></div><h1>MultipleAuthenticationHandlerFactory.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.auth;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.StringTokenizer;
+
+import org.subethamail.smtp.AuthenticationHandler;
+import org.subethamail.smtp.AuthenticationHandlerFactory;
+import org.subethamail.smtp.RejectException;
+
+/**
+ * This handler combines the behavior of several other authentication handler
+ * factories.
+ *
+ * @author Jeff Schnitzer
+ */
+public class MultipleAuthenticationHandlerFactory implements AuthenticationHandlerFactory {
+	/**
+	 * Maps the auth type (eg &quot;PLAIN&quot;) to a handler. The mechanism name (key) is in
+	 * upper case.
+	 */
+<span class="nc" id="L26">	Map&lt;String, AuthenticationHandlerFactory&gt; plugins = new HashMap&lt;&gt;();</span>
+
+	/**
+	 * A more orderly list of the supported mechanisms. Mechanism names are in upper
+	 * case.
+	 */
+<span class="nc" id="L32">	List&lt;String&gt; mechanisms = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L34">	public MultipleAuthenticationHandlerFactory() {</span>
+		// Starting with an empty list is ok, let the user add them all
+<span class="nc" id="L36">	}</span>
+
+<span class="nc" id="L38">	public MultipleAuthenticationHandlerFactory(final Collection&lt;AuthenticationHandlerFactory&gt; factories) {</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">		for (final AuthenticationHandlerFactory fact : factories) {</span>
+<span class="nc" id="L40">			this.addFactory(fact);</span>
+<span class="nc" id="L41">		}</span>
+<span class="nc" id="L42">	}</span>
+
+	public void addFactory(final AuthenticationHandlerFactory fact) {
+<span class="nc" id="L45">		final List&lt;String&gt; partialMechanisms = fact.getAuthenticationMechanisms();</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		for (final String mechanism : partialMechanisms) {</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">			if (!this.mechanisms.contains(mechanism)) {</span>
+<span class="nc" id="L48">				this.mechanisms.add(mechanism);</span>
+<span class="nc" id="L49">				this.plugins.put(mechanism, fact);</span>
+			}
+<span class="nc" id="L51">		}</span>
+<span class="nc" id="L52">	}</span>
+
+	@Override
+	public List&lt;String&gt; getAuthenticationMechanisms() {
+<span class="nc" id="L56">		return this.mechanisms;</span>
+	}
+
+	@Override
+	public AuthenticationHandler create() {
+<span class="nc" id="L61">		return new Handler();</span>
+	}
+
+	/**
+	 */
+<span class="nc" id="L66">	class Handler implements AuthenticationHandler {</span>
+		AuthenticationHandler active;
+
+		/* */
+		@Override
+		public String auth(final String clientInput) throws RejectException {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (this.active == null) {</span>
+<span class="nc" id="L73">				final StringTokenizer stk = new StringTokenizer(clientInput);</span>
+<span class="nc" id="L74">				final String auth = stk.nextToken();</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">				if (!&quot;AUTH&quot;.equalsIgnoreCase(auth)) {</span>
+<span class="nc" id="L76">					throw new IllegalArgumentException(&quot;Not an AUTH command: &quot; + clientInput);</span>
+				}
+
+<span class="nc" id="L79">				final String method = stk.nextToken();</span>
+<span class="nc" id="L80">				final AuthenticationHandlerFactory fact</span>
+<span class="nc" id="L81">						= MultipleAuthenticationHandlerFactory.this.plugins.get(method.toUpperCase(Locale.ENGLISH));</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">				if (fact == null) {</span>
+<span class="nc" id="L84">					throw new RejectException(504, &quot;Method not supported&quot;);</span>
+				}
+
+<span class="nc" id="L87">				this.active = fact.create();</span>
+			}
+
+<span class="nc" id="L90">			return this.active.auth(clientInput);</span>
+		}
+
+		/* */
+		@Override
+		public Object getIdentity() {
+<span class="nc" id="L96">			return this.active.getIdentity();</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

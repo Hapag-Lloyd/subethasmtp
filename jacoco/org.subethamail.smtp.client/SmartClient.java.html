@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SmartClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.client</a> &gt; <span class="el_source">SmartClient.java</span></div><h1>SmartClient.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.client;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * A somewhat smarter abstraction of an SMTP client which doesn't require
+ * knowing anything about the nitty gritty of SMTP.
+ *
+ * @author Jeff Schnitzer
+ */
+public class SmartClient extends SMTPClient {
+<span class="nc" id="L22">	private static Logger log = LoggerFactory.getLogger(SmartClient.class);</span>
+
+	boolean sentFrom;
+
+	int recipientCount;
+
+	/** The host name which is sent in the HELO and EHLO commands */
+	private String heloHost;
+
+	/**
+	 * True if the server sent a 421 &quot;Service not available, closing transmission
+	 * channel&quot; response. In this case the QUIT command should not be sent.
+	 */
+<span class="nc" id="L35">	private boolean serverClosingTransmissionChannel = false;</span>
+
+	/**
+	 * SMTP extensions supported by the server, and their parameters as the server
+	 * specified it in response to the EHLO command. Key is the extension keyword in
+	 * upper case, like &quot;AUTH&quot;, value is the extension parameters string in unparsed
+	 * form. If the server does not support EHLO, then this map is empty.
+	 */
+<span class="nc" id="L43">	private final Map&lt;String, String&gt; extensions = new HashMap&lt;&gt;();</span>
+
+	/**
+	 * If supplied (not null), then it will be called after EHLO, to authenticate
+	 * this client to the server.
+	 */
+<span class="nc" id="L49">	private Authenticator authenticator = null;</span>
+
+	/**
+	 * Creates an unconnected client.
+	 */
+<span class="nc" id="L54">	public SmartClient() {</span>
+		// nothing to do
+<span class="nc" id="L56">	}</span>
+
+	/**
+	 * Connects to the specified server and issues the initial HELO command.
+	 *
+	 * @throws UnknownHostException if problem looking up hostname
+	 * @throws SMTPException        if problem reported by the server
+	 * @throws IOException          if problem communicating with host
+	 */
+	public SmartClient(final String host, final int port, final String myHost)
+			throws UnknownHostException, IOException, SMTPException {
+<span class="nc" id="L67">		this(host, port, null, myHost);</span>
+<span class="nc" id="L68">	}</span>
+
+	/**
+	 * Connects to the specified server and issues the initial HELO command.
+	 *
+	 * @throws UnknownHostException if problem looking up hostname
+	 * @throws SMTPException        if problem reported by the server
+	 * @throws IOException          if problem communicating with host
+	 */
+	public SmartClient(final String host, final int port, final SocketAddress bindpoint, final String myHost)
+<span class="nc" id="L78">			throws UnknownHostException, IOException, SMTPException {</span>
+<span class="nc" id="L79">		this.setBindpoint(bindpoint);</span>
+<span class="nc" id="L80">		this.setHeloHost(myHost);</span>
+<span class="nc" id="L81">		this.connect(host, port);</span>
+<span class="nc" id="L82">	}</span>
+
+	/**
+	 * Connects to the specified server and issues the initial HELO command. It
+	 * gracefully closes the connection if it could be established but subsequently
+	 * it fails or if the server does not accept messages.
+	 */
+	@Override
+	public void connect(final String host, final int port)
+			throws SMTPException, AuthenticationNotSupportedException, IOException {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">		if (heloHost == null) {</span>
+<span class="nc" id="L93">			throw new IllegalStateException(&quot;Helo host must be specified before connecting&quot;);</span>
+		}
+
+<span class="nc" id="L96">		super.connect(host, port);</span>
+		try {
+<span class="nc" id="L98">			this.receiveAndCheck(); // The server announces itself first</span>
+<span class="nc" id="L99">			this.sendHeloOrEhlo();</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">			if (this.authenticator != null) {</span>
+<span class="nc" id="L101">				this.authenticator.authenticate();</span>
+			}
+<span class="nc" id="L103">		} catch (final SMTPException | AuthenticationNotSupportedException e) {</span>
+<span class="nc" id="L104">			this.quit();</span>
+<span class="nc" id="L105">			throw e;</span>
+<span class="nc" id="L106">		} catch (final IOException e) {</span>
+<span class="nc" id="L107">			this.close(); // just close the socket, issuing QUIT is hopeless now</span>
+<span class="nc" id="L108">			throw e;</span>
+<span class="nc" id="L109">		}</span>
+<span class="nc" id="L110">	}</span>
+
+	/**
+	 * Sends the EHLO command, or HELO if EHLO is not supported, and saves the list
+	 * of SMTP extensions which are supported by the server.
+	 */
+	protected void sendHeloOrEhlo() throws IOException, SMTPException {
+<span class="nc" id="L117">		extensions.clear();</span>
+<span class="nc" id="L118">		final Response resp = this.sendReceive(&quot;EHLO &quot; + heloHost);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		if (resp.isSuccess()) {</span>
+<span class="nc" id="L120">			parseEhloResponse(resp);</span>
+<span class="nc bnc" id="L121" title="All 4 branches missed.">		} else if (resp.getCode() == 500 || resp.getCode() == 502) {</span>
+			// server does not support EHLO, try HELO
+<span class="nc" id="L123">			this.sendAndCheck(&quot;HELO &quot; + heloHost);</span>
+		} else {
+			// some serious error
+<span class="nc" id="L126">			throw new SMTPException(resp);</span>
+		}
+<span class="nc" id="L128">	}</span>
+
+	/**
+	 * Extracts the list of SMTP extensions from the server's response to EHLO, and
+	 * stores them in {@link #extensions}.
+	 */
+	private void parseEhloResponse(final Response resp) throws IOException {
+<span class="nc" id="L135">		final BufferedReader reader = new BufferedReader(new StringReader(resp.getMessage()));</span>
+		// first line contains server name and welcome message, skip it
+<span class="nc" id="L137">		reader.readLine();</span>
+		String line;
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		while (null != (line = reader.readLine())) {</span>
+<span class="nc" id="L140">			final int iFirstSpace = line.indexOf(' ');</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			final String keyword = iFirstSpace == -1 ? line : line.substring(0, iFirstSpace);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			final String parameters = iFirstSpace == -1 ? &quot;&quot; : line.substring(iFirstSpace + 1);</span>
+<span class="nc" id="L143">			extensions.put(keyword.toUpperCase(Locale.ENGLISH), parameters);</span>
+<span class="nc" id="L144">		}</span>
+<span class="nc" id="L145">	}</span>
+
+	/**
+	 * Returns the server response. It takes note of a 421 response code, so QUIT
+	 * will not be issued unnecessarily.
+	 */
+	@Override
+	protected Response receive() throws IOException {
+<span class="nc" id="L153">		final Response response = super.receive();</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		if (response.getCode() == 421) {</span>
+<span class="nc" id="L155">			serverClosingTransmissionChannel = true;</span>
+		}
+<span class="nc" id="L157">		return response;</span>
+	}
+
+	public void from(final String from) throws IOException, SMTPException {
+<span class="nc" id="L161">		this.sendAndCheck(&quot;MAIL FROM: &lt;&quot; + from + &quot;&gt;&quot;);</span>
+<span class="nc" id="L162">		this.sentFrom = true;</span>
+<span class="nc" id="L163">	}</span>
+
+	public void to(final String to) throws IOException, SMTPException {
+<span class="nc" id="L166">		this.sendAndCheck(&quot;RCPT TO: &lt;&quot; + to + &quot;&gt;&quot;);</span>
+<span class="nc" id="L167">		this.recipientCount++;</span>
+<span class="nc" id="L168">	}</span>
+
+	/**
+	 * Prelude to writing data
+	 */
+	public void dataStart() throws IOException, SMTPException {
+<span class="nc" id="L174">		this.sendAndCheck(&quot;DATA&quot;);</span>
+<span class="nc" id="L175">	}</span>
+
+	/**
+	 * Actually write some data
+	 */
+	public void dataWrite(final byte[] data, final int numBytes) throws IOException {
+<span class="nc" id="L181">		this.dataOutput.write(data, 0, numBytes);</span>
+<span class="nc" id="L182">	}</span>
+
+	/**
+	 * Last step after writing data
+	 */
+	public void dataEnd() throws IOException, SMTPException {
+<span class="nc" id="L188">		this.dataOutput.flush();</span>
+<span class="nc" id="L189">		this.dotTerminatedOutput.writeTerminatingSequence();</span>
+<span class="nc" id="L190">		this.dotTerminatedOutput.flush();</span>
+
+<span class="nc" id="L192">		this.receiveAndCheck();</span>
+<span class="nc" id="L193">	}</span>
+
+	/**
+	 * Quit and close down the connection. Ignore any errors.
+	 * &lt;p&gt;
+	 * It still closes the connection, but it does not send the QUIT command if a
+	 * 421 Service closing transmission channel is received previously. In these
+	 * cases QUIT would fail anyway.
+	 *
+	 * @see &lt;a href=&quot;http://tools.ietf.org/html/rfc5321#section-3.8&quot;&gt;RFC 5321
+	 *      Terminating Sessions and Connections&lt;/a&gt;
+	 */
+	public void quit() {
+		try {
+<span class="nc bnc" id="L207" title="All 4 branches missed.">			if (this.isConnected() &amp;&amp; !this.serverClosingTransmissionChannel) {</span>
+<span class="nc" id="L208">				this.sendAndCheck(&quot;QUIT&quot;);</span>
+			}
+<span class="nc" id="L210">		} catch (final IOException ex) {</span>
+<span class="nc" id="L211">			log.warn(&quot;Failed to issue QUIT to &quot; + this.hostPort);</span>
+<span class="nc" id="L212">		}</span>
+
+<span class="nc" id="L214">		this.close();</span>
+<span class="nc" id="L215">	}</span>
+
+	/**
+	 * @return true if we have already specified from()
+	 */
+	public boolean sentFrom() {
+<span class="nc" id="L221">		return this.sentFrom;</span>
+	}
+
+	/**
+	 * @return true if we have already specified to()
+	 */
+	public boolean sentTo() {
+<span class="nc bnc" id="L228" title="All 2 branches missed.">		return this.recipientCount &gt; 0;</span>
+	}
+
+	/**
+	 * @return the number of recipients that have been accepted by the server
+	 */
+	public int getRecipientCount() {
+<span class="nc" id="L235">		return this.recipientCount;</span>
+	}
+
+	/**
+	 * Returns the SMTP extensions supported by the server.
+	 *
+	 * @return the extension map. Key is the extension keyword in upper case, value
+	 *         is the unparsed string of extension parameters.
+	 */
+	public Map&lt;String, String&gt; getExtensions() {
+<span class="nc" id="L245">		return extensions;</span>
+	}
+
+	/**
+	 * Sets the domain name or address literal of this system, which name will be
+	 * sent to the server in the parameter of the HELO and EHLO commands. This has
+	 * no default and is required.
+	 */
+	public void setHeloHost(final String myHost) {
+<span class="nc" id="L254">		this.heloHost = myHost;</span>
+<span class="nc" id="L255">	}</span>
+
+	/**
+	 * Returns the HELO name of this system.
+	 */
+	public String getHeloHost() {
+<span class="nc" id="L261">		return heloHost;</span>
+	}
+
+	/**
+	 * Returns the Authenticator object, which is used to authenticate this client
+	 * to the server, or null, if no authentication is required.
+	 */
+	public Authenticator getAuthenticator() {
+<span class="nc" id="L269">		return authenticator;</span>
+	}
+
+	/**
+	 * Sets the Authenticator object which will be called after the EHLO command to
+	 * authenticate this client to the server. The default is that no authentication
+	 * will happen.
+	 */
+	public void setAuthenticator(final Authenticator authenticator) {
+<span class="nc" id="L278">		this.authenticator = authenticator;</span>
+<span class="nc" id="L279">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RequireTLSCommandWrapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.server</a> &gt; <span class="el_source">RequireTLSCommandWrapper.java</span></div><h1>RequireTLSCommandWrapper.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.server;
+
+import java.io.IOException;
+
+import org.subethamail.smtp.DropConnectionException;
+
+/**
+ * Verifies the presence of a TLS connection if TLS is required. The wrapped
+ * command is executed when the test succeeds.
+ *
+ * @author Erik van Oosten
+ */
+public class RequireTLSCommandWrapper implements Command {
+	private final Command wrapped;
+
+	/**
+	 * @param wrapped the wrapped command (not null)
+	 */
+<span class="nc" id="L19">	public RequireTLSCommandWrapper(final Command wrapped) {</span>
+<span class="nc" id="L20">		this.wrapped = wrapped;</span>
+<span class="nc" id="L21">	}</span>
+
+	@Override
+	public void execute(final String commandString, final Session sess) throws IOException, DropConnectionException {
+<span class="nc bnc" id="L25" title="All 4 branches missed.">		if (!sess.getServer().getRequireTLS() || sess.isTLSStarted()) {</span>
+<span class="nc" id="L26">			wrapped.execute(commandString, sess);</span>
+		} else {
+<span class="nc" id="L28">			sess.sendResponse(&quot;530 Must issue a STARTTLS command first&quot;);</span>
+		}
+<span class="nc" id="L30">	}</span>
+
+	@Override
+	public HelpMessage getHelp() throws CommandException {
+<span class="nc" id="L34">		return wrapped.getHelp();</span>
+	}
+
+	@Override
+	public String getName() {
+<span class="nc" id="L39">		return wrapped.getName();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

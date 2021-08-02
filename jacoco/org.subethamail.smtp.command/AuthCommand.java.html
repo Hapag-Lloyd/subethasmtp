@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.command</a> &gt; <span class="el_source">AuthCommand.java</span></div><h1>AuthCommand.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.command;
+
+import java.io.IOException;
+import java.util.Locale;
+
+import org.subethamail.smtp.AuthenticationHandler;
+import org.subethamail.smtp.AuthenticationHandlerFactory;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.io.CRLFTerminatedReader;
+import org.subethamail.smtp.server.BaseCommand;
+import org.subethamail.smtp.server.Session;
+
+/**
+ * @author Marco Trevisan &amp;lt;mrctrevisan@yahoo.it&amp;gt;
+ * @author Jeff Schnitzer
+ * @author Scott Hernandez
+ */
+public class AuthCommand extends BaseCommand {
+	public static final String VERB = &quot;AUTH&quot;;
+
+	public static final String AUTH_CANCEL_COMMAND = &quot;*&quot;;
+
+	/** Creates a new instance of AuthCommand */
+	public AuthCommand() {
+<span class="nc" id="L25">		super(VERB,</span>
+				&quot;Authentication service&quot;,
+				VERB
+						+ &quot; &lt;mechanism&gt; [initial-response] \n&quot;
+						+ &quot;\t mechanism = a string identifying a SASL authentication mechanism,\n&quot;
+						+ &quot;\t an optional base64-encoded response&quot;);
+<span class="nc" id="L31">	}</span>
+
+	@Override
+	public void execute(final String commandString, final Session sess) throws IOException {
+<span class="nc bnc" id="L35" title="All 2 branches missed.">		if (sess.isAuthenticated()) {</span>
+<span class="nc" id="L36">			sess.sendResponse(&quot;503 Refusing any other AUTH command.&quot;);</span>
+<span class="nc" id="L37">			return;</span>
+		}
+
+<span class="nc" id="L40">		final AuthenticationHandlerFactory authFactory = sess.getServer().getAuthenticationHandlerFactory();</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">		if (authFactory == null) {</span>
+<span class="nc" id="L43">			sess.sendResponse(&quot;502 Authentication not supported&quot;);</span>
+<span class="nc" id="L44">			return;</span>
+		}
+
+<span class="nc" id="L47">		final AuthenticationHandler authHandler = authFactory.create();</span>
+
+<span class="nc" id="L49">		final String[] args = this.getArgs(commandString);</span>
+		// Let's check the command syntax
+<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (args.length &lt; 2) {</span>
+<span class="nc" id="L52">			sess.sendResponse(&quot;501 Syntax: &quot; + VERB + &quot; mechanism [initial-response]&quot;);</span>
+<span class="nc" id="L53">			return;</span>
+		}
+
+		// Let's check if we support the required authentication mechanism
+<span class="nc" id="L57">		final String mechanism = args[1];</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">		if (!authFactory.getAuthenticationMechanisms().contains(mechanism.toUpperCase(Locale.ENGLISH))) {</span>
+<span class="nc" id="L59">			sess.sendResponse(&quot;504 The requested authentication mechanism is not supported&quot;);</span>
+<span class="nc" id="L60">			return;</span>
+		}
+		// OK, let's go trough the authentication process.
+		try {
+			// The authentication process may require a series of challenge-responses
+<span class="nc" id="L65">			final CRLFTerminatedReader reader = sess.getReader();</span>
+
+<span class="nc" id="L67">			String response = authHandler.auth(commandString);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">			if (response != null) {</span>
+				// challenge-response iteration
+<span class="nc" id="L70">				sess.sendResponse(response);</span>
+			}
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">			while (response != null) {</span>
+<span class="nc" id="L74">				final String clientInput = reader.readLine();</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">				if (clientInput.trim().equals(AUTH_CANCEL_COMMAND)) {</span>
+					// RFC 2554 explicitly states this:
+<span class="nc" id="L77">					sess.sendResponse(&quot;501 Authentication canceled by client.&quot;);</span>
+<span class="nc" id="L78">					return;</span>
+				}
+<span class="nc" id="L80">				response = authHandler.auth(clientInput);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">				if (response != null) {</span>
+					// challenge-response iteration
+<span class="nc" id="L83">					sess.sendResponse(response);</span>
+				}
+<span class="nc" id="L85">			}</span>
+
+<span class="nc" id="L87">			sess.sendResponse(&quot;235 Authentication successful.&quot;);</span>
+<span class="nc" id="L88">			sess.setAuthenticationHandler(authHandler);</span>
+<span class="nc" id="L89">		} catch (final RejectException authFailed) {</span>
+<span class="nc" id="L90">			sess.sendResponse(authFailed.getErrorResponse());</span>
+<span class="nc" id="L91">		}</span>
+<span class="nc" id="L92">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

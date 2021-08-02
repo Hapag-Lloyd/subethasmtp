@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WiserMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.wiser</a> &gt; <span class="el_source">WiserMessage.java</span></div><h1>WiserMessage.java</h1><pre class="source lang-java linenums">package org.subethamail.wiser;
+
+import java.io.ByteArrayInputStream;
+import java.io.PrintStream;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
+/**
+ * This class wraps a received message and provides a way to generate a JavaMail
+ * MimeMessage from the data.
+ *
+ * @author Jon Stevens
+ */
+public class WiserMessage {
+	byte[] messageData;
+
+	Wiser wiser;
+
+	String envelopeSender;
+
+	String envelopeReceiver;
+
+	WiserMessage(final Wiser wiser,
+			final String envelopeSender,
+			final String envelopeReceiver,
+<span class="nc" id="L27">			final byte[] messageData) {</span>
+<span class="nc" id="L28">		this.wiser = wiser;</span>
+<span class="nc" id="L29">		this.envelopeSender = envelopeSender;</span>
+<span class="nc" id="L30">		this.envelopeReceiver = envelopeReceiver;</span>
+<span class="nc" id="L31">		this.messageData = messageData;</span>
+<span class="nc" id="L32">	}</span>
+
+	/**
+	 * Generate a JavaMail MimeMessage.
+	 *
+	 * @throws MessagingException on messaging error
+	 */
+	public MimeMessage getMimeMessage() throws MessagingException {
+<span class="nc" id="L40">		return new MimeMessage(this.wiser.getSession(), new ByteArrayInputStream(this.messageData));</span>
+	}
+
+	/**
+	 * Get's the raw message DATA.
+	 */
+	public byte[] getData() {
+<span class="nc" id="L47">		return this.messageData;</span>
+	}
+
+	/**
+	 * Get's the RCPT TO:
+	 */
+	public String getEnvelopeReceiver() {
+<span class="nc" id="L54">		return this.envelopeReceiver;</span>
+	}
+
+	/**
+	 * Get's the MAIL FROM:
+	 */
+	public String getEnvelopeSender() {
+<span class="nc" id="L61">		return this.envelopeSender;</span>
+	}
+
+	/**
+	 * Dumps the rough contents of the message for debugging purposes
+	 */
+	public void dumpMessage(final PrintStream out) throws MessagingException {
+<span class="nc" id="L68">		out.println(&quot;===== Dumping message =====&quot;);</span>
+
+<span class="nc" id="L70">		out.println(&quot;Envelope sender: &quot; + this.getEnvelopeSender());</span>
+<span class="nc" id="L71">		out.println(&quot;Envelope recipient: &quot; + this.getEnvelopeReceiver());</span>
+
+		// It should all be convertible with ascii or utf8
+<span class="nc" id="L74">		final String content = new String(this.getData());</span>
+<span class="nc" id="L75">		out.println(content);</span>
+
+<span class="nc" id="L77">		out.println(&quot;===== End message dump =====&quot;);</span>
+<span class="nc" id="L78">	}</span>
+
+	/**
+	 * Implementation of toString()
+	 *
+	 * @return getData() as a string or an empty string if getData is null
+	 */
+	@Override
+	public String toString() {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		if (this.getData() == null) {</span>
+<span class="nc" id="L88">			return &quot;&quot;;</span>
+		}
+
+<span class="nc" id="L91">		return new String(this.getData());</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

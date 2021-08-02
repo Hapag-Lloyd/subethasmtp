@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DotTerminatedInputStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.io</a> &gt; <span class="el_source">DotTerminatedInputStream.java</span></div><h1>DotTerminatedInputStream.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.io;
+
+import java.io.EOFException;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * An InputStream class that terminates the stream when it encounters a US-ASCII
+ * encoded dot CR LF byte sequence immediately following a CR LF line end.
+ */
+public class DotTerminatedInputStream extends FilterInputStream {
+	/**
+	 * The last bytes returned by the {@link #read()} function. The first byte in
+	 * the array contains the byte returned by the penultimate read() call. The
+	 * second byte in the array contains the byte returned by the last read() call.
+	 * EOF (-1) is not shifted into the array. It's initial value is CR LF, so the
+	 * first character of the stream is considered to be the first character of a
+	 * line. This makes it possible to receive empty data.
+	 */
+<span class="nc" id="L21">	private final byte[] lastBytes = new byte[] { '\r', '\n' };</span>
+
+	/**
+	 * The buffer which contains the bytes read from the underlying stream in
+	 * advance. These bytes are not yet returned by the {@link #read()} function.
+	 * Null means uninitialized.
+	 */
+<span class="nc" id="L28">	private int[] nextBytes = null;</span>
+
+	/**
+	 * Indicates that the last byte - not including the terminating sequence - of
+	 * the wrapped stream was already returned by {@link #read()}
+	 */
+<span class="nc" id="L34">	private boolean endReached = false;</span>
+
+	/**
+	 * A constructor for this object that takes a stream to be wrapped and a
+	 * terminating character sequence.
+	 *
+	 * @param in the &lt;code&gt;InputStream&lt;/code&gt; to be wrapped
+	 * @throws IllegalArgumentException if the terminator array is null or empty
+	 */
+	public DotTerminatedInputStream(final InputStream in) {
+<span class="nc" id="L44">		super(in);</span>
+<span class="nc" id="L45">	}</span>
+
+	@Override
+	public int read() throws IOException {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">		if (nextBytes == null) {</span>
+<span class="nc" id="L50">			initNextBytes();</span>
+		}
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		if (endReached) {</span>
+<span class="nc" id="L53">			return -1;</span>
+		}
+<span class="nc bnc" id="L55" title="All 4 branches missed.">		if (lastBytesAreCrLf() &amp;&amp; nextBytesAreDotCrLf()) {</span>
+<span class="nc" id="L56">			endReached = true;</span>
+<span class="nc" id="L57">			return -1;</span>
+		}
+<span class="nc" id="L59">		final int result = nextBytes[0];</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		if (result == -1) {</span>
+			// End of stream reached without seeing the terminator
+<span class="nc" id="L62">			throw new EOFException(&quot;Pre-mature end of &lt;CRLF&gt;.&lt;CRLF&gt; terminated data&quot;);</span>
+		}
+<span class="nc" id="L64">		readWrappedStream();</span>
+<span class="nc" id="L65">		return result;</span>
+	}
+
+	private void initNextBytes() throws IOException {
+<span class="nc" id="L69">		nextBytes = new int[3];</span>
+<span class="nc" id="L70">		nextBytes[0] = super.read();</span>
+<span class="nc" id="L71">		nextBytes[1] = super.read();</span>
+<span class="nc" id="L72">		nextBytes[2] = super.read();</span>
+<span class="nc" id="L73">	}</span>
+
+	private boolean lastBytesAreCrLf() {
+<span class="nc bnc" id="L76" title="All 4 branches missed.">		return lastBytes[0] == '\r' &amp;&amp; lastBytes[1] == '\n';</span>
+	}
+
+	private boolean nextBytesAreDotCrLf() {
+<span class="nc bnc" id="L80" title="All 6 branches missed.">		return nextBytes[0] == '.' &amp;&amp; nextBytes[1] == '\r' &amp;&amp; nextBytes[2] == '\n';</span>
+	}
+
+	/**
+	 * Shifts bytes in the buffers, reads a byte from the wrapped stream, and places
+	 * it at the end of the nextBytes buffer.
+	 */
+	private void readWrappedStream() throws IOException {
+<span class="nc" id="L88">		lastBytes[0] = lastBytes[1];</span>
+		// casting is safe, this function is not called if an - unexpected - EOF
+		// was read
+<span class="nc" id="L91">		lastBytes[1] = (byte) nextBytes[0];</span>
+<span class="nc" id="L92">		nextBytes[0] = nextBytes[1];</span>
+<span class="nc" id="L93">		nextBytes[1] = nextBytes[2];</span>
+<span class="nc" id="L94">		nextBytes[2] = super.read();</span>
+<span class="nc" id="L95">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

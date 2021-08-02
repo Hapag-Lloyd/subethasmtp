@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServerThread.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.server</a> &gt; <span class="el_source">ServerThread.java</span></div><h1>ServerThread.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.server;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.concurrent.GuardedBy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+/**
+ * ServerThread accepts TCP connections to the server socket and starts a new
+ * {@link Session} thread for each connection which will handle the connection.
+ * On shutdown it terminates not only this thread, but the session threads too.
+ */
+class ServerThread extends Thread {
+<span class="nc" id="L26">	private final Logger log = LoggerFactory.getLogger(ServerThread.class);</span>
+
+	private final SMTPServer server;
+
+	private final ServerSocket serverSocket;
+
+	/**
+	 * A semaphore which is used to prevent accepting new connections by blocking
+	 * this thread if the allowed count of open connections is already reached.
+	 */
+	private final Semaphore connectionPermits;
+
+	/**
+	 * The list of currently running sessions.
+	 */
+	@GuardedBy(&quot;this&quot;)
+	private final Set&lt;Session&gt; sessionThreads;
+
+	/**
+	 * A flag which indicates that this SMTP port and all of its open connections
+	 * are being shut down.
+	 */
+	private volatile boolean shuttingDown;
+
+<span class="nc" id="L50">	private boolean updateThreadName = true;</span>
+
+	public ServerThread(final SMTPServer server, final ServerSocket serverSocket) {
+<span class="nc" id="L53">		super(ServerThread.class.getName() + &quot; &quot; + server.getDisplayableLocalSocketAddress());</span>
+<span class="nc" id="L54">		this.server = server;</span>
+<span class="nc" id="L55">		this.serverSocket = serverSocket;</span>
+		// reserve a few places for graceful disconnects with informative
+		// messages
+<span class="nc" id="L58">		final int countOfConnectionPermits = server.getMaxConnections() + 10;</span>
+<span class="nc" id="L59">		this.connectionPermits = new Semaphore(countOfConnectionPermits);</span>
+<span class="nc" id="L60">		this.sessionThreads = new HashSet&lt;&gt;(countOfConnectionPermits * 4 / 3 + 1);</span>
+<span class="nc" id="L61">	}</span>
+
+	/**
+	 * This method is called by this thread when it starts up. To safely cause this
+	 * to exit, call {@link #shutdown()}.
+	 */
+	@Override
+	public void run() {
+<span class="nc" id="L69">		MDC.put(&quot;smtpServerLocalSocketAddress&quot;, server.getDisplayableLocalSocketAddress());</span>
+<span class="nc" id="L70">		log.info(&quot;SMTP server {} started&quot;, server.getDisplayableLocalSocketAddress());</span>
+
+		try {
+<span class="nc" id="L73">			runAcceptLoop();</span>
+<span class="nc" id="L74">			log.info(&quot;SMTP server {} stopped accepting connections&quot;, server.getDisplayableLocalSocketAddress());</span>
+<span class="nc" id="L75">		} catch (final RuntimeException e) {</span>
+<span class="nc" id="L76">			log.error(&quot;Unexpected exception in server socket thread, server is stopped&quot;, e);</span>
+<span class="nc" id="L77">			throw e;</span>
+<span class="nc" id="L78">		} catch (final Error e) {</span>
+<span class="nc" id="L79">			log.error(&quot;Unexpected error in server socket thread, server is stopped&quot;, e);</span>
+<span class="nc" id="L80">			throw e;</span>
+		} finally {
+<span class="nc" id="L82">			MDC.remove(&quot;smtpServerLocalSocketAddress&quot;);</span>
+		}
+<span class="nc" id="L84">	}</span>
+
+	/**
+	 * Accept connections and run them in session threads until shutdown.
+	 */
+	private void runAcceptLoop() {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		while (!this.shuttingDown) {</span>
+			try {
+				// block if too many connections are open
+<span class="nc" id="L93">				connectionPermits.acquire();</span>
+<span class="nc" id="L94">			} catch (final InterruptedException consumed) {</span>
+<span class="nc" id="L95">				continue; // exit or retry</span>
+<span class="nc" id="L96">			}</span>
+
+<span class="nc" id="L98">			Socket socket = null;</span>
+			try {
+<span class="nc" id="L100">				socket = this.serverSocket.accept();</span>
+<span class="nc" id="L101">			} catch (final IOException e) {</span>
+<span class="nc" id="L102">				connectionPermits.release();</span>
+				// it also happens during shutdown, when the socket is closed
+<span class="nc bnc" id="L104" title="All 2 branches missed.">				if (!this.shuttingDown) {</span>
+<span class="nc" id="L105">					log.error(&quot;Error accepting connection&quot;, e);</span>
+					// prevent a possible loop causing 100% processor usage
+					try {
+<span class="nc" id="L108">						Thread.sleep(1000);</span>
+<span class="nc" id="L109">					} catch (final InterruptedException consumed) {</span>
+						// fall through
+<span class="nc" id="L111">					}</span>
+				}
+<span class="nc" id="L113">				continue;</span>
+<span class="nc" id="L114">			}</span>
+
+<span class="nc" id="L116">			Session session = null;</span>
+			try {
+<span class="nc" id="L118">				session = new Session(server, this, socket);</span>
+<span class="nc" id="L119">				session.setUpdateThreadName(isUpdateThreadName());</span>
+<span class="nc" id="L120">			} catch (final IOException e) {</span>
+<span class="nc" id="L121">				connectionPermits.release();</span>
+<span class="nc" id="L122">				log.error(&quot;Error while starting a connection&quot;, e);</span>
+				try {
+<span class="nc" id="L124">					socket.close();</span>
+<span class="nc" id="L125">				} catch (final IOException e1) {</span>
+<span class="nc" id="L126">					log.debug(&quot;Cannot close socket after exception&quot;, e1);</span>
+<span class="nc" id="L127">				}</span>
+<span class="nc" id="L128">				continue;</span>
+<span class="nc" id="L129">			}</span>
+
+			// add thread before starting it,
+			// because it will check the count of sessions
+<span class="nc" id="L133">			synchronized (this) {</span>
+<span class="nc" id="L134">				this.sessionThreads.add(session);</span>
+<span class="nc" id="L135">			}</span>
+
+			try {
+<span class="nc" id="L138">				server.getExecutorService().execute(session);</span>
+<span class="nc" id="L139">			} catch (final RejectedExecutionException e) {</span>
+<span class="nc" id="L140">				connectionPermits.release();</span>
+<span class="nc" id="L141">				synchronized (this) {</span>
+<span class="nc" id="L142">					this.sessionThreads.remove(session);</span>
+<span class="nc" id="L143">				}</span>
+<span class="nc" id="L144">				log.error(&quot;Error while executing a session&quot;, e);</span>
+				try {
+<span class="nc" id="L146">					socket.close();</span>
+<span class="nc" id="L147">				} catch (final IOException e1) {</span>
+<span class="nc" id="L148">					log.debug(&quot;Cannot close socket after exception&quot;, e1);</span>
+<span class="nc" id="L149">				}</span>
+<span class="nc" id="L150">				continue;</span>
+<span class="nc" id="L151">			}</span>
+<span class="nc" id="L152">		}</span>
+<span class="nc" id="L153">	}</span>
+
+	/**
+	 * Closes the server socket and all client sockets.
+	 */
+	public void shutdown() {
+		// First make sure we aren't accepting any new connections
+<span class="nc" id="L160">		shutdownServerThread();</span>
+		// Shut down any open connections.
+<span class="nc" id="L162">		shutdownSessions();</span>
+<span class="nc" id="L163">	}</span>
+
+	private void shutdownServerThread() {
+<span class="nc" id="L166">		shuttingDown = true;</span>
+<span class="nc" id="L167">		closeServerSocket();</span>
+<span class="nc" id="L168">		interrupt();</span>
+		try {
+<span class="nc" id="L170">			join();</span>
+<span class="nc" id="L171">		} catch (final InterruptedException e) {</span>
+<span class="nc" id="L172">			Thread.currentThread().interrupt();</span>
+<span class="nc" id="L173">		}</span>
+<span class="nc" id="L174">	}</span>
+
+	/**
+	 * Closes the serverSocket in an orderly way.
+	 */
+	private void closeServerSocket() {
+		try {
+<span class="nc" id="L181">			this.serverSocket.close();</span>
+<span class="nc" id="L182">			log.debug(&quot;SMTP Server socket shut down&quot;);</span>
+<span class="nc" id="L183">		} catch (final IOException e) {</span>
+<span class="nc" id="L184">			log.error(&quot;Failed to close server socket.&quot;, e);</span>
+<span class="nc" id="L185">		}</span>
+<span class="nc" id="L186">	}</span>
+
+	private void shutdownSessions() {
+		// Copy the sessionThreads collection so the guarding lock on this
+		// instance can be released before calling the Session.shutdown methods.
+		// This is necessary to avoid a deadlock, because the terminating
+		// session threads call back the sessionEnded function in this instance,
+		// which locks this instance.
+		List&lt;Session&gt; sessionsToBeClosed;
+<span class="nc" id="L195">		synchronized (this) {</span>
+<span class="nc" id="L196">			sessionsToBeClosed = new ArrayList&lt;&gt;(sessionThreads);</span>
+<span class="nc" id="L197">		}</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">		for (final Session sessionThread : sessionsToBeClosed) {</span>
+<span class="nc" id="L199">			sessionThread.quit();</span>
+<span class="nc" id="L200">		}</span>
+
+<span class="nc" id="L202">		server.getExecutorService().shutdown();</span>
+		try {
+<span class="nc" id="L204">			server.getExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);</span>
+<span class="nc" id="L205">		} catch (final InterruptedException e) {</span>
+<span class="nc" id="L206">			log.warn(&quot;Interrupted waiting for termination of session threads&quot;, e);</span>
+<span class="nc" id="L207">			Thread.currentThread().interrupt();</span>
+<span class="nc" id="L208">		}</span>
+<span class="nc" id="L209">	}</span>
+
+	public synchronized boolean hasTooManyConnections() {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		return sessionThreads.size() &gt; server.getMaxConnections();</span>
+	}
+
+	public synchronized int getNumberOfConnections() {
+<span class="nc" id="L216">		return sessionThreads.size();</span>
+	}
+
+	/**
+	 * Registers that the specified {@link Session} thread ended. Session threads
+	 * must call this function.
+	 */
+	public void sessionEnded(final Session session) {
+<span class="nc" id="L224">		synchronized (this) {</span>
+<span class="nc" id="L225">			sessionThreads.remove(session);</span>
+<span class="nc" id="L226">		}</span>
+<span class="nc" id="L227">		connectionPermits.release();</span>
+<span class="nc" id="L228">	}</span>
+
+	public boolean isUpdateThreadName() {
+<span class="nc" id="L231">		return updateThreadName;</span>
+	}
+
+	public void setUpdateThreadName(final boolean updateThreadName) {
+<span class="nc" id="L235">		this.updateThreadName = updateThreadName;</span>
+<span class="nc" id="L236">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CRLFTerminatedReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.io</a> &gt; <span class="el_source">CRLFTerminatedReader.java</span></div><h1>CRLFTerminatedReader.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.io;
+
+import java.io.FilterReader;
+
+/***********************************************************************
+ * Copyright (c) 2000-2006 The Apache Software Foundation. * All rights
+ * reserved. *
+ * ------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you * may not
+ * use this file except in compliance with the License. You * may obtain a copy
+ * of the License at: * * http://www.apache.org/licenses/LICENSE-2.0 * * Unless
+ * required by applicable law or agreed to in writing, software * distributed
+ * under the License is distributed on an &quot;AS IS&quot; BASIS, * WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or * implied. See the License for the
+ * specific language governing * permissions and limitations under the License.
+ * *
+ ***********************************************************************/
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+
+/**
+ * A Reader for use with SMTP or other protocols in which lines must end with
+ * CRLF. Extends Reader and overrides its readLine() method. The Reader
+ * readLine() method cannot serve for SMTP because it ends lines with either CR
+ * or LF alone.
+ *
+ * JSS: The readline() method of this class has been 'enchanced' from the Apache
+ * JAMES version to throw an IOException if the line is greater than or equal to
+ * MAX_LINE_LENGTH (998) which is defined in
+ * &lt;a href=&quot;http://rfc.net/rfc2822.html#s2.1.1.&quot;&gt;RFC 2822&lt;/a&gt;.
+ */
+public class CRLFTerminatedReader extends FilterReader {
+<span class="nc" id="L37">	private static int MAX_LINE_LENGTH = 998;</span>
+
+	@SuppressWarnings(&quot;serial&quot;)
+	public static class TerminationException extends IOException {
+		private final int where;
+
+<span class="nc" id="L43">		public TerminationException(final int where) {</span>
+<span class="nc" id="L44">			this.where = where;</span>
+<span class="nc" id="L45">		}</span>
+
+		public TerminationException(final String s, final int where) {
+<span class="nc" id="L48">			super(s);</span>
+<span class="nc" id="L49">			this.where = where;</span>
+<span class="nc" id="L50">		}</span>
+
+		public int position() {
+<span class="nc" id="L53">			return this.where;</span>
+		}
+	}
+
+	@SuppressWarnings(&quot;serial&quot;)
+	public static class MaxLineLengthException extends IOException {
+<span class="nc" id="L59">		public MaxLineLengthException() {}</span>
+
+		public MaxLineLengthException(final String s) {
+<span class="nc" id="L62">			super(s);</span>
+<span class="nc" id="L63">		}</span>
+	}
+
+	/**
+	 * Constructs this CRLFTerminatedReader.
+	 *
+	 * @param in      an InputStream
+	 * @param charset the {@link Charset} to use
+	 */
+	public CRLFTerminatedReader(final InputStream in, final Charset charset) {
+<span class="nc" id="L73">		super(new InputStreamReader(in, charset));</span>
+<span class="nc" id="L74">	}</span>
+
+	/**
+	 * Constructs this CRLFTerminatedReader.
+	 *
+	 * @param in  an InputStream
+	 * @param enc the {@link Charset} to use
+	 */
+	public CRLFTerminatedReader(final InputStream in, final String enc) throws UnsupportedEncodingException {
+<span class="nc" id="L83">		this(in, Charset.forName(enc));</span>
+<span class="nc" id="L84">	}</span>
+
+	private static final int EOF = -1;
+
+	private static final char CR = 13;
+
+	private static final char LF = 10;
+
+	/**
+	 * Read a line of text which is terminated by CRLF. The concluding CRLF
+	 * characters are not returned with the String, but if either CR or LF appears
+	 * in the text in any other sequence it is returned in the String like any other
+	 * character. Some characters at the end of the stream may be lost if they are
+	 * in a &quot;line&quot; not terminated by CRLF.
+	 *
+	 * @return either a String containing the contents of a line which must end with
+	 *         CRLF, or null if the end of the stream has been reached, possibly
+	 *         discarding some characters in a line not terminated with CRLF.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public String readLine() throws IOException {
+<span class="nc" id="L105">		final StringBuilder lineBuilder = new StringBuilder();</span>
+
+		/*
+		 * This boolean tells which state we are in, depending upon whether or not we
+		 * got a CR in the preceding read().
+		 */
+<span class="nc" id="L111">		boolean cr_just_received = false;</span>
+
+		/* If not -1 this int tells us where the first &quot;wrong&quot; line break is */
+<span class="nc" id="L114">		int tainted = -1;</span>
+
+		while (true) {
+<span class="nc" id="L117">			final int inChar = this.read();</span>
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">			if (!cr_just_received) {</span>
+				// the most common case, somewhere before the end of a line
+<span class="nc bnc" id="L121" title="All 4 branches missed.">				switch (inChar) {</span>
+				case CR:
+<span class="nc" id="L123">					cr_just_received = true;</span>
+<span class="nc" id="L124">					break;</span>
+				case EOF:
+<span class="nc" id="L126">					return null; // premature EOF -- discards data(?)</span>
+				case LF: // the normal ending of a line
+<span class="nc bnc" id="L128" title="All 2 branches missed.">					if (tainted == -1) {</span>
+<span class="nc" id="L129">						tainted = lineBuilder.length();</span>
+					}
+					// intentional fall-through
+				default:
+<span class="nc" id="L133">					lineBuilder.append((char) inChar);</span>
+				}
+			} else {
+				// CR has been received, we may be at end of line
+<span class="nc bnc" id="L137" title="All 4 branches missed.">				switch (inChar) {</span>
+				case LF: // LF without a preceding CR
+<span class="nc bnc" id="L139" title="All 2 branches missed.">					if (tainted != -1) {</span>
+<span class="nc" id="L140">						throw new TerminationException(&quot;\&quot;bare\&quot; CR or LF in data stream&quot;, tainted);</span>
+					}
+<span class="nc" id="L142">					return lineBuilder.toString();</span>
+				case EOF:
+<span class="nc" id="L144">					return null; // premature EOF -- discards data(?)</span>
+				case CR: // we got two (or more) CRs in a row
+<span class="nc bnc" id="L146" title="All 2 branches missed.">					if (tainted == -1) {</span>
+<span class="nc" id="L147">						tainted = lineBuilder.length();</span>
+					}
+<span class="nc" id="L149">					lineBuilder.append(CR);</span>
+<span class="nc" id="L150">					break;</span>
+				default: // we got some other character following a CR
+<span class="nc bnc" id="L152" title="All 2 branches missed.">					if (tainted == -1) {</span>
+<span class="nc" id="L153">						tainted = lineBuilder.length();</span>
+					}
+<span class="nc" id="L155">					lineBuilder.append(CR);</span>
+<span class="nc" id="L156">					lineBuilder.append((char) inChar);</span>
+<span class="nc" id="L157">					cr_just_received = false;</span>
+				}
+			}
+<span class="nc bnc" id="L160" title="All 2 branches missed.">			if (lineBuilder.length() &gt;= MAX_LINE_LENGTH) {</span>
+<span class="nc" id="L161">				throw new MaxLineLengthException(&quot;Input line length is too long!&quot;);</span>
+			}
+<span class="nc" id="L163">		}</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

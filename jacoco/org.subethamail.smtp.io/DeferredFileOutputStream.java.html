@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeferredFileOutputStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.io</a> &gt; <span class="el_source">DeferredFileOutputStream.java</span></div><h1>DeferredFileOutputStream.java</h1><pre class="source lang-java linenums">/*
+ * $Id$ $URL$
+ */
+package org.subethamail.smtp.io;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * This works like a ByteArrayOutputStream until a certain size is reached, then
+ * creates a temp file and acts like a buffered FileOutputStream. The data can
+ * be retreived afterwards by calling getInputStream().
+ *
+ * When this object is closed, the temporary file is deleted. You can no longer
+ * call getInputStream().
+ *
+ * @author Jeff Schnitzer
+ */
+public class DeferredFileOutputStream extends ThresholdingOutputStream {
+	/**
+	 * Initial size of the byte array buffer. Better to make this large to start
+	 * with so that we can avoid reallocs; mail messages are rarely tiny.
+	 */
+	static final int INITIAL_BUF_SIZE = 8192;
+
+	public static final String TMPFILE_PREFIX = &quot;subetha&quot;;
+
+	public static final String TMPFILE_SUFFIX = &quot;.msg&quot;;
+
+	/** If we switch to file output, this is the file. */
+	File outFile;
+
+	/** If we switch to file output, this is the stream. */
+	FileOutputStream outFileStream;
+
+	/** When the output stream is closed, this becomes true */
+	boolean closed;
+
+<span class="nc" id="L45">	boolean thresholdReached = false;</span>
+
+	/**
+	 * @param transitionSize is the number of bytes at which to convert from a byte
+	 *                       array to a real file.
+	 */
+	public DeferredFileOutputStream(final int transitionSize) {
+<span class="nc" id="L52">		super(new BetterByteArrayOutputStream(INITIAL_BUF_SIZE), transitionSize);</span>
+<span class="nc" id="L53">	}</span>
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.subethamail.common.io.ThresholdingOutputStream#thresholdReached(int,
+	 * int)
+	 */
+	@Override
+	protected void thresholdReached(final int current, final int predicted) throws IOException {
+		// Open a temp file, write the byte array version, and swap the
+		// output stream to the file version.
+
+<span class="nc" id="L66">		this.outFile = File.createTempFile(TMPFILE_PREFIX, TMPFILE_SUFFIX);</span>
+<span class="nc" id="L67">		this.outFileStream = new FileOutputStream(this.outFile);</span>
+
+<span class="nc" id="L69">		((ByteArrayOutputStream) this.output).writeTo(this.outFileStream);</span>
+<span class="nc" id="L70">		this.output = new BufferedOutputStream(this.outFileStream);</span>
+<span class="nc" id="L71">	}</span>
+
+	/**
+	 * Closes the output stream and creates an InputStream on the same data.
+	 *
+	 * @return either a BetterByteArrayOutputStream or buffered FileInputStream,
+	 *         depending on what state we are in.
+	 */
+	public InputStream getInputStream() throws IOException {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		if (this.output instanceof BetterByteArrayOutputStream) {</span>
+<span class="nc" id="L81">			return ((BetterByteArrayOutputStream) this.output).getInputStream();</span>
+		}
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		if (!this.closed) {</span>
+<span class="nc" id="L84">			this.output.flush();</span>
+<span class="nc" id="L85">			this.output.close();</span>
+<span class="nc" id="L86">			this.closed = true;</span>
+		}
+
+<span class="nc" id="L89">		return new BufferedInputStream(new FileInputStream(this.outFile));</span>
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.subethamail.common.io.ThresholdingOutputStream#close()
+	 */
+	@Override
+	public void close() throws IOException {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (!this.closed) {</span>
+<span class="nc" id="L100">			this.output.flush();</span>
+<span class="nc" id="L101">			this.output.close();</span>
+<span class="nc" id="L102">			this.closed = true;</span>
+		}
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if (this.outFile != null) {</span>
+<span class="nc" id="L106">			this.outFile.delete();</span>
+		}
+<span class="nc" id="L108">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

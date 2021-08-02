@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReceivedHeaderStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.io</a> &gt; <span class="el_source">ReceivedHeaderStream.java</span></div><h1>ReceivedHeaderStream.java</h1><pre class="source lang-java linenums">/*
+ *
+ */
+package org.subethamail.smtp.io;
+
+import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import org.subethamail.smtp.util.TextUtils;
+
+/**
+ * Prepends a Received: header at the beginning of the input stream.
+ */
+public class ReceivedHeaderStream extends FilterInputStream {
+	ByteArrayInputStream header;
+
+	/**
+	 * @param softwareName    A software name and version, or null if this
+	 *                        information should not be printed
+	 * @param singleRecipient The single recipient of the message. If there are more
+	 *                        than one recipients then this must be null.
+	 */
+	public ReceivedHeaderStream(final InputStream in,
+			final String heloHost,
+			final InetAddress host,
+			final String whoami,
+			final String softwareName,
+			final String id,
+			final String singleRecipient) {
+<span class="nc" id="L37">		super(in);</span>
+
+		/*
+		 * Looks like: Received: from iamhelo (wasabi.infohazard.org [209.237.247.14])
+		 * by mx.google.com with SMTP id 32si2669129wfa.13.2009.05.27.18.27.31; Wed, 27
+		 * May 2009 18:27:48 -0700 (PDT)
+		 */
+<span class="nc" id="L44">		final DateFormat fmt = new SimpleDateFormat(&quot;EEE, dd MMM yyyy HH:mm:ss Z (z)&quot;, Locale.US);</span>
+<span class="nc" id="L45">		final String timestamp = fmt.format(new Date());</span>
+
+<span class="nc" id="L47">		final StringBuilder header = new StringBuilder();</span>
+<span class="nc" id="L48">		header.append(&quot;Received: from &quot; + heloHost + &quot; (&quot; + constructTcpInfo(host) + &quot;)\r\n&quot;);</span>
+<span class="nc" id="L49">		header.append(&quot;        by &quot; + whoami + &quot;\r\n&quot;);</span>
+<span class="nc" id="L50">		header.append(&quot;        with SMTP&quot;);</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (softwareName != null) {</span>
+<span class="nc" id="L52">			header.append(&quot; (&quot; + softwareName + &quot;)&quot;);</span>
+		}
+<span class="nc" id="L54">		header.append(&quot; id &quot;).append(id);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">		if (singleRecipient != null) {</span>
+<span class="nc" id="L56">			header.append(&quot;\r\n        for &quot; + singleRecipient);</span>
+		}
+<span class="nc" id="L58">		header.append(&quot;;\r\n&quot;);</span>
+<span class="nc" id="L59">		header.append(&quot;        &quot; + timestamp + &quot;\r\n&quot;);</span>
+
+<span class="nc" id="L61">		this.header = new ByteArrayInputStream(TextUtils.getAsciiBytes(header.toString()));</span>
+<span class="nc" id="L62">	}</span>
+
+	/**
+	 * Returns a formatted TCP-info element, depending on the success of the IP
+	 * address name resolution either with domain name or only the address literal.
+	 *
+	 * @param host the address of the remote SMTP client.
+	 * @return the formatted TCP-info element as defined by RFC 5321
+	 */
+	private String constructTcpInfo(final InetAddress host) {
+		// if it is not successful it just returns the address
+<span class="nc" id="L73">		final String domain = host.getCanonicalHostName();</span>
+<span class="nc" id="L74">		final String address = host.getHostAddress();</span>
+		// check whether the host name resolution was successful
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if (domain.equals(address)) {</span>
+<span class="nc" id="L77">			return &quot;[&quot; + address + &quot;]&quot;;</span>
+		}
+<span class="nc" id="L79">		return domain + &quot; [&quot; + address + &quot;]&quot;;</span>
+	}
+
+	/* */
+	@Override
+	public int available() throws IOException {
+<span class="nc" id="L85">		return this.header.available() + super.available();</span>
+	}
+
+	/* */
+	@Override
+	public void close() throws IOException {
+<span class="nc" id="L91">		super.close();</span>
+<span class="nc" id="L92">	}</span>
+
+	/* */
+	@Override
+	public synchronized void mark(final int readlimit) {
+<span class="nc" id="L97">		throw new UnsupportedOperationException();</span>
+	}
+
+	/* */
+	@Override
+	public boolean markSupported() {
+<span class="nc" id="L103">		return false;</span>
+	}
+
+	/* */
+	@Override
+	public int read() throws IOException {
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		if (this.header.available() &gt; 0) {</span>
+<span class="nc" id="L110">			return this.header.read();</span>
+		}
+<span class="nc" id="L112">		return super.read();</span>
+	}
+
+	/* */
+	@Override
+	public int read(final byte[] b, final int off, final int len) throws IOException {
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		if (this.header.available() &lt;= 0) {</span>
+<span class="nc" id="L119">			return super.read(b, off, len);</span>
+		}
+<span class="nc" id="L121">		final int countRead = this.header.read(b, off, len);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if (countRead &lt; len) {</span>
+			// We need to add a little extra from the normal stream
+<span class="nc" id="L124">			final int remainder = len - countRead;</span>
+<span class="nc" id="L125">			final int additionalRead = super.read(b, off + countRead, remainder);</span>
+
+<span class="nc" id="L127">			return countRead + additionalRead;</span>
+		}
+<span class="nc" id="L129">		return countRead;</span>
+	}
+
+	/* */
+	@Override
+	public int read(final byte[] b) throws IOException {
+<span class="nc" id="L135">		return this.read(b, 0, b.length);</span>
+	}
+
+	/* */
+	@Override
+	public synchronized void reset() throws IOException {
+<span class="nc" id="L141">		throw new UnsupportedOperationException();</span>
+	}
+
+	/* */
+	@Override
+	public long skip(final long n) throws IOException {
+<span class="nc" id="L147">		throw new UnsupportedOperationException();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

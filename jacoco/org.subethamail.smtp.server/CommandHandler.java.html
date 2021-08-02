@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommandHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.server</a> &gt; <span class="el_source">CommandHandler.java</span></div><h1>CommandHandler.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.server;
+
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.DropConnectionException;
+
+/**
+ * This class manages execution of a SMTP command.
+ *
+ * @author Jon Stevens
+ * @author Scott Hernandez
+ */
+public class CommandHandler {
+<span class="nc" id="L23">	private final static Logger log = LoggerFactory.getLogger(CommandHandler.class);</span>
+
+	/**
+	 * The map of known SMTP commands. Keys are upper case names of the commands.
+	 */
+<span class="nc" id="L28">	private final Map&lt;String, Command&gt; commandMap = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L30">	public CommandHandler() {</span>
+		// This solution should be more robust than the earlier &quot;manual&quot; configuration.
+<span class="nc bnc" id="L32" title="All 2 branches missed.">		for (final CommandRegistry registry : CommandRegistry.values()) {</span>
+<span class="nc" id="L33">			this.addCommand(registry.getCommand());</span>
+		}
+<span class="nc" id="L35">	}</span>
+
+	/**
+	 * Create a command handler with a specific set of commands.
+	 *
+	 * @param availableCommands the available commands (not null) TLS note: wrap
+	 *                          commands with {@link RequireTLSCommandWrapper} when
+	 *                          appropriate.
+	 */
+<span class="nc" id="L44">	public CommandHandler(final Collection&lt;Command&gt; availableCommands) {</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		for (final Command command : availableCommands) {</span>
+<span class="nc" id="L46">			this.addCommand(command);</span>
+<span class="nc" id="L47">		}</span>
+<span class="nc" id="L48">	}</span>
+
+	/**
+	 * Adds or replaces the specified command.
+	 */
+	public void addCommand(final Command command) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		if (log.isDebugEnabled()) {</span>
+<span class="nc" id="L55">			log.debug(&quot;Added command: &quot; + command.getName());</span>
+		}
+
+<span class="nc" id="L58">		this.commandMap.put(command.getName(), command);</span>
+<span class="nc" id="L59">	}</span>
+
+	/**
+	 * Returns the command object corresponding to the specified command name.
+	 *
+	 * @param commandName case insensitive name of the command.
+	 * @return the command object, or null, if the command is unknown.
+	 */
+	public Command getCommand(final String commandName) {
+<span class="nc" id="L68">		final String upperCaseCommandName = commandName.toUpperCase(Locale.ENGLISH);</span>
+<span class="nc" id="L69">		return this.commandMap.get(upperCaseCommandName);</span>
+	}
+
+	public boolean containsCommand(final String command) {
+<span class="nc" id="L73">		return this.commandMap.containsKey(command);</span>
+	}
+
+	public Set&lt;String&gt; getVerbs() {
+<span class="nc" id="L77">		return this.commandMap.keySet();</span>
+	}
+
+	public void handleCommand(final Session context, final String commandString)
+			throws SocketTimeoutException, IOException, DropConnectionException {
+		try {
+<span class="nc" id="L83">			final Command command = this.getCommandFromString(commandString);</span>
+<span class="nc" id="L84">			command.execute(commandString, context);</span>
+<span class="nc" id="L85">		} catch (final CommandException e) {</span>
+<span class="nc" id="L86">			context.sendResponse(&quot;500 &quot; + e.getMessage());</span>
+<span class="nc" id="L87">		}</span>
+<span class="nc" id="L88">	}</span>
+
+	/**
+	 * @return the HelpMessage object for the given command name (verb)
+	 * @throws CommandException on command error
+	 */
+	public HelpMessage getHelp(final String command) throws CommandException {
+<span class="nc" id="L95">		return this.getCommandFromString(command).getHelp();</span>
+	}
+
+	private Command getCommandFromString(final String commandString)
+			throws UnknownCommandException, InvalidCommandNameException {
+<span class="nc" id="L100">		Command command = null;</span>
+<span class="nc" id="L101">		final String key = this.toKey(commandString);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if (key != null) {</span>
+<span class="nc" id="L103">			command = this.commandMap.get(key);</span>
+		}
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if (command == null) {</span>
+			// some commands have a verb longer than 4 letters
+<span class="nc" id="L107">			final String verb = this.toVerb(commandString);</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			if (verb != null) {</span>
+<span class="nc" id="L109">				command = this.commandMap.get(verb);</span>
+			}
+		}
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		if (command == null) {</span>
+<span class="nc" id="L113">			throw new UnknownCommandException(&quot;Error: command not implemented&quot;);</span>
+		}
+<span class="nc" id="L115">		return command;</span>
+	}
+
+	private String toKey(final String string) throws InvalidCommandNameException {
+<span class="nc bnc" id="L119" title="All 4 branches missed.">		if (string == null || string.length() &lt; 4) {</span>
+<span class="nc" id="L120">			throw new InvalidCommandNameException(&quot;Error: bad syntax&quot;);</span>
+		}
+
+<span class="nc" id="L123">		return string.substring(0, 4).toUpperCase(Locale.ENGLISH);</span>
+	}
+
+	private String toVerb(final String string) throws InvalidCommandNameException {
+<span class="nc" id="L127">		final StringTokenizer stringTokenizer = new StringTokenizer(string);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		if (!stringTokenizer.hasMoreTokens()) {</span>
+<span class="nc" id="L129">			throw new InvalidCommandNameException(&quot;Error: bad syntax&quot;);</span>
+		}
+
+<span class="nc" id="L132">		return stringTokenizer.nextToken().toUpperCase(Locale.ENGLISH);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SMTPServer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.server</a> &gt; <span class="el_source">SMTPServer.java</span></div><h1>SMTPServer.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.server;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.concurrent.GuardedBy;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.AuthenticationHandlerFactory;
+import org.subethamail.smtp.MessageHandlerFactory;
+import org.subethamail.smtp.Version;
+
+/**
+ * Main SMTPServer class. Construct this object, set the hostName, port, and
+ * bind address if you wish to override the defaults, and call start().
+ *
+ * This class starts opens a ServerSocket and creates a new instance of the
+ * ConnectionHandler class when a new connection comes in. The ConnectionHandler
+ * then parses the incoming SMTP stream and hands off the processing to the
+ * CommandHandler which will execute the appropriate SMTP command class.
+ *
+ * To use this class, construct a server with your implementation of the
+ * MessageHandlerFactory. This provides low-level callbacks at various phases of
+ * the SMTP exchange. For a higher-level but more limited interface, you can
+ * pass in a org.subethamail.smtp.helper.SimpleMessageListenerAdapter.
+ *
+ * By default, no authentication methods are offered. To use authentication, set
+ * an AuthenticationHandlerFactory.
+ *
+ * @author Jon Stevens
+ * @author Ian McFarland &amp;lt;ian@neo.com&amp;gt;
+ * @author Jeff Schnitzer
+ */
+public class SMTPServer {
+<span class="nc" id="L44">	private final static Logger log = LoggerFactory.getLogger(SMTPServer.class);</span>
+
+	/** Hostname used if we can't find one */
+	private final static String UNKNOWN_HOSTNAME = &quot;localhost&quot;;
+
+<span class="nc" id="L49">	private InetAddress bindAddress = null; // default to all interfaces</span>
+
+<span class="nc" id="L51">	private int port = 25; // default to 25</span>
+
+	private String hostName; // defaults to a lookup of the local address
+
+<span class="nc" id="L55">	private int backlog = 50;</span>
+
+<span class="nc" id="L57">	private String softwareName = &quot;SubEthaSMTP &quot; + Version.getSpecification();</span>
+
+	private MessageHandlerFactory messageHandlerFactory;
+
+	private AuthenticationHandlerFactory authenticationHandlerFactory;
+
+	private ExecutorService executorService;
+
+	private final CommandHandler commandHandler;
+
+	/** The thread listening on the server socket. */
+	@GuardedBy(&quot;this&quot;)
+	private ServerThread serverThread;
+
+<span class="nc" id="L71">	private boolean updateThreadName = true;</span>
+
+	/**
+	 * True if this SMTPServer was started. It remains true even if the SMTPServer
+	 * has been stopped since. It is used to prevent restarting this object. Even if
+	 * it was shutdown properly, it cannot be restarted, because the contained
+	 * thread pool object itself cannot be restarted.
+	 **/
+<span class="nc" id="L79">	@GuardedBy(&quot;this&quot;)</span>
+	private boolean started = false;
+
+	/** If true, TLS is enabled */
+<span class="nc" id="L83">	private boolean enableTLS = false;</span>
+
+	/** If true, TLS is not announced; ignored if enableTLS=false */
+<span class="nc" id="L86">	private boolean hideTLS = false;</span>
+
+	/** If true, a TLS handshake is required; ignored if enableTLS=false */
+<span class="nc" id="L89">	private boolean requireTLS = false;</span>
+
+	/**
+	 * If true, this server will accept no mail until auth succeeded; ignored if no
+	 * AuthenticationHandlerFactory has been set
+	 */
+<span class="nc" id="L95">	private boolean requireAuth = false;</span>
+
+	/** If true, no Received headers will be inserted */
+<span class="nc" id="L98">	private boolean disableReceivedHeaders = false;</span>
+
+	/**
+	 * set a hard limit on the maximum number of connections this server will accept
+	 * once we reach this limit, the server will gracefully reject new connections.
+	 * Default is 1000.
+	 */
+<span class="nc" id="L105">	private int maxConnections = 1000;</span>
+
+	/**
+	 * The timeout for waiting for data on a connection is one minute: 1000 * 60 * 1
+	 */
+<span class="nc" id="L110">	private int connectionTimeout = 1000 * 60 * 1;</span>
+
+	/**
+	 * The maximal number of recipients that this server accepts per message
+	 * delivery request.
+	 */
+<span class="nc" id="L116">	private int maxRecipients = 1000;</span>
+
+	/**
+	 * The maximum size of a message that the server will accept. This value is
+	 * advertised during the EHLO phase if it is larger than 0. If the message size
+	 * specified by the client during the MAIL phase, the message will be rejected
+	 * at that time. (RFC 1870) Default is 0. Note this doesn't actually enforce any
+	 * limits on the message being read; you must do that yourself when reading
+	 * data.
+	 */
+<span class="nc" id="L126">	private int maxMessageSize = 0;</span>
+
+<span class="nc" id="L128">	private SessionIdFactory sessionIdFactory = new TimeBasedSessionIdFactory();</span>
+
+	/**
+	 * Simple constructor.
+	 */
+	public SMTPServer(final MessageHandlerFactory handlerFactory) {
+<span class="nc" id="L134">		this(handlerFactory, null, null);</span>
+<span class="nc" id="L135">	}</span>
+
+	/**
+	 * Constructor with {@link AuthenticationHandlerFactory}.
+	 */
+	public SMTPServer(final MessageHandlerFactory handlerFactory, final AuthenticationHandlerFactory authHandlerFact) {
+<span class="nc" id="L141">		this(handlerFactory, authHandlerFact, null);</span>
+<span class="nc" id="L142">	}</span>
+
+	/**
+	 * Complex constructor.
+	 *
+	 * @param authHandlerFact the {@link AuthenticationHandlerFactory} which
+	 *                        performs authentication in the SMTP AUTH command. If
+	 *                        null, authentication is not supported. Note that
+	 *                        setting an authentication handler does not enforce
+	 *                        authentication, it only makes authentication possible.
+	 *                        Enforcing authentication is the responsibility of the
+	 *                        client application, which usually enforces it only
+	 *                        selectively. Use {@link Session#isAuthenticated} to
+	 *                        check whether the client was authenticated in the
+	 *                        session.
+	 * @param executorService the ExecutorService which will handle client
+	 *                        connections, one task per connection. The SMTPServer
+	 *                        will shut down this ExecutorService when the
+	 *                        SMTPServer itself stops. If null, a default one is
+	 *                        created by {@link Executors#newCachedThreadPool()}.
+	 */
+	public SMTPServer(final MessageHandlerFactory msgHandlerFact,
+			final AuthenticationHandlerFactory authHandlerFact,
+<span class="nc" id="L165">			final ExecutorService executorService) {</span>
+<span class="nc" id="L166">		this.messageHandlerFactory = msgHandlerFact;</span>
+<span class="nc" id="L167">		this.authenticationHandlerFactory = authHandlerFact;</span>
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		if (executorService != null) {</span>
+<span class="nc" id="L170">			this.executorService = executorService;</span>
+		} else {
+<span class="nc" id="L172">			this.executorService = Executors.newCachedThreadPool();</span>
+		}
+
+		try {
+<span class="nc" id="L176">			this.hostName = InetAddress.getLocalHost().getCanonicalHostName();</span>
+<span class="nc" id="L177">		} catch (final UnknownHostException e) {</span>
+<span class="nc" id="L178">			this.hostName = UNKNOWN_HOSTNAME;</span>
+<span class="nc" id="L179">		}</span>
+
+<span class="nc" id="L181">		this.commandHandler = new CommandHandler();</span>
+<span class="nc" id="L182">	}</span>
+
+	/** @return the host name that will be reported to SMTP clients */
+	public String getHostName() {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">		if (this.hostName == null) {</span>
+<span class="nc" id="L187">			return UNKNOWN_HOSTNAME;</span>
+		}
+<span class="nc" id="L189">		return this.hostName;</span>
+	}
+
+	/** The host name that will be reported to SMTP clients */
+	public void setHostName(final String hostName) {
+<span class="nc" id="L194">		this.hostName = hostName;</span>
+<span class="nc" id="L195">	}</span>
+
+	/** null means all interfaces */
+	public InetAddress getBindAddress() {
+<span class="nc" id="L199">		return this.bindAddress;</span>
+	}
+
+	/** null means all interfaces */
+	public void setBindAddress(final InetAddress bindAddress) {
+<span class="nc" id="L204">		this.bindAddress = bindAddress;</span>
+<span class="nc" id="L205">	}</span>
+
+	public int getPort() {
+<span class="nc" id="L208">		return this.port;</span>
+	}
+
+	public void setPort(final int port) {
+<span class="nc" id="L212">		this.port = port;</span>
+<span class="nc" id="L213">	}</span>
+
+	/**
+	 * The string reported to the public as the software running here. Defaults to
+	 * SubEthaSTP and the version number.
+	 */
+	public String getSoftwareName() {
+<span class="nc" id="L220">		return this.softwareName;</span>
+	}
+
+	/**
+	 * Changes the publicly reported software information.
+	 */
+	public void setSoftwareName(final String value) {
+<span class="nc" id="L227">		this.softwareName = value;</span>
+<span class="nc" id="L228">	}</span>
+
+	/**
+	 * @return the ExecutorService handling client connections
+	 */
+	public ExecutorService getExecutorService() {
+<span class="nc" id="L234">		return executorService;</span>
+	}
+
+	/**
+	 * Is the server running after start() has been called?
+	 */
+	public synchronized boolean isRunning() {
+<span class="nc bnc" id="L241" title="All 2 branches missed.">		return this.serverThread != null;</span>
+	}
+
+	/**
+	 * The backlog is the Socket backlog.
+	 *
+	 * The backlog argument must be a positive value greater than 0. If the value
+	 * passed if equal or less than 0, then the default value will be assumed.
+	 *
+	 * @return the backlog
+	 */
+	public int getBacklog() {
+<span class="nc" id="L253">		return this.backlog;</span>
+	}
+
+	/**
+	 * The backlog is the Socket backlog.
+	 *
+	 * The backlog argument must be a positive value greater than 0. If the value
+	 * passed if equal or less than 0, then the default value will be assumed.
+	 */
+	public void setBacklog(final int backlog) {
+<span class="nc" id="L263">		this.backlog = backlog;</span>
+<span class="nc" id="L264">	}</span>
+
+	/**
+	 * Call this method to get things rolling after instantiating the SMTPServer.
+	 * &lt;p&gt;
+	 * An SMTPServer which has been shut down, must not be reused.
+	 */
+	public synchronized void start() {
+<span class="nc bnc" id="L272" title="All 2 branches missed.">		if (log.isInfoEnabled()) {</span>
+<span class="nc" id="L273">			log.info(&quot;SMTP server {} starting&quot;, getDisplayableLocalSocketAddress());</span>
+		}
+
+<span class="nc bnc" id="L276" title="All 2 branches missed.">		if (this.started) {</span>
+<span class="nc" id="L277">			throw new IllegalStateException(&quot;SMTPServer can only be started once. &quot;</span>
+					+ &quot;Restarting is not allowed even after a proper shutdown.&quot;);
+		}
+
+		// Create our server socket here.
+		ServerSocket serverSocket;
+		try {
+<span class="nc" id="L284">			serverSocket = this.createServerSocket();</span>
+<span class="nc" id="L285">		} catch (final Exception e) {</span>
+<span class="nc" id="L286">			throw new RuntimeException(e);</span>
+<span class="nc" id="L287">		}</span>
+
+<span class="nc" id="L289">		this.serverThread = new ServerThread(this, serverSocket);</span>
+<span class="nc" id="L290">		this.serverThread.setUpdateThreadName(isUpdateThreadName());</span>
+<span class="nc" id="L291">		this.serverThread.start();</span>
+<span class="nc" id="L292">		this.started = true;</span>
+<span class="nc" id="L293">	}</span>
+
+	/**
+	 * Shut things down gracefully.
+	 */
+	public synchronized void stop() {
+<span class="nc" id="L299">		log.info(&quot;SMTP server {} stopping...&quot;, getDisplayableLocalSocketAddress());</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">		if (this.serverThread == null) {</span>
+<span class="nc" id="L301">			return;</span>
+		}
+
+<span class="nc" id="L304">		this.serverThread.shutdown();</span>
+<span class="nc" id="L305">		this.serverThread = null;</span>
+
+<span class="nc" id="L307">		log.info(&quot;SMTP server {} stopped&quot;, getDisplayableLocalSocketAddress());</span>
+<span class="nc" id="L308">	}</span>
+
+	/**
+	 * Override this method if you want to create your own server sockets. You must
+	 * return a bound ServerSocket instance
+	 *
+	 * @throws IOException on IO error
+	 */
+	protected ServerSocket createServerSocket() throws IOException {
+		InetSocketAddress isa;
+
+<span class="nc bnc" id="L319" title="All 2 branches missed.">		if (this.bindAddress == null) {</span>
+<span class="nc" id="L320">			isa = new InetSocketAddress(this.port);</span>
+		} else {
+<span class="nc" id="L322">			isa = new InetSocketAddress(this.bindAddress, this.port);</span>
+		}
+
+<span class="nc" id="L325">		final ServerSocket serverSocket = new ServerSocket();</span>
+<span class="nc" id="L326">		serverSocket.bind(isa, this.backlog);</span>
+
+<span class="nc bnc" id="L328" title="All 2 branches missed.">		if (this.port == 0) {</span>
+<span class="nc" id="L329">			this.port = serverSocket.getLocalPort();</span>
+		}
+
+<span class="nc" id="L332">		return serverSocket;</span>
+	}
+
+	/**
+	 * Create a SSL socket that wraps the existing socket. This method is called
+	 * after the client issued the STARTTLS command.
+	 * &lt;p&gt;
+	 * Subclasses may override this method to configure the key stores, enabled
+	 * protocols/ cipher suites, enforce client authentication, etc.
+	 *
+	 * @param socket the existing socket as created by {@link #createServerSocket()}
+	 *               (not null)
+	 * @return a SSLSocket
+	 * @throws IOException when creating the socket failed
+	 */
+	public SSLSocket createSSLSocket(final Socket socket) throws IOException {
+<span class="nc" id="L348">		final SSLSocketFactory sf = (SSLSocketFactory) SSLSocketFactory.getDefault();</span>
+<span class="nc" id="L349">		final InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();</span>
+<span class="nc" id="L350">		final SSLSocket s = (SSLSocket) sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true);</span>
+
+		// we are a server
+<span class="nc" id="L353">		s.setUseClientMode(false);</span>
+
+		// allow all supported cipher suites
+<span class="nc" id="L356">		s.setEnabledCipherSuites(s.getSupportedCipherSuites());</span>
+
+<span class="nc" id="L358">		return s;</span>
+	}
+
+	public String getDisplayableLocalSocketAddress() {
+<span class="nc bnc" id="L362" title="All 2 branches missed.">		return (this.bindAddress == null ? &quot;*&quot; : this.bindAddress) + &quot;:&quot; + this.port;</span>
+	}
+
+	/**
+	 * @return the factory for message handlers, cannot be null
+	 */
+	public MessageHandlerFactory getMessageHandlerFactory() {
+<span class="nc" id="L369">		return this.messageHandlerFactory;</span>
+	}
+
+	public void setMessageHandlerFactory(final MessageHandlerFactory fact) {
+<span class="nc" id="L373">		this.messageHandlerFactory = fact;</span>
+<span class="nc" id="L374">	}</span>
+
+	/**
+	 * @return the factory for auth handlers, or null if no such factory has been
+	 *         set.
+	 */
+	public AuthenticationHandlerFactory getAuthenticationHandlerFactory() {
+<span class="nc" id="L381">		return this.authenticationHandlerFactory;</span>
+	}
+
+	public void setAuthenticationHandlerFactory(final AuthenticationHandlerFactory fact) {
+<span class="nc" id="L385">		this.authenticationHandlerFactory = fact;</span>
+<span class="nc" id="L386">	}</span>
+
+	/**
+	 * The CommandHandler manages handling the SMTP commands such as QUIT, MAIL,
+	 * RCPT, DATA, etc.
+	 *
+	 * @return An instance of CommandHandler
+	 */
+	public CommandHandler getCommandHandler() {
+<span class="nc" id="L395">		return this.commandHandler;</span>
+	}
+
+	public int getMaxConnections() {
+<span class="nc" id="L399">		return this.maxConnections;</span>
+	}
+
+	/**
+	 * Set's the maximum number of connections this server instance will accept.
+	 *
+	 * @param maxConnections the maximum number of connections to accept
+	 */
+	public void setMaxConnections(final int maxConnections) {
+<span class="nc bnc" id="L408" title="All 2 branches missed.">		if (this.isRunning()) {</span>
+<span class="nc" id="L409">			throw new RuntimeException(</span>
+					&quot;Server is already running. It isn't possible to set the maxConnections. Please stop the server first.&quot;);
+		}
+
+<span class="nc" id="L413">		this.maxConnections = maxConnections;</span>
+<span class="nc" id="L414">	}</span>
+
+	public int getConnectionTimeout() {
+<span class="nc" id="L417">		return this.connectionTimeout;</span>
+	}
+
+	/**
+	 * Set the number of milliseconds that the server will wait for client input.
+	 * Sometime after this period expires, an client will be rejected and the
+	 * connection closed.
+	 */
+	public void setConnectionTimeout(final int connectionTimeout) {
+<span class="nc" id="L426">		this.connectionTimeout = connectionTimeout;</span>
+<span class="nc" id="L427">	}</span>
+
+	public int getMaxRecipients() {
+<span class="nc" id="L430">		return this.maxRecipients;</span>
+	}
+
+	/**
+	 * Set the maximum number of recipients allowed for each message. A value of -1
+	 * means &quot;unlimited&quot;.
+	 */
+	public void setMaxRecipients(final int maxRecipients) {
+<span class="nc" id="L438">		this.maxRecipients = maxRecipients;</span>
+<span class="nc" id="L439">	}</span>
+
+	/**
+	 * If set to true, TLS will be supported.
+	 * &lt;p&gt;
+	 * The minimal JSSE configuration necessary for a working TLS support on Oracle
+	 * JRE 6:
+	 * &lt;ul&gt;
+	 * &lt;li&gt;javax.net.ssl.keyStore system property must refer to a file containing a
+	 * JKS keystore with the private key.
+	 * &lt;li&gt;javax.net.ssl.keyStorePassword system property must specify the keystore
+	 * password.
+	 * &lt;/ul&gt;
+	 * &lt;p&gt;
+	 * Up to SubEthaSMTP 3.1.5 the default was true, i.e. TLS was enabled.
+	 *
+	 * @see &lt;a href=
+	 *      &quot;http://blog.jteam.nl/2009/11/10/securing-connections-with-tls/&quot;&gt;Securing
+	 *      Connections with TLS&lt;/a&gt;
+	 */
+	public void setEnableTLS(final boolean enableTLS) {
+<span class="nc" id="L460">		this.enableTLS = enableTLS;</span>
+<span class="nc" id="L461">	}</span>
+
+	public boolean getEnableTLS() {
+<span class="nc" id="L464">		return enableTLS;</span>
+	}
+
+	/**
+	 * @deprecated use {@link #enableTLS}
+	 */
+	@Deprecated
+	public boolean getDisableTLS() {
+<span class="nc bnc" id="L472" title="All 2 branches missed.">		return !this.enableTLS;</span>
+	}
+
+	/**
+	 * @deprecated use {@link #setEnableTLS(boolean)}
+	 */
+	@Deprecated
+	public void setDisableTLS(final boolean value) {
+<span class="nc bnc" id="L480" title="All 2 branches missed.">		this.enableTLS = !value;</span>
+<span class="nc" id="L481">	}</span>
+
+	public boolean getHideTLS() {
+<span class="nc" id="L484">		return this.hideTLS;</span>
+	}
+
+	/**
+	 * If set to true, TLS will not be advertised in the EHLO string. Default is
+	 * false; true implied when disableTLS=true.
+	 */
+	public void setHideTLS(final boolean value) {
+<span class="nc" id="L492">		this.hideTLS = value;</span>
+<span class="nc" id="L493">	}</span>
+
+	public boolean getRequireTLS() {
+<span class="nc" id="L496">		return this.requireTLS;</span>
+	}
+
+	/**
+	 * @param requireTLS true to require a TLS handshake, false to allow operation
+	 *                   with or without TLS. Default is false; ignored when
+	 *                   disableTLS=true.
+	 */
+	public void setRequireTLS(final boolean requireTLS) {
+<span class="nc" id="L505">		this.requireTLS = requireTLS;</span>
+<span class="nc" id="L506">	}</span>
+
+	public boolean getRequireAuth() {
+<span class="nc" id="L509">		return requireAuth;</span>
+	}
+
+	/**
+	 * @param requireAuth true for mandatory smtp authentication, i.e. no mail mail
+	 *                    be accepted until authentication succeeds. Don't forget to
+	 *                    set AuthenticationHandlerFactory to allow client
+	 *                    authentication. Defaults to false.
+	 */
+	public void setRequireAuth(final boolean requireAuth) {
+<span class="nc" id="L519">		this.requireAuth = requireAuth;</span>
+<span class="nc" id="L520">	}</span>
+
+	/**
+	 * @return the maxMessageSize
+	 */
+	public int getMaxMessageSize() {
+<span class="nc" id="L526">		return maxMessageSize;</span>
+	}
+
+	/**
+	 * @param maxMessageSize the maxMessageSize to set
+	 */
+	public void setMaxMessageSize(final int maxMessageSize) {
+<span class="nc" id="L533">		this.maxMessageSize = maxMessageSize;</span>
+<span class="nc" id="L534">	}</span>
+
+	public boolean getDisableReceivedHeaders() {
+<span class="nc" id="L537">		return disableReceivedHeaders;</span>
+	}
+
+	/**
+	 * @param disableReceivedHeaders false to include Received headers. Default is
+	 *                               false.
+	 */
+	public void setDisableReceivedHeaders(final boolean disableReceivedHeaders) {
+<span class="nc" id="L545">		this.disableReceivedHeaders = disableReceivedHeaders;</span>
+<span class="nc" id="L546">	}</span>
+
+	public SessionIdFactory getSessionIdFactory() {
+<span class="nc" id="L549">		return sessionIdFactory;</span>
+	}
+
+	/**
+	 * Sets the {@link SessionIdFactory} which will allocate a unique identifier for
+	 * each mail sessions. If not set, a reasonable default will be used.
+	 */
+	public void setSessionIdFactory(final SessionIdFactory sessionIdFactory) {
+<span class="nc" id="L557">		this.sessionIdFactory = sessionIdFactory;</span>
+<span class="nc" id="L558">	}</span>
+
+	public boolean isUpdateThreadName() {
+<span class="nc" id="L561">		return updateThreadName;</span>
+	}
+
+	public void setUpdateThreadName(final boolean updateThreadName) {
+<span class="nc" id="L565">		this.updateThreadName = updateThreadName;</span>
+<span class="nc" id="L566">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

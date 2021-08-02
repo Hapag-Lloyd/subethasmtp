@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SmarterMessageListenerAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.helper</a> &gt; <span class="el_source">SmarterMessageListenerAdapter.java</span></div><h1>SmarterMessageListenerAdapter.java</h1><pre class="source lang-java linenums">/*
+ * $Id: SimpleMessageListenerAdapter.java 320 2009-05-20 09:19:20Z lhoriman $
+ * $URL:
+ * https://subethasmtp.googlecode.com/svn/trunk/src/org/subethamail/smtp/helper/
+ * SimpleMessageListenerAdapter.java $
+ */
+package org.subethamail.smtp.helper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.subethamail.smtp.MessageContext;
+import org.subethamail.smtp.MessageHandler;
+import org.subethamail.smtp.MessageHandlerFactory;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.TooMuchDataException;
+import org.subethamail.smtp.helper.SmarterMessageListener.Receiver;
+import org.subethamail.smtp.io.DeferredFileOutputStream;
+
+/**
+ * MessageHandlerFactory implementation which adapts to a collection of
+ * SmarterMessageListeners. This is actually half-way between the
+ * SimpleMessageListener interface and the raw MessageHandler.
+ *
+ * The key point is that for any message, every accepted recipient will get a
+ * separate delivery.
+ *
+ * @author Jeff Schnitzer
+ */
+public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
+	/**
+	 * 5 megs by default. The server will buffer incoming messages to disk when they
+	 * hit this limit in the DATA received.
+	 */
+<span class="nc" id="L39">	private static int DEFAULT_DATA_DEFERRED_SIZE = 1024 * 1024 * 5;</span>
+
+	private final Collection&lt;SmarterMessageListener&gt; listeners;
+
+	private final int dataDeferredSize;
+
+	/**
+	 * Initializes this factory with a single listener.
+	 *
+	 * Default data deferred size is 5 megs.
+	 */
+	public SmarterMessageListenerAdapter(final SmarterMessageListener listener) {
+<span class="nc" id="L51">		this(Collections.singleton(listener), DEFAULT_DATA_DEFERRED_SIZE);</span>
+<span class="nc" id="L52">	}</span>
+
+	/**
+	 * Initializes this factory with the listeners.
+	 *
+	 * Default data deferred size is 5 megs.
+	 */
+	public SmarterMessageListenerAdapter(final Collection&lt;SmarterMessageListener&gt; listeners) {
+<span class="nc" id="L60">		this(listeners, DEFAULT_DATA_DEFERRED_SIZE);</span>
+<span class="nc" id="L61">	}</span>
+
+	/**
+	 * Initializes this factory with the listeners.
+	 *
+	 * @param dataDeferredSize The server will buffer incoming messages to disk when
+	 *                         they hit this limit in the DATA received.
+	 */
+	public SmarterMessageListenerAdapter(final Collection&lt;SmarterMessageListener&gt; listeners,
+<span class="nc" id="L70">			final int dataDeferredSize) {</span>
+<span class="nc" id="L71">		this.listeners = listeners;</span>
+<span class="nc" id="L72">		this.dataDeferredSize = dataDeferredSize;</span>
+<span class="nc" id="L73">	}</span>
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.
+	 * MessageContext)
+	 */
+	@Override
+	public MessageHandler create(final MessageContext ctx) {
+<span class="nc" id="L83">		return new Handler(ctx);</span>
+	}
+
+	/**
+	 * Class which implements the actual handler interface.
+	 */
+	class Handler implements MessageHandler {
+		MessageContext ctx;
+
+		String from;
+
+<span class="nc" id="L94">		List&lt;Receiver&gt; deliveries = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L96">		public Handler(final MessageContext ctx) {</span>
+<span class="nc" id="L97">			this.ctx = ctx;</span>
+<span class="nc" id="L98">		}</span>
+
+		@Override
+		public void from(final String from) throws RejectException {
+<span class="nc" id="L102">			this.from = from;</span>
+<span class="nc" id="L103">		}</span>
+
+		@Override
+		public void recipient(final String recipient) throws RejectException {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">			for (final SmarterMessageListener listener : SmarterMessageListenerAdapter.this.listeners) {</span>
+<span class="nc" id="L108">				final Receiver rec = listener.accept(this.from, recipient);</span>
+
+<span class="nc bnc" id="L110" title="All 2 branches missed.">				if (rec != null) {</span>
+<span class="nc" id="L111">					this.deliveries.add(rec);</span>
+				}
+<span class="nc" id="L113">			}</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			if (this.deliveries.isEmpty()) {</span>
+<span class="nc" id="L116">				throw new RejectException(553, &quot;&lt;&quot; + recipient + &quot;&gt; address unknown.&quot;);</span>
+			}
+<span class="nc" id="L118">		}</span>
+
+		@Override
+		public void data(final InputStream data) throws TooMuchDataException, IOException {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			if (this.deliveries.size() == 1) {</span>
+<span class="nc" id="L123">				this.deliveries.get(0).deliver(data);</span>
+			} else {
+<span class="nc" id="L125">				try (DeferredFileOutputStream dfos</span>
+<span class="nc" id="L126">						= new DeferredFileOutputStream(SmarterMessageListenerAdapter.this.dataDeferredSize)) {</span>
+					int value;
+<span class="nc bnc" id="L128" title="All 2 branches missed.">					while ((value = data.read()) &gt;= 0) {</span>
+<span class="nc" id="L129">						dfos.write(value);</span>
+					}
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">					for (final Receiver rec : this.deliveries) {</span>
+<span class="nc" id="L133">						rec.deliver(dfos.getInputStream());</span>
+<span class="nc" id="L134">					}</span>
+				}
+			}
+<span class="nc" id="L137">		}</span>
+
+		@Override
+		public void done() {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			for (final Receiver rec : this.deliveries) {</span>
+<span class="nc" id="L142">				rec.done();</span>
+<span class="nc" id="L143">			}</span>
+<span class="nc" id="L144">		}</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

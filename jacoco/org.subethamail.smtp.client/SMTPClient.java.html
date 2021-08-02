@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SMTPClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.client</a> &gt; <span class="el_source">SMTPClient.java</span></div><h1>SMTPClient.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.client;
+
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.io.DotTerminatedOutputStream;
+import org.subethamail.smtp.io.ExtraDotOutputStream;
+
+/**
+ * A very low level abstraction of the STMP stream which knows how to handle the
+ * raw protocol for lines, whitespace, etc.
+ *
+ * @author Jeff Schnitzer
+ */
+public class SMTPClient {
+	/** 5 minutes */
+	private static final int CONNECT_TIMEOUT = 300 * 1000;
+
+	/** 10 minutes */
+	private static final int REPLY_TIMEOUT = 600 * 1000;
+
+<span class="nc" id="L32">	private static Logger log = LoggerFactory.getLogger(SMTPClient.class);</span>
+
+	/** the local socket address */
+	private SocketAddress bindpoint;
+
+	/**
+	 * True if the client has been successfully connected to the server and not it
+	 * has not been closed yet.
+	 **/
+	private boolean connected;
+
+	/** Just for display purposes */
+	String hostPort;
+
+	/** The raw socket */
+	Socket socket;
+
+	BufferedReader reader;
+
+	/** Output streams used for data */
+	OutputStream rawOutput;
+
+	/**
+	 * A stream which wraps {@link #rawOutput} and is used to write out the DOT CR
+	 * LF terminating sequence in the DATA command, if necessary complementing the
+	 * message content with a closing CR LF.
+	 */
+	DotTerminatedOutputStream dotTerminatedOutput;
+
+	/**
+	 * This stream wraps {@link #dotTerminatedOutput} and it does the dot stuffing
+	 * for the SMTP DATA command.
+	 */
+	ExtraDotOutputStream dataOutput;
+
+	/** Note we bypass this during DATA */
+	PrintWriter writer;
+
+	/**
+	 * Result of an SMTP exchange.
+	 */
+	public static class Response {
+		int code;
+
+		String message;
+
+<span class="nc" id="L78">		public Response(final int code, final String text) {</span>
+<span class="nc" id="L79">			this.code = code;</span>
+<span class="nc" id="L80">			this.message = text;</span>
+<span class="nc" id="L81">		}</span>
+
+		public int getCode() {
+<span class="nc" id="L84">			return this.code;</span>
+		}
+
+		public String getMessage() {
+<span class="nc" id="L88">			return this.message;</span>
+		}
+
+		public boolean isSuccess() {
+<span class="nc bnc" id="L92" title="All 4 branches missed.">			return this.code &gt;= 100 &amp;&amp; this.code &lt; 400;</span>
+		}
+
+		@Override
+		public String toString() {
+<span class="nc" id="L97">			return this.code + &quot; &quot; + this.message;</span>
+		}
+	}
+
+	/**
+	 * Creates an unconnected client.
+	 */
+<span class="nc" id="L104">	public SMTPClient() {</span>
+		// nothing to do
+<span class="nc" id="L106">	}</span>
+
+	/**
+	 * Establishes a connection to host and port.
+	 *
+	 * @throws UnknownHostException if the hostname cannot be resolved
+	 * @throws IOException          if there is a problem connecting to the port
+	 */
+	public SMTPClient(final String host, final int port) throws UnknownHostException, IOException {
+<span class="nc" id="L115">		this(host, port, null);</span>
+<span class="nc" id="L116">	}</span>
+
+	/**
+	 * Establishes a connection to host and port from the specified local socket
+	 * address.
+	 *
+	 * @param bindpoint the local socket address. If null, the system will pick up
+	 *                  an ephemeral port and a valid local address.
+	 * @throws UnknownHostException if the hostname cannot be resolved
+	 * @throws IOException          if there is a problem connecting to the port
+	 */
+	public SMTPClient(final String host, final int port, final SocketAddress bindpoint)
+<span class="nc" id="L128">			throws UnknownHostException, IOException {</span>
+<span class="nc" id="L129">		this.bindpoint = bindpoint;</span>
+<span class="nc" id="L130">		connect(host, port);</span>
+<span class="nc" id="L131">	}</span>
+
+	/**
+	 * Establishes a connection to host and port.
+	 *
+	 * @throws IOException if there is a problem connecting to the port
+	 */
+	public void connect(final String host, final int port) throws IOException {
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		if (connected) {</span>
+<span class="nc" id="L140">			throw new IllegalStateException(&quot;Already connected&quot;);</span>
+		}
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">		if (this.hostPort == null) {</span>
+<span class="nc" id="L144">			this.hostPort = host + &quot;:&quot; + port;</span>
+		}
+
+<span class="nc bnc" id="L147" title="All 2 branches missed.">		if (log.isDebugEnabled()) {</span>
+<span class="nc" id="L148">			log.debug(&quot;Connecting to &quot; + this.hostPort);</span>
+		}
+
+<span class="nc" id="L151">		this.socket = createSocket();</span>
+<span class="nc" id="L152">		this.socket.bind(this.bindpoint);</span>
+<span class="nc" id="L153">		this.socket.setSoTimeout(REPLY_TIMEOUT);</span>
+<span class="nc" id="L154">		this.socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT);</span>
+
+		try {
+<span class="nc" id="L157">			this.bindpoint = this.socket.getLocalSocketAddress();</span>
+
+<span class="nc" id="L159">			this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));</span>
+
+<span class="nc" id="L161">			this.rawOutput = this.socket.getOutputStream();</span>
+<span class="nc" id="L162">			this.dotTerminatedOutput = new DotTerminatedOutputStream(this.rawOutput);</span>
+<span class="nc" id="L163">			this.dataOutput = new ExtraDotOutputStream(this.dotTerminatedOutput);</span>
+<span class="nc" id="L164">			this.writer = new PrintWriter(this.rawOutput, true);</span>
+<span class="nc" id="L165">		} catch (final IOException e) {</span>
+<span class="nc" id="L166">			close();</span>
+<span class="nc" id="L167">			throw e;</span>
+<span class="nc" id="L168">		}</span>
+
+<span class="nc" id="L170">		connected = true;</span>
+<span class="nc" id="L171">	}</span>
+
+	/**
+	 * Returns a new unconnected socket.
+	 * &lt;p&gt;
+	 * Implementation notice for subclasses: This function is called by the
+	 * constructors which open the connection immediately. In these cases the
+	 * subclass is not yet initialized, therefore subclasses overriding this
+	 * function shouldn't use those constructors.
+	 */
+	protected Socket createSocket() {
+<span class="nc" id="L182">		return new Socket();</span>
+	}
+
+	/**
+	 * Returns true if the client is connected to the server.
+	 */
+	public boolean isConnected() {
+<span class="nc" id="L189">		return connected;</span>
+	}
+
+	/**
+	 * Sends a message to the server, ie &quot;HELO foo.example.com&quot;. A newline will be
+	 * appended to the message.
+	 *
+	 * @param msg should not have any newlines
+	 */
+	protected void send(final String msg) throws IOException {
+<span class="nc bnc" id="L199" title="All 2 branches missed.">		if (log.isDebugEnabled()) {</span>
+<span class="nc" id="L200">			log.debug(&quot;Client: &quot; + msg);</span>
+		}
+<span class="nc bnc" id="L202" title="All 2 branches missed.">		if (!connected) {</span>
+<span class="nc" id="L203">			throw new IllegalStateException(&quot;Not connected&quot;);</span>
+		}
+
+		// Force \r\n since println() behaves differently on different platforms
+<span class="nc" id="L207">		this.writer.print(msg + &quot;\r\n&quot;);</span>
+<span class="nc" id="L208">		this.writer.flush();</span>
+<span class="nc" id="L209">	}</span>
+
+	/**
+	 * Note that the response text comes back without trailing newlines.
+	 */
+	protected Response receive() throws IOException {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">		if (!connected) {</span>
+<span class="nc" id="L216">			throw new IllegalStateException(&quot;Not connected&quot;);</span>
+		}
+
+<span class="nc" id="L219">		final StringBuilder builder = new StringBuilder();</span>
+<span class="nc" id="L220">		String line = null;</span>
+
+<span class="nc" id="L222">		boolean done = false;</span>
+		do {
+<span class="nc" id="L224">			line = this.reader.readLine();</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">			if (line == null) {</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">				if (builder.length() == 0) {</span>
+<span class="nc" id="L227">					throw new EOFException(&quot;Server disconnected unexpectedly, no reply received&quot;);</span>
+				}
+<span class="nc" id="L229">				throw new IOException(&quot;Malformed SMTP reply: &quot; + builder);</span>
+			}
+
+<span class="nc bnc" id="L232" title="All 2 branches missed.">			if (log.isDebugEnabled()) {</span>
+<span class="nc" id="L233">				log.debug(&quot;Server: &quot; + line);</span>
+			}
+
+<span class="nc bnc" id="L236" title="All 2 branches missed.">			if (line.length() &lt; 4) {</span>
+<span class="nc" id="L237">				throw new IOException(&quot;Malformed SMTP reply: &quot; + line);</span>
+			}
+<span class="nc" id="L239">			builder.append(line.substring(4));</span>
+
+<span class="nc bnc" id="L241" title="All 2 branches missed.">			if (line.charAt(3) == '-') {</span>
+<span class="nc" id="L242">				builder.append('\n');</span>
+			} else {
+<span class="nc" id="L244">				done = true;</span>
+			}
+<span class="nc bnc" id="L246" title="All 2 branches missed.">		} while (!done);</span>
+
+		int code;
+<span class="nc" id="L249">		final String codeString = line.substring(0, 3);</span>
+		try {
+<span class="nc" id="L251">			code = Integer.parseInt(codeString);</span>
+<span class="nc" id="L252">		} catch (final NumberFormatException e) {</span>
+<span class="nc" id="L253">			throw new IOException(&quot;Malformed SMTP reply: &quot; + line, e);</span>
+<span class="nc" id="L254">		}</span>
+
+<span class="nc" id="L256">		return new Response(code, builder.toString());</span>
+	}
+
+	/**
+	 * Sends a message to the server, ie &quot;HELO foo.example.com&quot;. A newline will be
+	 * appended to the message.
+	 *
+	 * @param msg should not have any newlines
+	 * @return the response from the server
+	 */
+	public Response sendReceive(final String msg) throws IOException {
+<span class="nc" id="L267">		this.send(msg);</span>
+<span class="nc" id="L268">		return this.receive();</span>
+	}
+
+	/** If response is not success, throw an exception */
+	public Response receiveAndCheck() throws IOException, SMTPException {
+<span class="nc" id="L273">		final Response resp = this.receive();</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">		if (!resp.isSuccess()) {</span>
+<span class="nc" id="L275">			throw new SMTPException(resp);</span>
+		}
+<span class="nc" id="L277">		return resp;</span>
+	}
+
+	/** If response is not success, throw an exception */
+	public Response sendAndCheck(final String msg) throws IOException, SMTPException {
+<span class="nc" id="L282">		this.send(msg);</span>
+<span class="nc" id="L283">		return this.receiveAndCheck();</span>
+	}
+
+	/** Logs but otherwise ignores errors */
+	public void close() {
+<span class="nc" id="L288">		connected = false;</span>
+
+<span class="nc bnc" id="L290" title="All 4 branches missed.">		if (this.socket != null &amp;&amp; !this.socket.isClosed()) {</span>
+			try {
+<span class="nc" id="L292">				this.socket.close();</span>
+
+<span class="nc bnc" id="L294" title="All 2 branches missed.">				if (log.isDebugEnabled()) {</span>
+<span class="nc" id="L295">					log.debug(&quot;Closed connection to &quot; + this.hostPort);</span>
+				}
+<span class="nc" id="L297">			} catch (final IOException ex) {</span>
+<span class="nc" id="L298">				log.error(&quot;Problem closing connection to &quot; + this.hostPort, ex);</span>
+<span class="nc" id="L299">			}</span>
+		}
+<span class="nc" id="L301">	}</span>
+
+	@Override
+	public String toString() {
+<span class="nc" id="L305">		return this.getClass().getSimpleName() + &quot; { &quot; + this.hostPort + &quot;}&quot;;</span>
+	}
+
+	/**
+	 * Sets the local socket address. If null, the system will pick up an ephemeral
+	 * port and a valid local address. Default is null.
+	 */
+	public void setBindpoint(final SocketAddress bindpoint) {
+<span class="nc" id="L313">		this.bindpoint = bindpoint;</span>
+<span class="nc" id="L314">	}</span>
+
+	/**
+	 * Returns the local socket address.
+	 */
+	public SocketAddress getBindpoint() {
+<span class="nc" id="L320">		return bindpoint;</span>
+	}
+
+	/**
+	 * Sets the name of the remote MTA for informative purposes. Default is
+	 * host:port, where host and port are the values which were used to open the TCP
+	 * connection to the server, as they were passed to the connect method.
+	 */
+	public void setHostPort(final String hostPort) {
+<span class="nc" id="L329">		this.hostPort = hostPort;</span>
+<span class="nc" id="L330">	}</span>
+
+	/**
+	 * @return a nice pretty description of who we are connected to
+	 */
+	public String getHostPort() {
+<span class="nc" id="L336">		return this.hostPort;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

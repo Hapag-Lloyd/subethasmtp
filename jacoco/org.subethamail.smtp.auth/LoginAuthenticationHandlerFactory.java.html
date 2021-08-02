@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginAuthenticationHandlerFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp.auth</a> &gt; <span class="el_source">LoginAuthenticationHandlerFactory.java</span></div><h1>LoginAuthenticationHandlerFactory.java</h1><pre class="source lang-java linenums">package org.subethamail.smtp.auth;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
+import org.subethamail.smtp.AuthenticationHandler;
+import org.subethamail.smtp.AuthenticationHandlerFactory;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.util.Base64;
+import org.subethamail.smtp.util.TextUtils;
+
+/**
+ * Implements the SMTP AUTH LOGIN mechanism.&lt;br&gt;
+ * You are only required to plug your UsernamePasswordValidator implementation
+ * for username and password validation to take effect.
+ * &lt;p&gt;
+ * LOGIN is an obsolete authentication method which has no formal specification.
+ * There is an expired IETF draft for informational purposes. A Microsoft
+ * document can also be found, which intends to specify the LOGIN mechanism. The
+ * latter is not entirely compatible, neither with the IETF draft nor with RFC
+ * 4954 (SMTP Service Extension for Authentication). However this implementation
+ * is likely usable with clients following any of the two documents.
+ *
+ * @see &lt;a href=&quot;http://tools.ietf.org/html/draft-murchison-sasl-login-00&quot;&gt;The
+ *      LOGIN SASL Mechanism&lt;/a&gt;
+ * @see &lt;a href=
+ *      &quot;http://download.microsoft.com/download/5/d/d/5dd33fdf-91f5-496d-9884-0a0b0ee698bb/%5BMS-XLOGIN%5D.pdf&quot;&gt;[MS-XLOGIN]&lt;/a&gt;
+ *
+ * @author Marco Trevisan &amp;lt;mrctrevisan@yahoo.it&amp;gt;
+ * @author Jeff Schnitzer
+ */
+public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory {
+<span class="nc" id="L34">	static List&lt;String&gt; MECHANISMS = new ArrayList&lt;&gt;(1);</span>
+	static {
+<span class="nc" id="L36">		MECHANISMS.add(&quot;LOGIN&quot;);</span>
+<span class="nc" id="L37">	}</span>
+
+	private final UsernamePasswordValidator helper;
+
+<span class="nc" id="L41">	public LoginAuthenticationHandlerFactory(final UsernamePasswordValidator helper) {</span>
+<span class="nc" id="L42">		this.helper = helper;</span>
+<span class="nc" id="L43">	}</span>
+
+	@Override
+	public List&lt;String&gt; getAuthenticationMechanisms() {
+<span class="nc" id="L47">		return MECHANISMS;</span>
+	}
+
+	@Override
+	public AuthenticationHandler create() {
+<span class="nc" id="L52">		return new Handler();</span>
+	}
+
+	/**
+	 */
+<span class="nc" id="L57">	class Handler implements AuthenticationHandler {</span>
+		private String username;
+
+		private String password;
+
+		@Override
+		public String auth(final String clientInput) throws RejectException {
+<span class="nc" id="L64">			final StringTokenizer stk = new StringTokenizer(clientInput);</span>
+<span class="nc" id="L65">			final String token = stk.nextToken();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">			if (token.trim().equalsIgnoreCase(&quot;AUTH&quot;)) {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">				if (!stk.nextToken().trim().equalsIgnoreCase(&quot;LOGIN&quot;)) {</span>
+					// Mechanism mismatch
+<span class="nc" id="L69">					throw new RejectException(504, &quot;AUTH mechanism mismatch&quot;);</span>
+				}
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">				if (!stk.hasMoreTokens()) {</span>
+<span class="nc" id="L73">					return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Username:&quot;), false);</span>
+				}
+				// The client submitted an initial response, which should be
+				// the username.
+				// .Net's built in System.Net.Mail.SmtpClient sends its
+				// authentication this way (and this way only).
+<span class="nc" id="L79">				final byte[] decoded = Base64.decode(stk.nextToken());</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">				if (decoded == null) {</span>
+<span class="nc" id="L81">					throw new RejectException(501, /* 5.5.4 */</span>
+							&quot;Invalid command argument, not a valid Base64 string&quot;);
+				}
+<span class="nc" id="L84">				username = TextUtils.getStringUtf8(decoded);</span>
+
+<span class="nc" id="L86">				return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Password:&quot;), false);</span>
+			}
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">			if (this.username == null) {</span>
+<span class="nc" id="L90">				final byte[] decoded = Base64.decode(clientInput);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">				if (decoded == null) {</span>
+<span class="nc" id="L92">					throw new RejectException(501, /* 5.5.4 */</span>
+							&quot;Invalid command argument, not a valid Base64 string&quot;);
+				}
+
+<span class="nc" id="L96">				this.username = TextUtils.getStringUtf8(decoded);</span>
+
+<span class="nc" id="L98">				return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Password:&quot;), false);</span>
+			}
+
+<span class="nc" id="L101">			final byte[] decoded = Base64.decode(clientInput);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">			if (decoded == null) {</span>
+<span class="nc" id="L103">				throw new RejectException(501, /* 5.5.4 */</span>
+						&quot;Invalid command argument, not a valid Base64 string&quot;);
+			}
+
+<span class="nc" id="L107">			this.password = TextUtils.getStringUtf8(decoded);</span>
+			try {
+<span class="nc" id="L109">				LoginAuthenticationHandlerFactory.this.helper.login(this.username, this.password);</span>
+<span class="nc" id="L110">			} catch (final LoginFailedException lfe) {</span>
+<span class="nc" id="L111">				throw new RejectException(535, /* 5.7.8 */</span>
+						&quot;Authentication credentials invalid&quot;);
+<span class="nc" id="L113">			}</span>
+
+<span class="nc" id="L115">			return null;</span>
+		}
+
+		/* */
+		@Override
+		public Object getIdentity() {
+<span class="nc" id="L121">			return this.username;</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

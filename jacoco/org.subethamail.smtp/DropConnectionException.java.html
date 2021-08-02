@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DropConnectionException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SubEtha SMTP</a> &gt; <a href="index.source.html" class="el_package">org.subethamail.smtp</a> &gt; <span class="el_source">DropConnectionException.java</span></div><h1>DropConnectionException.java</h1><pre class="source lang-java linenums">/*
+ * $Id: RejectException.java 337 2009-06-29 19:20:58Z latchkey $ $Source:
+ * /cvsroot/Similarity4/src/java/com/similarity/mbean/BindStatisticsManagerMBean
+ * .java,v $
+ */
+package org.subethamail.smtp;
+
+/**
+ * A type of RejectException that additionally causes the server to close the
+ * connection to the client.
+ *
+ * @author Jeff Schnitzer
+ */
+@SuppressWarnings(&quot;serial&quot;)
+public class DropConnectionException extends RejectException {
+	int code;
+
+<span class="nc" id="L18">	public DropConnectionException() {}</span>
+
+	public DropConnectionException(final String message) {
+<span class="nc" id="L21">		super(message);</span>
+<span class="nc" id="L22">	}</span>
+
+	public DropConnectionException(final int code, final String message) {
+<span class="nc" id="L25">		super(code, message);</span>
+<span class="nc" id="L26">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

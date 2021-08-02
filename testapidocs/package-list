@@ -1,0 +1,5 @@
+org.subethamail.smtp
+org.subethamail.smtp.client
+org.subethamail.smtp.command
+org.subethamail.smtp.server
+org.subethamail.smtp.util
