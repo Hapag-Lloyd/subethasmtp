@@ -20,6 +20,9 @@ public class ThreadDeathLoggingTest {
 	 * Note that any exception that causes a thread death is printed on stderr by
 	 * the default uncaughtExceptionHandler of the JRE, but this is not what you are
 	 * looking for.
+	 *
+	 * @throws SMTPException on SMTP error
+	 * @throws IOException   on IO error
 	 */
 	@Ignore("Requires manual setup and verification")
 	@Test()

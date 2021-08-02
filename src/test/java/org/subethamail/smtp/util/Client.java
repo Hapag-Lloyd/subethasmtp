@@ -24,8 +24,10 @@ public class Client {
 	/**
 	 * Establishes a connection to host and port.
 	 *
-	 * @throws IOException
-	 * @throws UnknownHostException
+	 * @param host the SMTP host
+	 * @param port the SMTP port
+	 * @throws IOException          on IO error
+	 * @throws UnknownHostException on unknown host
 	 */
 	public Client(final String host, final int port) throws UnknownHostException, IOException {
 		this.socket = new Socket(host, port);
@@ -37,7 +39,8 @@ public class Client {
 	 * Sends a message to the server, ie "HELO foo.example.com". A newline will be
 	 * appended to the message.
 	 *
-	 * @throws an exception if the method cannot send for any reason
+	 * @param msg the message to send
+	 * @throws Exception an exception if the method cannot send for any reason
 	 */
 	public void send(final String msg) throws Exception {
 		// Force \r\n since println() behaves differently on different platforms
@@ -47,6 +50,9 @@ public class Client {
 
 	/**
 	 * Throws an exception if the response does not start with the specified string.
+	 *
+	 * @param expect the expected response
+	 * @throws Exception on error
 	 */
 	public void expect(final String expect) throws Exception {
 		final String response = this.readResponse();
@@ -57,6 +63,9 @@ public class Client {
 
 	/**
 	 * Throws an exception if the response does not contain the specified string.
+	 *
+	 * @param expect a part of the expected response
+	 * @throws Exception on error
 	 */
 	public void expectContains(final String expect) throws Exception {
 		final String response = this.readResponse();
@@ -68,6 +77,9 @@ public class Client {
 	/**
 	 * Get the complete response, including a multiline response. Newlines are
 	 * included.
+	 *
+	 * @return the response
+	 * @throws Exception on error
 	 */
 	protected String readResponse() throws Exception {
 		final StringBuilder builder = new StringBuilder();

@@ -72,6 +72,8 @@ public class AuthTest extends ServerTestCase {
 	 * <li>We expect an error message</li>
 	 * </ol>
 	 * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
+	 *
+	 * @throws Exception on error
 	 */
 	public void testAuthPlain() throws Exception {
 		this.expect("220");
@@ -109,6 +111,8 @@ public class AuthTest extends ServerTestCase {
 	 * <li>We expect an error message</li>
 	 * </ol>
 	 * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
+	 *
+	 * @throws Exception on error
 	 */
 	public void testAuthLogin() throws Exception {
 		this.expect("220");

@@ -80,8 +80,11 @@ public class WiserFailuresTest extends TestCase {
 
 	/**
 	 * See
-	 * http://sourceforge.net/tracker/index.php?func=detail&aid=1474700&group_id=78413&atid=553186
+	 * http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1474700&amp;group_id=78413&amp;atid=553186
 	 * for discussion about this bug
+	 *
+	 * @throws IOException        on IO error
+	 * @throws MessagingException on messaging error
 	 */
 	public void testMailFromAfterReset() throws IOException, MessagingException {
 		log.info("testMailFromAfterReset() start");
@@ -107,8 +110,11 @@ public class WiserFailuresTest extends TestCase {
 
 	/**
 	 * See
-	 * http://sourceforge.net/tracker/index.php?func=detail&aid=1474700&group_id=78413&atid=553186
+	 * http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1474700&amp;group_id=78413&amp;atid=553186
 	 * for discussion about this bug
+	 *
+	 * @throws IOException        on IO error
+	 * @throws MessagingException on messaging error
 	 */
 	public void testMailFromWithInitialReset() throws IOException, MessagingException {
 		this.assertConnect();

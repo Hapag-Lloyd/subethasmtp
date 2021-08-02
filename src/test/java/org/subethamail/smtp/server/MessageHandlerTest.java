@@ -148,8 +148,11 @@ public class MessageHandlerTest {
 	 * Test for issue 56: rejecting a Mail From causes IllegalStateException in the
 	 * next Mail From attempt.
 	 *
-	 * @see <a href=http://code.google.com/p/subethasmtp/issues/detail?id=56>Issue
+	 * @see <a href="http://code.google.com/p/subethasmtp/issues/detail?id=56">Issue
 	 *      56</a>
+	 *
+	 * @throws IOException        on IO error
+	 * @throws MessagingException on messaging error
 	 */
 	// @Test
 	public void testMailFromRejectedFirst() throws IOException, MessagingException {
