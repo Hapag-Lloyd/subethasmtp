@@ -15,12 +15,10 @@ import org.subethamail.smtp.util.EmailUtils;
  * @author Jeff Schnitzer
  */
 public class ReceiptCommand extends BaseCommand {
-	/** */
 	public ReceiptCommand() {
 		super("RCPT", "Specifies the recipient. Can be used any number of times.", "TO: <recipient> [ <parameters> ]");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException, DropConnectionException {
 		if (!sess.isMailTransactionInProgress()) {

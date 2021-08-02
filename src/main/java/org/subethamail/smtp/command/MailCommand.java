@@ -16,12 +16,10 @@ import org.subethamail.smtp.util.EmailUtils;
  * @author Jeff Schnitzer
  */
 public class MailCommand extends BaseCommand {
-	/** */
 	public MailCommand() {
 		super("MAIL", "Specifies the sender.", "FROM: <sender> [ <parameters> ]");
 	}
 
-	/** */
 	/*
 	 * (non-Javadoc)
 	 *

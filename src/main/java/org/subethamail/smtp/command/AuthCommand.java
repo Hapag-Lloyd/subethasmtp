@@ -11,7 +11,7 @@ import org.subethamail.smtp.server.BaseCommand;
 import org.subethamail.smtp.server.Session;
 
 /**
- * @author Marco Trevisan <mrctrevisan@yahoo.it>
+ * @author Marco Trevisan &lt;mrctrevisan@yahoo.it&gt;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
@@ -30,7 +30,6 @@ public class AuthCommand extends BaseCommand {
 						+ "\t an optional base64-encoded response");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
 		if (sess.isAuthenticated()) {

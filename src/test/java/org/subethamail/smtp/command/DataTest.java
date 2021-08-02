@@ -6,12 +6,10 @@ import org.subethamail.smtp.util.ServerTestCase;
  * @author Jon Stevens
  */
 public class DataTest extends ServerTestCase {
-	/** */
 	public DataTest(final String name) {
 		super(name);
 	}
 
-	/** */
 	public void testNeedMail() throws Exception {
 		this.expect("220");
 
@@ -22,7 +20,6 @@ public class DataTest extends ServerTestCase {
 		this.expect("503 5.5.1 Error: need MAIL command");
 	}
 
-	/** */
 	public void testNeedRcpt() throws Exception {
 		this.expect("220");
 
@@ -36,7 +33,6 @@ public class DataTest extends ServerTestCase {
 		this.expect("503 Error: need RCPT command");
 	}
 
-	/** */
 	public void testData() throws Exception {
 		this.expect("220");
 
@@ -53,7 +49,6 @@ public class DataTest extends ServerTestCase {
 		this.expect("354 End data with <CR><LF>.<CR><LF>");
 	}
 
-	/** */
 	public void testRsetAfterData() throws Exception {
 		this.expect("220");
 

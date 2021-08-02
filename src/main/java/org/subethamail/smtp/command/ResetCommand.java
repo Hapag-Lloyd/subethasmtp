@@ -11,12 +11,10 @@ import org.subethamail.smtp.server.Session;
  * @author Jeff Schnitzer
  */
 public class ResetCommand extends BaseCommand {
-	/** */
 	public ResetCommand() {
 		super("RSET", "Resets the system.");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
 		sess.resetMailTransaction();

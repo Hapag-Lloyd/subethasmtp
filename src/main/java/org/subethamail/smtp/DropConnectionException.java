@@ -15,15 +15,12 @@ package org.subethamail.smtp;
 public class DropConnectionException extends RejectException {
 	int code;
 
-	/** */
 	public DropConnectionException() {}
 
-	/** */
 	public DropConnectionException(final String message) {
 		super(message);
 	}
 
-	/** */
 	public DropConnectionException(final int code, final String message) {
 		super(code, message);
 	}

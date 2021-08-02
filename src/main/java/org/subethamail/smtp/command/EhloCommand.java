@@ -15,12 +15,10 @@ import org.subethamail.smtp.util.TextUtils;
  * @author Scott Hernandez
  */
 public class EhloCommand extends BaseCommand {
-	/** */
 	public EhloCommand() {
 		super("EHLO", "Introduce yourself.", "<hostname>");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
 		final String[] args = this.getArgs(commandString);

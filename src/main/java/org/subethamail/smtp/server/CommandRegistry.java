@@ -22,7 +22,7 @@ import org.subethamail.smtp.command.VerifyCommand;
 /**
  * Enumerates all the Commands made available in this release.
  *
- * @author Marco Trevisan <mrctrevisan@yahoo.it>
+ * @author Marco Trevisan &lt;mrctrevisan@yahoo.it&gt;
  */
 public enum CommandRegistry {
 	AUTH(new AuthCommand(), true, false),
@@ -41,7 +41,6 @@ public enum CommandRegistry {
 
 	private Command command;
 
-	/** */
 	CommandRegistry(final Command cmd,
 			final boolean checkForStartedTLSWhenRequired,
 			final boolean checkForAuthIfRequired) {
@@ -55,7 +54,6 @@ public enum CommandRegistry {
 		}
 	}
 
-	/** */
 	public Command getCommand() {
 		return this.command;
 	}

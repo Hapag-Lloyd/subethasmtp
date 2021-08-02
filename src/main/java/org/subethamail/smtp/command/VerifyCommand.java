@@ -10,12 +10,10 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  */
 public class VerifyCommand extends BaseCommand {
-	/** */
 	public VerifyCommand() {
 		super("VRFY", "The vrfy command.");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
 		sess.sendResponse("502 VRFY command is disabled");

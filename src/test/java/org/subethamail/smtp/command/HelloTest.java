@@ -6,12 +6,10 @@ import org.subethamail.smtp.util.ServerTestCase;
  * @author Jeff Schnitzer
  */
 public class HelloTest extends ServerTestCase {
-	/** */
 	public HelloTest(final String name) {
 		super(name);
 	}
 
-	/** */
 	public void testHelloCommand() throws Exception {
 		this.expect("220");
 
@@ -30,7 +28,6 @@ public class HelloTest extends ServerTestCase {
 		this.expect("250");
 	}
 
-	/** */
 	public void testHelloReset() throws Exception {
 		this.expect("220");
 
@@ -47,7 +44,6 @@ public class HelloTest extends ServerTestCase {
 		this.expect("250 Ok");
 	}
 
-	/** */
 	public void testEhloSize() throws Exception {
 		this.wiser.getServer().setMaxMessageSize(1000);
 		this.expect("220");

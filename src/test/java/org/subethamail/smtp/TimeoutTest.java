@@ -13,10 +13,8 @@ import org.subethamail.wiser.Wiser;
  * @author Jeff Schnitzer
  */
 public class TimeoutTest {
-	/** */
 	public static final int PORT = 2566;
 
-	/** */
 	// @Test
 	public void testTimeout() throws Exception {
 		final Wiser wiser = new Wiser();

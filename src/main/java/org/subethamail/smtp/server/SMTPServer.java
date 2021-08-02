@@ -204,12 +204,10 @@ public class SMTPServer {
 		this.bindAddress = bindAddress;
 	}
 
-	/** */
 	public int getPort() {
 		return this.port;
 	}
 
-	/** */
 	public void setPort(final int port) {
 		this.port = port;
 	}
@@ -371,7 +369,6 @@ public class SMTPServer {
 		return this.messageHandlerFactory;
 	}
 
-	/** */
 	public void setMessageHandlerFactory(final MessageHandlerFactory fact) {
 		this.messageHandlerFactory = fact;
 	}
@@ -384,7 +381,6 @@ public class SMTPServer {
 		return this.authenticationHandlerFactory;
 	}
 
-	/** */
 	public void setAuthenticationHandlerFactory(final AuthenticationHandlerFactory fact) {
 		this.authenticationHandlerFactory = fact;
 	}
@@ -399,7 +395,6 @@ public class SMTPServer {
 		return this.commandHandler;
 	}
 
-	/** */
 	public int getMaxConnections() {
 		return this.maxConnections;
 	}
@@ -418,7 +413,6 @@ public class SMTPServer {
 		this.maxConnections = maxConnections;
 	}
 
-	/** */
 	public int getConnectionTimeout() {
 		return this.connectionTimeout;
 	}
@@ -466,7 +460,6 @@ public class SMTPServer {
 		this.enableTLS = enableTLS;
 	}
 
-	/** */
 	public boolean getEnableTLS() {
 		return enableTLS;
 	}
@@ -487,7 +480,6 @@ public class SMTPServer {
 		this.enableTLS = !value;
 	}
 
-	/** */
 	public boolean getHideTLS() {
 		return this.hideTLS;
 	}
@@ -500,7 +492,6 @@ public class SMTPServer {
 		this.hideTLS = value;
 	}
 
-	/** */
 	public boolean getRequireTLS() {
 		return this.requireTLS;
 	}
@@ -514,7 +505,6 @@ public class SMTPServer {
 		this.requireTLS = requireTLS;
 	}
 
-	/** */
 	public boolean getRequireAuth() {
 		return requireAuth;
 	}
@@ -543,7 +533,6 @@ public class SMTPServer {
 		this.maxMessageSize = maxMessageSize;
 	}
 
-	/** */
 	public boolean getDisableReceivedHeaders() {
 		return disableReceivedHeaders;
 	}
@@ -556,7 +545,6 @@ public class SMTPServer {
 		this.disableReceivedHeaders = disableReceivedHeaders;
 	}
 
-	/** */
 	public SessionIdFactory getSessionIdFactory() {
 		return sessionIdFactory;
 	}

@@ -31,19 +31,16 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	 */
 	List<String> mechanisms = new ArrayList<>();
 
-	/** */
 	public MultipleAuthenticationHandlerFactory() {
 		// Starting with an empty list is ok, let the user add them all
 	}
 
-	/** */
 	public MultipleAuthenticationHandlerFactory(final Collection<AuthenticationHandlerFactory> factories) {
 		for (final AuthenticationHandlerFactory fact : factories) {
 			this.addFactory(fact);
 		}
 	}
 
-	/** */
 	public void addFactory(final AuthenticationHandlerFactory fact) {
 		final List<String> partialMechanisms = fact.getAuthenticationMechanisms();
 		for (final String mechanism : partialMechanisms) {
@@ -54,13 +51,11 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 		}
 	}
 
-	/** */
 	@Override
 	public List<String> getAuthenticationMechanisms() {
 		return this.mechanisms;
 	}
 
-	/** */
 	@Override
 	public AuthenticationHandler create() {
 		return new Handler();

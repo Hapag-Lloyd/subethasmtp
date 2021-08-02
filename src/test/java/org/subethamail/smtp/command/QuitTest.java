@@ -6,12 +6,10 @@ import org.subethamail.smtp.util.ServerTestCase;
  * @author Jon Stevens
  */
 public class QuitTest extends ServerTestCase {
-	/** */
 	public QuitTest(final String name) {
 		super(name);
 	}
 
-	/** */
 	public void testQuit() throws Exception {
 		this.expect("220");
 

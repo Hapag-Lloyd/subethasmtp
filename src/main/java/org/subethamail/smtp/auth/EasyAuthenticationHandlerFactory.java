@@ -12,7 +12,6 @@ public class EasyAuthenticationHandlerFactory extends MultipleAuthenticationHand
 	/** Just hold on to this so that the caller can get it later, if necessary */
 	UsernamePasswordValidator validator;
 
-	/** */
 	public EasyAuthenticationHandlerFactory(final UsernamePasswordValidator validator) {
 		this.validator = validator;
 
@@ -20,7 +19,6 @@ public class EasyAuthenticationHandlerFactory extends MultipleAuthenticationHand
 		this.addFactory(new LoginAuthenticationHandlerFactory(this.validator));
 	}
 
-	/** */
 	public UsernamePasswordValidator getValidator() {
 		return this.validator;
 	}

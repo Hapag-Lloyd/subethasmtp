@@ -106,18 +106,15 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 
 		List<Delivery> deliveries = new ArrayList<>();
 
-		/** */
 		public Handler(final MessageContext ctx) {
 			this.ctx = ctx;
 		}
 
-		/** */
 		@Override
 		public void from(final String from) throws RejectException {
 			this.from = from;
 		}
 
-		/** */
 		@Override
 		public void recipient(final String recipient) throws RejectException {
 			boolean addedListener = false;
@@ -134,7 +131,6 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 			}
 		}
 
-		/** */
 		@Override
 		public void data(final InputStream data) throws TooMuchDataException, IOException {
 			if (this.deliveries.size() == 1) {
@@ -155,7 +151,6 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 			}
 		}
 
-		/** */
 		@Override
 		public void done() {}
 	}

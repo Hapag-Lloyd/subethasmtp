@@ -27,7 +27,7 @@ import org.subethamail.smtp.util.TextUtils;
  * @see <a href=
  *      "http://download.microsoft.com/download/5/d/d/5dd33fdf-91f5-496d-9884-0a0b0ee698bb/%5BMS-XLOGIN%5D.pdf">[MS-XLOGIN]</a>
  *
- * @author Marco Trevisan <mrctrevisan@yahoo.it>
+ * @author Marco Trevisan &lt;mrctrevisan@yahoo.it&gt;
  * @author Jeff Schnitzer
  */
 public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory {
@@ -38,18 +38,15 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 
 	private final UsernamePasswordValidator helper;
 
-	/** */
 	public LoginAuthenticationHandlerFactory(final UsernamePasswordValidator helper) {
 		this.helper = helper;
 	}
 
-	/** */
 	@Override
 	public List<String> getAuthenticationMechanisms() {
 		return MECHANISMS;
 	}
 
-	/** */
 	@Override
 	public AuthenticationHandler create() {
 		return new Handler();

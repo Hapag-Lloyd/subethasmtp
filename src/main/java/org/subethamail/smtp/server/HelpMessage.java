@@ -15,7 +15,6 @@ public class HelpMessage {
 
 	private String outputString;
 
-	/** */
 	public HelpMessage(final String commandName, final String helpMessage, final String argumentDescription) {
 		this.commandName = commandName;
 		this.argumentDescription = argumentDescription == null ? "" : " " + argumentDescription;
@@ -23,22 +22,18 @@ public class HelpMessage {
 		this.buildOutputString();
 	}
 
-	/** */
 	public HelpMessage(final String commandName, final String helpMessage) {
 		this(commandName, helpMessage, null);
 	}
 
-	/** */
 	public String getName() {
 		return this.commandName;
 	}
 
-	/** */
 	public String toOutputString() {
 		return this.outputString;
 	}
 
-	/** */
 	private void buildOutputString() {
 		final StringTokenizer stringTokenizer = new StringTokenizer(this.helpMessage, "\n");
 		final StringBuilder stringBuilder
@@ -51,7 +46,6 @@ public class HelpMessage {
 		this.outputString = stringBuilder.toString();
 	}
 
-	/** */
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
@@ -71,7 +65,6 @@ public class HelpMessage {
 		return true;
 	}
 
-	/** */
 	@Override
 	public int hashCode() {
 		int result;

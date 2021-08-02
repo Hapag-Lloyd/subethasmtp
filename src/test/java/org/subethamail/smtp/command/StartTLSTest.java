@@ -6,12 +6,10 @@ import org.subethamail.smtp.util.ServerTestCase;
  * @author Jon Stevens
  */
 public class StartTLSTest extends ServerTestCase {
-	/** */
 	public StartTLSTest(final String name) {
 		super(name);
 	}
 
-	/** */
 	public void testQuit() throws Exception {
 		this.expect("220");
 

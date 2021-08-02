@@ -9,7 +9,7 @@ import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.TextUtils;
 
 /**
- * @author Marco Trevisan <mrctrevisan@yahoo.it>
+ * @author Marco Trevisan &lt;mrctrevisan@yahoo.it&gt;
  * @author Jeff Schnitzer
  */
 public class AuthTest extends ServerTestCase {
@@ -26,7 +26,6 @@ public class AuthTest extends ServerTestCase {
 		}
 	}
 
-	/** */
 	public AuthTest(final String name) {
 		super(name);
 	}

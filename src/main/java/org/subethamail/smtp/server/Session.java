@@ -372,7 +372,6 @@ public class Session implements Runnable, MessageContext {
 		return this.helo;
 	}
 
-	/** */
 	public void setHelo(final String value) {
 		this.helo = value;
 	}
@@ -383,13 +382,11 @@ public class Session implements Runnable, MessageContext {
 		return isMailTransactionInProgress();
 	}
 
-	/** */
 	public void addRecipient(final String recipientAddress) {
 		this.recipientCount++;
 		this.singleRecipient = this.recipientCount == 1 ? recipientAddress : null;
 	}
 
-	/** */
 	public int getRecipientCount() {
 		return this.recipientCount;
 	}
@@ -402,12 +399,10 @@ public class Session implements Runnable, MessageContext {
 		return singleRecipient;
 	}
 
-	/** */
 	public boolean isAuthenticated() {
 		return this.authenticationHandler != null;
 	}
 
-	/** */
 	@Override
 	public AuthenticationHandler getAuthenticationHandler() {
 		return this.authenticationHandler;

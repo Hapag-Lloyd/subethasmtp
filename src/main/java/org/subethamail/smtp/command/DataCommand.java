@@ -20,12 +20,10 @@ import org.subethamail.smtp.server.Session;
 public class DataCommand extends BaseCommand {
 	private final static int BUFFER_SIZE = 1024 * 32; // 32k seems reasonable
 
-	/** */
 	public DataCommand() {
 		super("DATA", "Following text is collected as the message.\n" + "End data with <CR><LF>.<CR><LF>");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException, DropConnectionException {
 		if (!sess.isMailTransactionInProgress()) {

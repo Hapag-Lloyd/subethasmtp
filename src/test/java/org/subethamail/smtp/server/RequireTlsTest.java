@@ -7,7 +7,6 @@ import org.subethamail.smtp.util.ServerTestCase;
  * @author Erik van Oosten
  */
 public class RequireTlsTest extends ServerTestCase {
-	/** */
 	public RequireTlsTest(final String name) {
 		super(name);
 	}
@@ -38,7 +37,6 @@ public class RequireTlsTest extends ServerTestCase {
 		super.tearDown();
 	}
 
-	/** */
 	public void testNeedSTARTTLS() throws Exception {
 		this.expect("220");
 

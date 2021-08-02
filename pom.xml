@@ -89,7 +89,6 @@
 		<eclipse.compiler.nullAnalysis>disabled</eclipse.compiler.nullAnalysis>
 
 		<jar.manifest.mainClass>org.subethamail.smtp.Version</jar.manifest.mainClass>
-		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
 		<checkstyle.skip>true</checkstyle.skip>
 		<gpg.skip>true</gpg.skip>

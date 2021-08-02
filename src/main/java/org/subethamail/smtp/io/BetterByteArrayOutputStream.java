@@ -9,10 +9,8 @@ import java.io.InputStream;
  * underlying array.
  */
 class BetterByteArrayOutputStream extends ByteArrayOutputStream {
-	/** */
 	public BetterByteArrayOutputStream() {}
 
-	/** */
 	public BetterByteArrayOutputStream(final int size) {
 		super(size);
 	}

@@ -38,13 +38,10 @@ import org.subethamail.smtp.server.SMTPServer;
  * @author Jeff Schnitzer
  */
 public class Wiser implements SimpleMessageListener {
-	/** */
 	private final static Logger log = LoggerFactory.getLogger(Wiser.class);
 
-	/** */
 	SMTPServer server;
 
-	/** */
 	protected List<WiserMessage> messages = Collections.synchronizedList(new ArrayList<WiserMessage>());
 
 	/**
@@ -55,7 +52,11 @@ public class Wiser implements SimpleMessageListener {
 		this.server = new SMTPServer(new SimpleMessageListenerAdapter(this));
 	}
 
-	/** Convenience constructor */
+	/**
+	 * Convenience constructor
+	 *
+	 * @param port the port to listen on
+	 */
 	public Wiser(final int port) {
 		this();
 		this.setPort(port);
@@ -64,7 +65,7 @@ public class Wiser implements SimpleMessageListener {
 	/**
 	 * The port that the server should listen on.
 	 *
-	 * @param port
+	 * @param port the port to listen on
 	 */
 	public void setPort(final int port) {
 		this.server.setPort(port);
@@ -73,7 +74,7 @@ public class Wiser implements SimpleMessageListener {
 	/**
 	 * The hostname that the server should listen on.
 	 *
-	 * @param hostname
+	 * @param hostname the hostname to listen on
 	 */
 	public void setHostname(final String hostname) {
 		this.server.setHostName(hostname);
@@ -89,7 +90,12 @@ public class Wiser implements SimpleMessageListener {
 		this.server.stop();
 	}
 
-	/** A main() for this class. Starts up the server. */
+	/**
+	 * A main() for this class. Starts up the server.
+	 *
+	 * @param args command line arguments
+	 * @throws Exception on error
+	 */
 	public static void main(final String[] args) throws Exception {
 		final Wiser wiser = new Wiser();
 		wiser.start();
@@ -134,6 +140,8 @@ public class Wiser implements SimpleMessageListener {
 
 	/**
 	 * Creates the JavaMail Session object for use in WiserMessage
+	 *
+	 * @return the JavaMail session
 	 */
 	protected Session getSession() {
 		return Session.getDefaultInstance(new Properties());
@@ -141,17 +149,22 @@ public class Wiser implements SimpleMessageListener {
 
 	/**
 	 * Returns the list of WiserMessages.
+	 *
 	 * <p>
 	 * The number of mail transactions and the number of mails may be different. If
 	 * a message is received with multiple recipients in a single mail transaction,
 	 * then the list will contain more WiserMessage instances, one for each
 	 * recipient.
+	 *
+	 * @return the list of WiserMessages
 	 */
 	public List<WiserMessage> getMessages() {
 		return this.messages;
 	}
 
 	/**
+	 * Returns the server implementation
+	 *
 	 * @return the server implementation
 	 */
 	public SMTPServer getServer() {
@@ -161,6 +174,9 @@ public class Wiser implements SimpleMessageListener {
 	/**
 	 * For debugging purposes, dumps a rough outline of the messages to the output
 	 * stream.
+	 *
+	 * @param out the output PrintStream
+	 * @throws MessagingException on dump error
 	 */
 	public void dumpMessages(final PrintStream out) throws MessagingException {
 		out.println("----- Start printing messages -----");

@@ -33,24 +33,19 @@ import junit.framework.TestSuite;
  * @author Ville Skyttä (contributed some encoding tests)
  */
 public class MessageContentTest extends TestCase {
-	/** */
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(MessageContentTest.class);
 
-	/** */
 	public static final int PORT = 2566;
 
-	/** */
 	protected Wiser wiser;
 
 	protected Session session;
 
-	/** */
 	public MessageContentTest(final String name) {
 		super(name);
 	}
 
-	/** */
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -66,7 +61,6 @@ public class MessageContentTest extends TestCase {
 		this.wiser.start();
 	}
 
-	/** */
 	@Override
 	protected void tearDown() throws Exception {
 		this.wiser.stop();
@@ -77,7 +71,6 @@ public class MessageContentTest extends TestCase {
 		super.tearDown();
 	}
 
-	/** */
 	public void testReceivedHeader() throws Exception {
 		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
@@ -94,7 +87,6 @@ public class MessageContentTest extends TestCase {
 		assertEquals(1, receivedHeaders.length);
 	}
 
-	/** */
 	public void testMultipleRecipients() throws Exception {
 		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
@@ -108,7 +100,6 @@ public class MessageContentTest extends TestCase {
 		assertEquals(2, this.wiser.getMessages().size());
 	}
 
-	/** */
 	public void testLargeMessage() throws Exception {
 		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
@@ -125,7 +116,6 @@ public class MessageContentTest extends TestCase {
 		assertEquals("barf", this.wiser.getMessages().get(1).getMimeMessage().getSubject());
 	}
 
-	/** */
 	public void testUtf8EightBitMessage() throws Exception {
 		// Beware editor/compiler character encoding issues; safest to put unicode
 		// escapes here
@@ -136,7 +126,6 @@ public class MessageContentTest extends TestCase {
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
 	}
 
-	/** */
 	public void testIso88591EightBitMessage() throws Exception {
 		// Beware editor/compiler character encoding issues; safest to put unicode
 		// escapes here
@@ -147,7 +136,6 @@ public class MessageContentTest extends TestCase {
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
 	}
 
-	/** */
 	public void testIso885915EightBitMessage() throws Exception {
 		// Beware editor/compiler character encoding issues; safest to put unicode
 		// escapes here
@@ -165,7 +153,6 @@ public class MessageContentTest extends TestCase {
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
 	}
 
-	/** */
 	private void testEightBitMessage(final String body, final String charset) throws Exception {
 		final MimeMessage message = new MimeMessage(this.session);
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("anyone@anywhere.com"));
@@ -177,7 +164,6 @@ public class MessageContentTest extends TestCase {
 		Transport.send(message);
 	}
 
-	/** */
 	public void testIso2022JPEightBitMessage() throws Exception {
 		final String body = "\u3042\u3044\u3046\u3048\u304a\r\n"; // some Japanese letters
 		this.testEightBitMessage(body, "iso-2022-jp");
@@ -185,7 +171,6 @@ public class MessageContentTest extends TestCase {
 		assertEquals(body, this.wiser.getMessages().get(0).getMimeMessage().getContent());
 	}
 
-	/** */
 	public void testBinaryEightBitMessage() throws Exception {
 		final byte[] body = new byte[64];
 		new Random().nextBytes(body);
@@ -211,7 +196,6 @@ public class MessageContentTest extends TestCase {
 		assertTrue(Arrays.equals(body, tmp.toByteArray()));
 	}
 
-	/** */
 	public static Test suite() {
 		return new TestSuite(MessageContentTest.class);
 	}

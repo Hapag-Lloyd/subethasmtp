@@ -7,6 +7,8 @@ package org.subethamail.smtp.server;
 public interface SessionIdFactory {
 	/**
 	 * Returns a new identifier.
+	 *
+	 * @return new identifier
 	 */
 	String create();
 }

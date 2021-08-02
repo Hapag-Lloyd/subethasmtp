@@ -6,12 +6,10 @@ import org.subethamail.smtp.util.ServerTestCase;
  * @author Jon Stevens
  */
 public class MailTest extends ServerTestCase {
-	/** */
 	public MailTest(final String name) {
 		super(name);
 	}
 
-	/** */
 	public void testMailNoHello() throws Exception {
 		this.expect("220");
 
@@ -19,7 +17,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("250");
 	}
 
-	/** */
 	public void testAlreadySpecified() throws Exception {
 		this.expect("220");
 
@@ -33,7 +30,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("503 5.5.1 Sender already specified.");
 	}
 
-	/** */
 	public void testInvalidSenders() throws Exception {
 		this.expect("220");
 
@@ -46,7 +42,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("553 <test@lkjsd lkjk> Invalid email address.");
 	}
 
-	/** */
 	public void testMalformedMailCommand() throws Exception {
 		this.expect("220");
 
@@ -57,7 +52,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("501 Syntax: MAIL FROM: <address>  Error in parameters:");
 	}
 
-	/** */
 	public void testEmptyFromCommand() throws Exception {
 		this.expect("220");
 
@@ -68,7 +62,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("250");
 	}
 
-	/** */
 	public void testEmptyEmailFromCommand() throws Exception {
 		this.expect("220");
 
@@ -79,7 +72,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("501 Syntax: MAIL FROM: <address>");
 	}
 
-	/** */
 	public void testMailWithoutWhitespace() throws Exception {
 		this.expect("220");
 
@@ -90,7 +82,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("250 Ok");
 	}
 
-	/** */
 	public void testSize() throws Exception {
 		this.wiser.getServer().setMaxMessageSize(1000);
 		this.expect("220");
@@ -102,7 +93,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("250 Ok");
 	}
 
-	/** */
 	public void testSizeWithoutSize() throws Exception {
 		this.wiser.getServer().setMaxMessageSize(1000);
 		this.expect("220");
@@ -114,7 +104,6 @@ public class MailTest extends ServerTestCase {
 		this.expect("250 Ok");
 	}
 
-	/** */
 	public void testSizeTooLarge() throws Exception {
 		this.wiser.getServer().setMaxMessageSize(1000);
 		this.expect("220");

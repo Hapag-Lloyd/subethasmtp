@@ -21,12 +21,10 @@ import org.subethamail.smtp.server.Session;
 public class StartTLSCommand extends BaseCommand {
 	private final static Logger log = LoggerFactory.getLogger(StartTLSCommand.class);
 
-	/** */
 	public StartTLSCommand() {
 		super("STARTTLS", "The starttls command");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
 		if (!commandString.trim().toUpperCase(Locale.ENGLISH).equals(this.getName())) {

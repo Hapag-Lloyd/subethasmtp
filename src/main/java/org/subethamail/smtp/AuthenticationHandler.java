@@ -9,14 +9,14 @@ package org.subethamail.smtp;
  * Do not share a single instance of this interface if you don't explicitly need
  * to do so.
  *
- * @author Marco Trevisan <mrctrevisan@yahoo.it>
+ * @author Marco Trevisan &lt;mrctrevisan@yahoo.it&gt;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
 public interface AuthenticationHandler {
 	/**
-	 * Initially called using an input string in the RFC2554 form: "AUTH <mechanism>
-	 * [initial-response]". <br>
+	 * Initially called using an input string in the RFC2554 form: "AUTH
+	 * &lt;mechanism&gt; [initial-response]". <br>
 	 * This method must return text which will be delivered to the client, or null
 	 * if the exchange has been completed successfully. If a response is provided to
 	 * the client, this continues the exchange - there will be another auth() call
@@ -27,7 +27,7 @@ public interface AuthenticationHandler {
 	 * <code>null</code> only when the authentication process is finished.
 	 * <p>
 	 * AuthenticationHandlers are associated with a single authentication exchange.
-	 * If the exchange is stopped (ie fails) and is restarted, a new
+	 * If the exchange is stopped (i.e. fails) and is restarted, a new
 	 * AuthenticationHandler is created. Upon successful authentication, your
 	 * implementation of this object becomes part of the MessageContext. Your
 	 * MessageHandler may upcast your AuthenticationHandler to obtain further

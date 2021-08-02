@@ -17,14 +17,11 @@ import org.subethamail.wiser.Wiser;
  * @author Jeff Schnitzer
  */
 public class Practice {
-	/** */
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(Practice.class);
 
-	/** */
 	public static final int PORT = 2566;
 
-	/** */
 	public static void main(final String[] args) throws Exception {
 		final Wiser wiser = new Wiser();
 		wiser.setHostname("localhost");

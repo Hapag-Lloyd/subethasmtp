@@ -27,7 +27,6 @@ public class CommandHandler {
 	 */
 	private final Map<String, Command> commandMap = new HashMap<>();
 
-	/** */
 	public CommandHandler() {
 		// This solution should be more robust than the earlier "manual" configuration.
 		for (final CommandRegistry registry : CommandRegistry.values()) {
@@ -70,17 +69,14 @@ public class CommandHandler {
 		return this.commandMap.get(upperCaseCommandName);
 	}
 
-	/** */
 	public boolean containsCommand(final String command) {
 		return this.commandMap.containsKey(command);
 	}
 
-	/** */
 	public Set<String> getVerbs() {
 		return this.commandMap.keySet();
 	}
 
-	/** */
 	public void handleCommand(final Session context, final String commandString)
 			throws SocketTimeoutException, IOException, DropConnectionException {
 		try {
@@ -99,7 +95,6 @@ public class CommandHandler {
 		return this.getCommandFromString(command).getHelp();
 	}
 
-	/** */
 	private Command getCommandFromString(final String commandString)
 			throws UnknownCommandException, InvalidCommandNameException {
 		Command command = null;
@@ -120,7 +115,6 @@ public class CommandHandler {
 		return command;
 	}
 
-	/** */
 	private String toKey(final String string) throws InvalidCommandNameException {
 		if (string == null || string.length() < 4) {
 			throw new InvalidCommandNameException("Error: bad syntax");
@@ -129,7 +123,6 @@ public class CommandHandler {
 		return string.substring(0, 4).toUpperCase(Locale.ENGLISH);
 	}
 
-	/** */
 	private String toVerb(final String string) throws InvalidCommandNameException {
 		final StringTokenizer stringTokenizer = new StringTokenizer(string);
 		if (!stringTokenizer.hasMoreTokens()) {

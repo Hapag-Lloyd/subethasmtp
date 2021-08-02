@@ -12,12 +12,10 @@ import org.subethamail.smtp.server.Session;
  * @author Scott Hernandez
  */
 public class HelloCommand extends BaseCommand {
-	/** */
 	public HelloCommand() {
 		super("HELO", "Introduce yourself.", "<hostname>");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
 		final String[] args = this.getArgs(commandString);

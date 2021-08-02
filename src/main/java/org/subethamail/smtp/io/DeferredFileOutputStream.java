@@ -29,7 +29,6 @@ public class DeferredFileOutputStream extends ThresholdingOutputStream {
 	 */
 	static final int INITIAL_BUF_SIZE = 8192;
 
-	/** */
 	public static final String TMPFILE_PREFIX = "subetha";
 
 	public static final String TMPFILE_SUFFIX = ".msg";

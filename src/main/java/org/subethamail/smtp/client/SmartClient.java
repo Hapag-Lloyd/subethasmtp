@@ -19,10 +19,8 @@ import org.slf4j.LoggerFactory;
  * @author Jeff Schnitzer
  */
 public class SmartClient extends SMTPClient {
-	/** */
 	private static Logger log = LoggerFactory.getLogger(SmartClient.class);
 
-	/** */
 	boolean sentFrom;
 
 	int recipientCount;
@@ -159,13 +157,11 @@ public class SmartClient extends SMTPClient {
 		return response;
 	}
 
-	/** */
 	public void from(final String from) throws IOException, SMTPException {
 		this.sendAndCheck("MAIL FROM: <" + from + ">");
 		this.sentFrom = true;
 	}
 
-	/** */
 	public void to(final String to) throws IOException, SMTPException {
 		this.sendAndCheck("RCPT TO: <" + to + ">");
 		this.recipientCount++;

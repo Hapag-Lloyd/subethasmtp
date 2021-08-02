@@ -93,18 +93,15 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
 
 		List<Receiver> deliveries = new ArrayList<>();
 
-		/** */
 		public Handler(final MessageContext ctx) {
 			this.ctx = ctx;
 		}
 
-		/** */
 		@Override
 		public void from(final String from) throws RejectException {
 			this.from = from;
 		}
 
-		/** */
 		@Override
 		public void recipient(final String recipient) throws RejectException {
 			for (final SmarterMessageListener listener : SmarterMessageListenerAdapter.this.listeners) {
@@ -120,7 +117,6 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
 			}
 		}
 
-		/** */
 		@Override
 		public void data(final InputStream data) throws TooMuchDataException, IOException {
 			if (this.deliveries.size() == 1) {
@@ -140,7 +136,6 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
 			}
 		}
 
-		/** */
 		@Override
 		public void done() {
 			for (final Receiver rec : this.deliveries) {

@@ -14,11 +14,9 @@ import junit.framework.TestCase;
  * @author Jeff Schnitzer
  */
 public abstract class ServerTestCase extends TestCase {
-	/** */
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(ServerTestCase.class);
 
-	/** */
 	public static final int PORT = 2566;
 
 	/**
@@ -31,18 +29,14 @@ public abstract class ServerTestCase extends TestCase {
 		}
 	}
 
-	/** */
 	protected TestWiser wiser;
 
-	/** */
 	protected Client c;
 
-	/** */
 	public ServerTestCase(final String name) {
 		super(name);
 	}
 
-	/** */
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -55,7 +49,6 @@ public abstract class ServerTestCase extends TestCase {
 		this.c = new Client("localhost", PORT);
 	}
 
-	/** */
 	@Override
 	protected void tearDown() throws Exception {
 		this.wiser.stop();
@@ -66,17 +59,14 @@ public abstract class ServerTestCase extends TestCase {
 		super.tearDown();
 	}
 
-	/** */
 	public void send(final String msg) throws Exception {
 		this.c.send(msg);
 	}
 
-	/** */
 	public void expect(final String msg) throws Exception {
 		this.c.expect(msg);
 	}
 
-	/** */
 	public void expectContains(final String msg) throws Exception {
 		this.c.expectContains(msg);
 	}

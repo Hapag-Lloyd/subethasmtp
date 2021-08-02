@@ -8,14 +8,13 @@ import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.server.Session;
 
 /**
- * Provides a help <verb> system for people to interact with.
+ * Provides a help topic system for people to interact with.
  *
  * @author Ian McFarland &lt;ian@neo.com&gt;
  * @author Jon Stevens
  * @author Scott Hernandez
  */
 public class HelpCommand extends BaseCommand {
-	/** */
 	public HelpCommand() {
 		super("HELP",
 				"The HELP command gives help info about the topic specified.\n"
@@ -23,7 +22,6 @@ public class HelpCommand extends BaseCommand {
 				"[ <topic> ]");
 	}
 
-	/** */
 	@Override
 	public void execute(final String commandString, final Session context) throws IOException {
 		final String args = this.getArgPredicate(commandString);
@@ -38,7 +36,6 @@ public class HelpCommand extends BaseCommand {
 		}
 	}
 
-	/** */
 	private String getCommandMessage(final SMTPServer server) {
 		return "214-"
 				+ server.getSoftwareName()
@@ -51,7 +48,6 @@ public class HelpCommand extends BaseCommand {
 				+ "214 End of HELP info";
 	}
 
-	/** */
 	protected String getFormattedTopicList(final SMTPServer server) {
 		final StringBuilder sb = new StringBuilder();
 		for (final String key : server.getCommandHandler().getVerbs()) {
