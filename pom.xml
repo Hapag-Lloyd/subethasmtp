@@ -88,6 +88,7 @@
 		<eclipse.compiler.javadoc>disabled</eclipse.compiler.javadoc>
 		<eclipse.compiler.nullAnalysis>disabled</eclipse.compiler.nullAnalysis>
 
+		<doclint>all,-missing</doclint>
 		<jar.manifest.mainClass>org.subethamail.smtp.Version</jar.manifest.mainClass>
 		<maven.javadoc.failOnWarnings>false</maven.javadoc.failOnWarnings>
 
