@@ -153,7 +153,7 @@
 				<plugin>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<configuration>
-						<usedDependencies>
+						<usedDependencies combine.children="append">
 							<usedDependency>org.junit.vintage:junit-vintage-engine</usedDependency>
 						</usedDependencies>
 					</configuration>
