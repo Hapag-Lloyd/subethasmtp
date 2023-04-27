@@ -34,8 +34,8 @@ SubEtha SMTP,org.subethamail.smtp.auth,PlainAuthenticationHandlerFactory,23,0,0,
 SubEtha SMTP,org.subethamail.smtp.auth,LoginFailedException,8,0,0,0,4,0,2,0,2,0
 SubEtha SMTP,org.subethamail.smtp.auth,EasyAuthenticationHandlerFactory,23,0,0,0,6,0,2,0,2,0
 SubEtha SMTP,org.subethamail.smtp.auth,MultipleAuthenticationHandlerFactory,79,0,6,0,18,0,8,0,5,0
-SubEtha SMTP,org.subethamail.smtp.auth,PlainAuthenticationHandlerFactory.Handler,158,0,20,0,29,0,13,0,3,0
 SubEtha SMTP,org.subethamail.smtp.auth,LoginAuthenticationHandlerFactory.Handler,140,0,14,0,29,0,10,0,3,0
+SubEtha SMTP,org.subethamail.smtp.auth,PlainAuthenticationHandlerFactory.Handler,158,0,20,0,29,0,13,0,3,0
 SubEtha SMTP,org.subethamail.smtp.auth,LoginAuthenticationHandlerFactory,23,0,0,0,8,0,4,0,4,0
 SubEtha SMTP,org.subethamail.smtp.auth,MultipleAuthenticationHandlerFactory.Handler,66,0,6,0,14,0,6,0,3,0
 SubEtha SMTP,org.subethamail.wiser,WiserMessage,85,0,2,0,20,0,8,0,7,0
