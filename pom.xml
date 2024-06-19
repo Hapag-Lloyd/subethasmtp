@@ -129,9 +129,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1.1</version>
+			<groupId>jakarta.activation</groupId>
+			<artifactId>jakarta.activation-api</artifactId>
+			<version>1.2.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
