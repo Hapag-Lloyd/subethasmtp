@@ -80,6 +80,7 @@
 
 	<properties>
 		<parent-pom.create-changelog-md>false</parent-pom.create-changelog-md>
+		<parent-pom.create-dependabot-yml>false</parent-pom.create-dependabot-yml>
 		<parent-pom.create-lombok-config>false</parent-pom.create-lombok-config>
 		<parent-pom.default-sources-folder>java</parent-pom.default-sources-folder>
 		<parent-pom.github.organization>Hapag-Lloyd</parent-pom.github.organization>
@@ -129,8 +130,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.activation</groupId>
-			<artifactId>jakarta.activation</artifactId>
+			<groupId>jakarta.activation</groupId>
+			<artifactId>jakarta.activation-api</artifactId>
 			<version>1.2.2</version>
 			<scope>test</scope>
 		</dependency>
