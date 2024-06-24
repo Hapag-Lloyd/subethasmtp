@@ -17,8 +17,8 @@ import org.subethamail.smtp.util.EmailUtils;
  */
 public class MailCommand extends BaseCommand {
 	public MailCommand() {
-<span class="nc" id="L20">		super(&quot;MAIL&quot;, &quot;Specifies the sender.&quot;, &quot;FROM: &lt;sender&gt; [ &lt;parameters&gt; ]&quot;);</span>
-<span class="nc" id="L21">	}</span>
+<span class="fc" id="L20">		super(&quot;MAIL&quot;, &quot;Specifies the sender.&quot;, &quot;FROM: &lt;sender&gt; [ &lt;parameters&gt; ]&quot;);</span>
+<span class="fc" id="L21">	}</span>
 
 	/*
 	 * (non-Javadoc)
@@ -28,55 +28,55 @@ public class MailCommand extends BaseCommand {
 	 */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException, DropConnectionException {
-<span class="nc bnc" id="L31" title="All 2 branches missed.">		if (sess.isMailTransactionInProgress()) {</span>
-<span class="nc" id="L32">			sess.sendResponse(&quot;503 5.5.1 Sender already specified.&quot;);</span>
-<span class="nc" id="L33">			return;</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">		if (sess.isMailTransactionInProgress()) {</span>
+<span class="fc" id="L32">			sess.sendResponse(&quot;503 5.5.1 Sender already specified.&quot;);</span>
+<span class="fc" id="L33">			return;</span>
 		}
 
-<span class="nc bnc" id="L36" title="All 2 branches missed.">		if (commandString.trim().equals(&quot;MAIL FROM:&quot;)) {</span>
-<span class="nc" id="L37">			sess.sendResponse(&quot;501 Syntax: MAIL FROM: &lt;address&gt;&quot;);</span>
-<span class="nc" id="L38">			return;</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">		if (commandString.trim().equals(&quot;MAIL FROM:&quot;)) {</span>
+<span class="fc" id="L37">			sess.sendResponse(&quot;501 Syntax: MAIL FROM: &lt;address&gt;&quot;);</span>
+<span class="fc" id="L38">			return;</span>
 		}
 
-<span class="nc" id="L41">		final String args = this.getArgPredicate(commandString);</span>
-<span class="nc bnc" id="L42" title="All 2 branches missed.">		if (!args.toUpperCase(Locale.ENGLISH).startsWith(&quot;FROM:&quot;)) {</span>
-<span class="nc" id="L43">			sess.sendResponse(&quot;501 Syntax: MAIL FROM: &lt;address&gt;  Error in parameters: \&quot;&quot;</span>
-<span class="nc" id="L44">					+ this.getArgPredicate(commandString)</span>
+<span class="fc" id="L41">		final String args = this.getArgPredicate(commandString);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">		if (!args.toUpperCase(Locale.ENGLISH).startsWith(&quot;FROM:&quot;)) {</span>
+<span class="fc" id="L43">			sess.sendResponse(&quot;501 Syntax: MAIL FROM: &lt;address&gt;  Error in parameters: \&quot;&quot;</span>
+<span class="fc" id="L44">					+ this.getArgPredicate(commandString)</span>
 					+ &quot;\&quot;&quot;);
-<span class="nc" id="L46">			return;</span>
+<span class="fc" id="L46">			return;</span>
 		}
 
-<span class="nc" id="L49">		final String emailAddress = EmailUtils.extractEmailAddress(args, 5);</span>
-<span class="nc bnc" id="L50" title="All 2 branches missed.">		if (!EmailUtils.isValidEmailAddress(emailAddress)) {</span>
-<span class="nc" id="L51">			sess.sendResponse(&quot;553 &lt;&quot; + emailAddress + &quot;&gt; Invalid email address.&quot;);</span>
-<span class="nc" id="L52">			return;</span>
+<span class="fc" id="L49">		final String emailAddress = EmailUtils.extractEmailAddress(args, 5);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">		if (!EmailUtils.isValidEmailAddress(emailAddress)) {</span>
+<span class="fc" id="L51">			sess.sendResponse(&quot;553 &lt;&quot; + emailAddress + &quot;&gt; Invalid email address.&quot;);</span>
+<span class="fc" id="L52">			return;</span>
 		}
 
 		// extract SIZE argument from MAIL FROM command.
 		// disregard unknown parameters. TODO: reject unknown
 		// parameters.
-<span class="nc" id="L58">		int size = 0;</span>
-<span class="nc" id="L59">		final String largs = args.toLowerCase(Locale.ENGLISH);</span>
-<span class="nc" id="L60">		final int sizec = largs.indexOf(&quot; size=&quot;);</span>
-<span class="nc bnc" id="L61" title="All 2 branches missed.">		if (sizec &gt; -1) {</span>
+<span class="fc" id="L58">		int size = 0;</span>
+<span class="fc" id="L59">		final String largs = args.toLowerCase(Locale.ENGLISH);</span>
+<span class="fc" id="L60">		final int sizec = largs.indexOf(&quot; size=&quot;);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">		if (sizec &gt; -1) {</span>
 			// disregard non-numeric values.
-<span class="nc" id="L63">			final String ssize = largs.substring(sizec + 6).trim();</span>
-<span class="nc bnc" id="L64" title="All 4 branches missed.">			if (ssize.length() &gt; 0 &amp;&amp; ssize.matches(&quot;[0-9]+&quot;)) {</span>
-<span class="nc" id="L65">				size = Integer.parseInt(ssize);</span>
+<span class="fc" id="L63">			final String ssize = largs.substring(sizec + 6).trim();</span>
+<span class="pc bpc" id="L64" title="2 of 4 branches missed.">			if (ssize.length() &gt; 0 &amp;&amp; ssize.matches(&quot;[0-9]+&quot;)) {</span>
+<span class="fc" id="L65">				size = Integer.parseInt(ssize);</span>
 			}
 		}
 		// Reject the message if the size supplied by the client
 		// is larger than what we advertised in EHLO answer.
-<span class="nc bnc" id="L70" title="All 2 branches missed.">		if (size &gt; sess.getServer().getMaxMessageSize()) {</span>
-<span class="nc" id="L71">			sess.sendResponse(&quot;552 5.3.4 Message size exceeds fixed limit&quot;);</span>
-<span class="nc" id="L72">			return;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">		if (size &gt; sess.getServer().getMaxMessageSize()) {</span>
+<span class="fc" id="L71">			sess.sendResponse(&quot;552 5.3.4 Message size exceeds fixed limit&quot;);</span>
+<span class="fc" id="L72">			return;</span>
 		}
 
-<span class="nc" id="L75">		sess.setDeclaredMessageSize(size);</span>
-<span class="nc" id="L76">		sess.startMailTransaction();</span>
+<span class="fc" id="L75">		sess.setDeclaredMessageSize(size);</span>
+<span class="fc" id="L76">		sess.startMailTransaction();</span>
 
 		try {
-<span class="nc" id="L79">			sess.getMessageHandler().from(emailAddress);</span>
+<span class="fc" id="L79">			sess.getMessageHandler().from(emailAddress);</span>
 <span class="nc" id="L80">		} catch (final DropConnectionException ex) {</span>
 			// roll back the start of the transaction
 <span class="nc" id="L82">			sess.resetMailTransaction();</span>
@@ -86,9 +86,9 @@ public class MailCommand extends BaseCommand {
 <span class="nc" id="L86">			sess.resetMailTransaction();</span>
 <span class="nc" id="L87">			sess.sendResponse(ex.getErrorResponse());</span>
 <span class="nc" id="L88">			return;</span>
-<span class="nc" id="L89">		}</span>
+<span class="fc" id="L89">		}</span>
 
-<span class="nc" id="L91">		sess.sendResponse(&quot;250 Ok&quot;);</span>
-<span class="nc" id="L92">	}</span>
+<span class="fc" id="L91">		sess.sendResponse(&quot;250 Ok&quot;);</span>
+<span class="fc" id="L92">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

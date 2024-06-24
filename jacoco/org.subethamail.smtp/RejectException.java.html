@@ -23,17 +23,17 @@ public class RejectException extends RuntimeException {
 <span class="nc" id="L23">	}</span>
 
 	public RejectException(final int code, final String message) {
-<span class="nc" id="L26">		super(message);</span>
+<span class="fc" id="L26">		super(message);</span>
 
-<span class="nc" id="L28">		this.code = code;</span>
-<span class="nc" id="L29">	}</span>
+<span class="fc" id="L28">		this.code = code;</span>
+<span class="fc" id="L29">	}</span>
 
 	public int getCode() {
 <span class="nc" id="L32">		return this.code;</span>
 	}
 
 	public String getErrorResponse() {
-<span class="nc" id="L36">		return this.code + &quot; &quot; + this.getMessage();</span>
+<span class="fc" id="L36">		return this.code + &quot; &quot; + this.getMessage();</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

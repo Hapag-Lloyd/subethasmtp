@@ -34,32 +34,32 @@ public class ReceivedHeaderStream extends FilterInputStream {
 			final String softwareName,
 			final String id,
 			final String singleRecipient) {
-<span class="nc" id="L37">		super(in);</span>
+<span class="fc" id="L37">		super(in);</span>
 
 		/*
 		 * Looks like: Received: from iamhelo (wasabi.infohazard.org [209.237.247.14])
 		 * by mx.google.com with SMTP id 32si2669129wfa.13.2009.05.27.18.27.31; Wed, 27
 		 * May 2009 18:27:48 -0700 (PDT)
 		 */
-<span class="nc" id="L44">		final DateFormat fmt = new SimpleDateFormat(&quot;EEE, dd MMM yyyy HH:mm:ss Z (z)&quot;, Locale.US);</span>
-<span class="nc" id="L45">		final String timestamp = fmt.format(new Date());</span>
+<span class="fc" id="L44">		final DateFormat fmt = new SimpleDateFormat(&quot;EEE, dd MMM yyyy HH:mm:ss Z (z)&quot;, Locale.US);</span>
+<span class="fc" id="L45">		final String timestamp = fmt.format(new Date());</span>
 
-<span class="nc" id="L47">		final StringBuilder header = new StringBuilder();</span>
-<span class="nc" id="L48">		header.append(&quot;Received: from &quot; + heloHost + &quot; (&quot; + constructTcpInfo(host) + &quot;)\r\n&quot;);</span>
-<span class="nc" id="L49">		header.append(&quot;        by &quot; + whoami + &quot;\r\n&quot;);</span>
-<span class="nc" id="L50">		header.append(&quot;        with SMTP&quot;);</span>
-<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (softwareName != null) {</span>
-<span class="nc" id="L52">			header.append(&quot; (&quot; + softwareName + &quot;)&quot;);</span>
+<span class="fc" id="L47">		final StringBuilder header = new StringBuilder();</span>
+<span class="fc" id="L48">		header.append(&quot;Received: from &quot; + heloHost + &quot; (&quot; + constructTcpInfo(host) + &quot;)\r\n&quot;);</span>
+<span class="fc" id="L49">		header.append(&quot;        by &quot; + whoami + &quot;\r\n&quot;);</span>
+<span class="fc" id="L50">		header.append(&quot;        with SMTP&quot;);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">		if (softwareName != null) {</span>
+<span class="fc" id="L52">			header.append(&quot; (&quot; + softwareName + &quot;)&quot;);</span>
 		}
-<span class="nc" id="L54">		header.append(&quot; id &quot;).append(id);</span>
-<span class="nc bnc" id="L55" title="All 2 branches missed.">		if (singleRecipient != null) {</span>
-<span class="nc" id="L56">			header.append(&quot;\r\n        for &quot; + singleRecipient);</span>
+<span class="fc" id="L54">		header.append(&quot; id &quot;).append(id);</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">		if (singleRecipient != null) {</span>
+<span class="fc" id="L56">			header.append(&quot;\r\n        for &quot; + singleRecipient);</span>
 		}
-<span class="nc" id="L58">		header.append(&quot;;\r\n&quot;);</span>
-<span class="nc" id="L59">		header.append(&quot;        &quot; + timestamp + &quot;\r\n&quot;);</span>
+<span class="fc" id="L58">		header.append(&quot;;\r\n&quot;);</span>
+<span class="fc" id="L59">		header.append(&quot;        &quot; + timestamp + &quot;\r\n&quot;);</span>
 
-<span class="nc" id="L61">		this.header = new ByteArrayInputStream(TextUtils.getAsciiBytes(header.toString()));</span>
-<span class="nc" id="L62">	}</span>
+<span class="fc" id="L61">		this.header = new ByteArrayInputStream(TextUtils.getAsciiBytes(header.toString()));</span>
+<span class="fc" id="L62">	}</span>
 
 	/**
 	 * Returns a formatted TCP-info element, depending on the success of the IP
@@ -70,13 +70,13 @@ public class ReceivedHeaderStream extends FilterInputStream {
 	 */
 	private String constructTcpInfo(final InetAddress host) {
 		// if it is not successful it just returns the address
-<span class="nc" id="L73">		final String domain = host.getCanonicalHostName();</span>
-<span class="nc" id="L74">		final String address = host.getHostAddress();</span>
+<span class="fc" id="L73">		final String domain = host.getCanonicalHostName();</span>
+<span class="fc" id="L74">		final String address = host.getHostAddress();</span>
 		// check whether the host name resolution was successful
-<span class="nc bnc" id="L76" title="All 2 branches missed.">		if (domain.equals(address)) {</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">		if (domain.equals(address)) {</span>
 <span class="nc" id="L77">			return &quot;[&quot; + address + &quot;]&quot;;</span>
 		}
-<span class="nc" id="L79">		return domain + &quot; [&quot; + address + &quot;]&quot;;</span>
+<span class="fc" id="L79">		return domain + &quot; [&quot; + address + &quot;]&quot;;</span>
 	}
 
 	/* */
@@ -88,8 +88,8 @@ public class ReceivedHeaderStream extends FilterInputStream {
 	/* */
 	@Override
 	public void close() throws IOException {
-<span class="nc" id="L91">		super.close();</span>
-<span class="nc" id="L92">	}</span>
+<span class="fc" id="L91">		super.close();</span>
+<span class="fc" id="L92">	}</span>
 
 	/* */
 	@Override
@@ -106,25 +106,25 @@ public class ReceivedHeaderStream extends FilterInputStream {
 	/* */
 	@Override
 	public int read() throws IOException {
-<span class="nc bnc" id="L109" title="All 2 branches missed.">		if (this.header.available() &gt; 0) {</span>
-<span class="nc" id="L110">			return this.header.read();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">		if (this.header.available() &gt; 0) {</span>
+<span class="fc" id="L110">			return this.header.read();</span>
 		}
-<span class="nc" id="L112">		return super.read();</span>
+<span class="fc" id="L112">		return super.read();</span>
 	}
 
 	/* */
 	@Override
 	public int read(final byte[] b, final int off, final int len) throws IOException {
-<span class="nc bnc" id="L118" title="All 2 branches missed.">		if (this.header.available() &lt;= 0) {</span>
-<span class="nc" id="L119">			return super.read(b, off, len);</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">		if (this.header.available() &lt;= 0) {</span>
+<span class="fc" id="L119">			return super.read(b, off, len);</span>
 		}
-<span class="nc" id="L121">		final int countRead = this.header.read(b, off, len);</span>
-<span class="nc bnc" id="L122" title="All 2 branches missed.">		if (countRead &lt; len) {</span>
+<span class="fc" id="L121">		final int countRead = this.header.read(b, off, len);</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">		if (countRead &lt; len) {</span>
 			// We need to add a little extra from the normal stream
-<span class="nc" id="L124">			final int remainder = len - countRead;</span>
-<span class="nc" id="L125">			final int additionalRead = super.read(b, off + countRead, remainder);</span>
+<span class="fc" id="L124">			final int remainder = len - countRead;</span>
+<span class="fc" id="L125">			final int additionalRead = super.read(b, off + countRead, remainder);</span>
 
-<span class="nc" id="L127">			return countRead + additionalRead;</span>
+<span class="fc" id="L127">			return countRead + additionalRead;</span>
 		}
 <span class="nc" id="L129">		return countRead;</span>
 	}
@@ -147,4 +147,4 @@ public class ReceivedHeaderStream extends FilterInputStream {
 <span class="nc" id="L147">		throw new UnsupportedOperationException();</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

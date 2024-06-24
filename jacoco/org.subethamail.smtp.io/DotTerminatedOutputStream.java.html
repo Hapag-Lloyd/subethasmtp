@@ -12,9 +12,9 @@ import java.io.OutputStream;
  * See RFC 5321 4.1.1.4. second paragraph
  */
 public class DotTerminatedOutputStream extends FilterOutputStream {
-<span class="nc" id="L15">	private static final byte[] DOT_CRLF = new byte[] { '.', '\r', '\n' };</span>
+<span class="fc" id="L15">	private static final byte[] DOT_CRLF = new byte[] { '.', '\r', '\n' };</span>
 
-<span class="nc" id="L17">	private static final byte[] CRLF_DOT_CRLF = new byte[] { '\r', '\n', '.', '\r', '\n' };</span>
+<span class="fc" id="L17">	private static final byte[] CRLF_DOT_CRLF = new byte[] { '\r', '\n', '.', '\r', '\n' };</span>
 
 	/**
 	 * The last bytes written out by the {@link #write()} function. The first byte
@@ -22,30 +22,30 @@ public class DotTerminatedOutputStream extends FilterOutputStream {
 	 * written out by the write function. It's initial value is CR LF, so it is
 	 * possible to write out empty data.
 	 */
-<span class="nc" id="L25">	private final byte[] lastBytes = new byte[] { '\r', '\n' };</span>
+<span class="fc" id="L25">	private final byte[] lastBytes = new byte[] { '\r', '\n' };</span>
 
 	public DotTerminatedOutputStream(final OutputStream out) {
-<span class="nc" id="L28">		super(out);</span>
-<span class="nc" id="L29">	}</span>
+<span class="fc" id="L28">		super(out);</span>
+<span class="fc" id="L29">	}</span>
 
 	@Override
 	public void write(final int b) throws IOException {
-<span class="nc" id="L33">		lastBytes[0] = lastBytes[1];</span>
-<span class="nc" id="L34">		lastBytes[1] = (byte) b;</span>
-<span class="nc" id="L35">		super.write(b);</span>
-<span class="nc" id="L36">	}</span>
+<span class="fc" id="L33">		lastBytes[0] = lastBytes[1];</span>
+<span class="fc" id="L34">		lastBytes[1] = (byte) b;</span>
+<span class="fc" id="L35">		super.write(b);</span>
+<span class="fc" id="L36">	}</span>
 
 	@Override
 	public void write(final byte[] b, final int off, final int len) throws IOException {
-<span class="nc bnc" id="L40" title="All 2 branches missed.">		if (len == 1) {</span>
-<span class="nc" id="L41">			lastBytes[0] = lastBytes[1];</span>
-<span class="nc" id="L42">			lastBytes[1] = b[off];</span>
-<span class="nc bnc" id="L43" title="All 2 branches missed.">		} else if (len &gt;= 2) {</span>
-<span class="nc" id="L44">			lastBytes[0] = b[off + len - 2];</span>
-<span class="nc" id="L45">			lastBytes[1] = b[off + len - 1];</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">		if (len == 1) {</span>
+<span class="fc" id="L41">			lastBytes[0] = lastBytes[1];</span>
+<span class="fc" id="L42">			lastBytes[1] = b[off];</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">		} else if (len &gt;= 2) {</span>
+<span class="fc" id="L44">			lastBytes[0] = b[off + len - 2];</span>
+<span class="fc" id="L45">			lastBytes[1] = b[off + len - 1];</span>
 		}
-<span class="nc" id="L47">		super.write(b, off, len);</span>
-<span class="nc" id="L48">	}</span>
+<span class="fc" id="L47">		super.write(b, off, len);</span>
+<span class="fc" id="L48">	}</span>
 
 	/**
 	 * Writes &quot;. CR LF&quot; to the wrapped stream, but prefixes it with another CR LF
@@ -54,11 +54,11 @@ public class DotTerminatedOutputStream extends FilterOutputStream {
 	 * @throws IOException on IO error
 	 */
 	public void writeTerminatingSequence() throws IOException {
-<span class="nc bnc" id="L57" title="All 4 branches missed.">		if (lastBytes[0] == '\r' &amp;&amp; lastBytes[1] == '\n') {</span>
-<span class="nc" id="L58">			super.write(DOT_CRLF);</span>
+<span class="pc bpc" id="L57" title="1 of 4 branches missed.">		if (lastBytes[0] == '\r' &amp;&amp; lastBytes[1] == '\n') {</span>
+<span class="fc" id="L58">			super.write(DOT_CRLF);</span>
 		} else {
-<span class="nc" id="L60">			super.write(CRLF_DOT_CRLF);</span>
+<span class="fc" id="L60">			super.write(CRLF_DOT_CRLF);</span>
 		}
-<span class="nc" id="L62">	}</span>
+<span class="fc" id="L62">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

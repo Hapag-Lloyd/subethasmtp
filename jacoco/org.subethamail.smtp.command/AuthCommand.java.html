@@ -22,73 +22,73 @@ public class AuthCommand extends BaseCommand {
 
 	/** Creates a new instance of AuthCommand */
 	public AuthCommand() {
-<span class="nc" id="L25">		super(VERB,</span>
+<span class="fc" id="L25">		super(VERB,</span>
 				&quot;Authentication service&quot;,
 				VERB
 						+ &quot; &lt;mechanism&gt; [initial-response] \n&quot;
 						+ &quot;\t mechanism = a string identifying a SASL authentication mechanism,\n&quot;
 						+ &quot;\t an optional base64-encoded response&quot;);
-<span class="nc" id="L31">	}</span>
+<span class="fc" id="L31">	}</span>
 
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
-<span class="nc bnc" id="L35" title="All 2 branches missed.">		if (sess.isAuthenticated()) {</span>
-<span class="nc" id="L36">			sess.sendResponse(&quot;503 Refusing any other AUTH command.&quot;);</span>
-<span class="nc" id="L37">			return;</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">		if (sess.isAuthenticated()) {</span>
+<span class="fc" id="L36">			sess.sendResponse(&quot;503 Refusing any other AUTH command.&quot;);</span>
+<span class="fc" id="L37">			return;</span>
 		}
 
-<span class="nc" id="L40">		final AuthenticationHandlerFactory authFactory = sess.getServer().getAuthenticationHandlerFactory();</span>
+<span class="fc" id="L40">		final AuthenticationHandlerFactory authFactory = sess.getServer().getAuthenticationHandlerFactory();</span>
 
-<span class="nc bnc" id="L42" title="All 2 branches missed.">		if (authFactory == null) {</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">		if (authFactory == null) {</span>
 <span class="nc" id="L43">			sess.sendResponse(&quot;502 Authentication not supported&quot;);</span>
 <span class="nc" id="L44">			return;</span>
 		}
 
-<span class="nc" id="L47">		final AuthenticationHandler authHandler = authFactory.create();</span>
+<span class="fc" id="L47">		final AuthenticationHandler authHandler = authFactory.create();</span>
 
-<span class="nc" id="L49">		final String[] args = this.getArgs(commandString);</span>
+<span class="fc" id="L49">		final String[] args = this.getArgs(commandString);</span>
 		// Let's check the command syntax
-<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (args.length &lt; 2) {</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">		if (args.length &lt; 2) {</span>
 <span class="nc" id="L52">			sess.sendResponse(&quot;501 Syntax: &quot; + VERB + &quot; mechanism [initial-response]&quot;);</span>
 <span class="nc" id="L53">			return;</span>
 		}
 
 		// Let's check if we support the required authentication mechanism
-<span class="nc" id="L57">		final String mechanism = args[1];</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">		if (!authFactory.getAuthenticationMechanisms().contains(mechanism.toUpperCase(Locale.ENGLISH))) {</span>
+<span class="fc" id="L57">		final String mechanism = args[1];</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">		if (!authFactory.getAuthenticationMechanisms().contains(mechanism.toUpperCase(Locale.ENGLISH))) {</span>
 <span class="nc" id="L59">			sess.sendResponse(&quot;504 The requested authentication mechanism is not supported&quot;);</span>
 <span class="nc" id="L60">			return;</span>
 		}
 		// OK, let's go trough the authentication process.
 		try {
 			// The authentication process may require a series of challenge-responses
-<span class="nc" id="L65">			final CRLFTerminatedReader reader = sess.getReader();</span>
+<span class="fc" id="L65">			final CRLFTerminatedReader reader = sess.getReader();</span>
 
-<span class="nc" id="L67">			String response = authHandler.auth(commandString);</span>
-<span class="nc bnc" id="L68" title="All 2 branches missed.">			if (response != null) {</span>
+<span class="fc" id="L67">			String response = authHandler.auth(commandString);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">			if (response != null) {</span>
 				// challenge-response iteration
-<span class="nc" id="L70">				sess.sendResponse(response);</span>
+<span class="fc" id="L70">				sess.sendResponse(response);</span>
 			}
 
-<span class="nc bnc" id="L73" title="All 2 branches missed.">			while (response != null) {</span>
-<span class="nc" id="L74">				final String clientInput = reader.readLine();</span>
-<span class="nc bnc" id="L75" title="All 2 branches missed.">				if (clientInput.trim().equals(AUTH_CANCEL_COMMAND)) {</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">			while (response != null) {</span>
+<span class="fc" id="L74">				final String clientInput = reader.readLine();</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">				if (clientInput.trim().equals(AUTH_CANCEL_COMMAND)) {</span>
 					// RFC 2554 explicitly states this:
-<span class="nc" id="L77">					sess.sendResponse(&quot;501 Authentication canceled by client.&quot;);</span>
-<span class="nc" id="L78">					return;</span>
+<span class="fc" id="L77">					sess.sendResponse(&quot;501 Authentication canceled by client.&quot;);</span>
+<span class="fc" id="L78">					return;</span>
 				}
-<span class="nc" id="L80">				response = authHandler.auth(clientInput);</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">				if (response != null) {</span>
+<span class="fc" id="L80">				response = authHandler.auth(clientInput);</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">				if (response != null) {</span>
 					// challenge-response iteration
-<span class="nc" id="L83">					sess.sendResponse(response);</span>
+<span class="fc" id="L83">					sess.sendResponse(response);</span>
 				}
-<span class="nc" id="L85">			}</span>
+<span class="fc" id="L85">			}</span>
 
-<span class="nc" id="L87">			sess.sendResponse(&quot;235 Authentication successful.&quot;);</span>
-<span class="nc" id="L88">			sess.setAuthenticationHandler(authHandler);</span>
+<span class="fc" id="L87">			sess.sendResponse(&quot;235 Authentication successful.&quot;);</span>
+<span class="fc" id="L88">			sess.setAuthenticationHandler(authHandler);</span>
 <span class="nc" id="L89">		} catch (final RejectException authFailed) {</span>
 <span class="nc" id="L90">			sess.sendResponse(authFailed.getErrorResponse());</span>
-<span class="nc" id="L91">		}</span>
-<span class="nc" id="L92">	}</span>
+<span class="fc" id="L91">		}</span>
+<span class="fc" id="L92">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

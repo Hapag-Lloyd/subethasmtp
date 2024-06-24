@@ -34,7 +34,7 @@ import java.nio.charset.Charset;
  * &lt;a href=&quot;http://rfc.net/rfc2822.html#s2.1.1.&quot;&gt;RFC 2822&lt;/a&gt;.
  */
 public class CRLFTerminatedReader extends FilterReader {
-<span class="nc" id="L37">	private static int MAX_LINE_LENGTH = 998;</span>
+<span class="fc" id="L37">	private static int MAX_LINE_LENGTH = 998;</span>
 
 	@SuppressWarnings(&quot;serial&quot;)
 	public static class TerminationException extends IOException {
@@ -70,8 +70,8 @@ public class CRLFTerminatedReader extends FilterReader {
 	 * @param charset the {@link Charset} to use
 	 */
 	public CRLFTerminatedReader(final InputStream in, final Charset charset) {
-<span class="nc" id="L73">		super(new InputStreamReader(in, charset));</span>
-<span class="nc" id="L74">	}</span>
+<span class="fc" id="L73">		super(new InputStreamReader(in, charset));</span>
+<span class="fc" id="L74">	}</span>
 
 	/**
 	 * Constructs this CRLFTerminatedReader.
@@ -102,26 +102,26 @@ public class CRLFTerminatedReader extends FilterReader {
 	 * @throws IOException if an I/O error occurs.
 	 */
 	public String readLine() throws IOException {
-<span class="nc" id="L105">		final StringBuilder lineBuilder = new StringBuilder();</span>
+<span class="fc" id="L105">		final StringBuilder lineBuilder = new StringBuilder();</span>
 
 		/*
 		 * This boolean tells which state we are in, depending upon whether or not we
 		 * got a CR in the preceding read().
 		 */
-<span class="nc" id="L111">		boolean cr_just_received = false;</span>
+<span class="fc" id="L111">		boolean cr_just_received = false;</span>
 
 		/* If not -1 this int tells us where the first &quot;wrong&quot; line break is */
-<span class="nc" id="L114">		int tainted = -1;</span>
+<span class="fc" id="L114">		int tainted = -1;</span>
 
 		while (true) {
-<span class="nc" id="L117">			final int inChar = this.read();</span>
+<span class="fc" id="L117">			final int inChar = this.read();</span>
 
-<span class="nc bnc" id="L119" title="All 2 branches missed.">			if (!cr_just_received) {</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">			if (!cr_just_received) {</span>
 				// the most common case, somewhere before the end of a line
-<span class="nc bnc" id="L121" title="All 4 branches missed.">				switch (inChar) {</span>
+<span class="pc bpc" id="L121" title="2 of 4 branches missed.">				switch (inChar) {</span>
 				case CR:
-<span class="nc" id="L123">					cr_just_received = true;</span>
-<span class="nc" id="L124">					break;</span>
+<span class="fc" id="L123">					cr_just_received = true;</span>
+<span class="fc" id="L124">					break;</span>
 				case EOF:
 <span class="nc" id="L126">					return null; // premature EOF -- discards data(?)</span>
 				case LF: // the normal ending of a line
@@ -130,16 +130,16 @@ public class CRLFTerminatedReader extends FilterReader {
 					}
 					// intentional fall-through
 				default:
-<span class="nc" id="L133">					lineBuilder.append((char) inChar);</span>
+<span class="fc" id="L133">					lineBuilder.append((char) inChar);</span>
 				}
 			} else {
 				// CR has been received, we may be at end of line
-<span class="nc bnc" id="L137" title="All 4 branches missed.">				switch (inChar) {</span>
+<span class="pc bpc" id="L137" title="3 of 4 branches missed.">				switch (inChar) {</span>
 				case LF: // LF without a preceding CR
-<span class="nc bnc" id="L139" title="All 2 branches missed.">					if (tainted != -1) {</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">					if (tainted != -1) {</span>
 <span class="nc" id="L140">						throw new TerminationException(&quot;\&quot;bare\&quot; CR or LF in data stream&quot;, tainted);</span>
 					}
-<span class="nc" id="L142">					return lineBuilder.toString();</span>
+<span class="fc" id="L142">					return lineBuilder.toString();</span>
 				case EOF:
 <span class="nc" id="L144">					return null; // premature EOF -- discards data(?)</span>
 				case CR: // we got two (or more) CRs in a row
@@ -157,10 +157,10 @@ public class CRLFTerminatedReader extends FilterReader {
 <span class="nc" id="L157">					cr_just_received = false;</span>
 				}
 			}
-<span class="nc bnc" id="L160" title="All 2 branches missed.">			if (lineBuilder.length() &gt;= MAX_LINE_LENGTH) {</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">			if (lineBuilder.length() &gt;= MAX_LINE_LENGTH) {</span>
 <span class="nc" id="L161">				throw new MaxLineLengthException(&quot;Input line length is too long!&quot;);</span>
 			}
-<span class="nc" id="L163">		}</span>
+<span class="fc" id="L163">		}</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

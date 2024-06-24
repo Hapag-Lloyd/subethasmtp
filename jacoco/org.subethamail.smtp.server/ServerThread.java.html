@@ -23,7 +23,7 @@ import org.slf4j.MDC;
  * On shutdown it terminates not only this thread, but the session threads too.
  */
 class ServerThread extends Thread {
-<span class="nc" id="L26">	private final Logger log = LoggerFactory.getLogger(ServerThread.class);</span>
+<span class="fc" id="L26">	private final Logger log = LoggerFactory.getLogger(ServerThread.class);</span>
 
 	private final SMTPServer server;
 
@@ -47,18 +47,18 @@ class ServerThread extends Thread {
 	 */
 	private volatile boolean shuttingDown;
 
-<span class="nc" id="L50">	private boolean updateThreadName = true;</span>
+<span class="fc" id="L50">	private boolean updateThreadName = true;</span>
 
 	public ServerThread(final SMTPServer server, final ServerSocket serverSocket) {
-<span class="nc" id="L53">		super(ServerThread.class.getName() + &quot; &quot; + server.getDisplayableLocalSocketAddress());</span>
-<span class="nc" id="L54">		this.server = server;</span>
-<span class="nc" id="L55">		this.serverSocket = serverSocket;</span>
+<span class="fc" id="L53">		super(ServerThread.class.getName() + &quot; &quot; + server.getDisplayableLocalSocketAddress());</span>
+<span class="fc" id="L54">		this.server = server;</span>
+<span class="fc" id="L55">		this.serverSocket = serverSocket;</span>
 		// reserve a few places for graceful disconnects with informative
 		// messages
-<span class="nc" id="L58">		final int countOfConnectionPermits = server.getMaxConnections() + 10;</span>
-<span class="nc" id="L59">		this.connectionPermits = new Semaphore(countOfConnectionPermits);</span>
-<span class="nc" id="L60">		this.sessionThreads = new HashSet&lt;&gt;(countOfConnectionPermits * 4 / 3 + 1);</span>
-<span class="nc" id="L61">	}</span>
+<span class="fc" id="L58">		final int countOfConnectionPermits = server.getMaxConnections() + 10;</span>
+<span class="fc" id="L59">		this.connectionPermits = new Semaphore(countOfConnectionPermits);</span>
+<span class="fc" id="L60">		this.sessionThreads = new HashSet&lt;&gt;(countOfConnectionPermits * 4 / 3 + 1);</span>
+<span class="fc" id="L61">	}</span>
 
 	/**
 	 * This method is called by this thread when it starts up. To safely cause this
@@ -66,12 +66,12 @@ class ServerThread extends Thread {
 	 */
 	@Override
 	public void run() {
-<span class="nc" id="L69">		MDC.put(&quot;smtpServerLocalSocketAddress&quot;, server.getDisplayableLocalSocketAddress());</span>
-<span class="nc" id="L70">		log.info(&quot;SMTP server {} started&quot;, server.getDisplayableLocalSocketAddress());</span>
+<span class="fc" id="L69">		MDC.put(&quot;smtpServerLocalSocketAddress&quot;, server.getDisplayableLocalSocketAddress());</span>
+<span class="fc" id="L70">		log.info(&quot;SMTP server {} started&quot;, server.getDisplayableLocalSocketAddress());</span>
 
 		try {
-<span class="nc" id="L73">			runAcceptLoop();</span>
-<span class="nc" id="L74">			log.info(&quot;SMTP server {} stopped accepting connections&quot;, server.getDisplayableLocalSocketAddress());</span>
+<span class="fc" id="L73">			runAcceptLoop();</span>
+<span class="fc" id="L74">			log.info(&quot;SMTP server {} stopped accepting connections&quot;, server.getDisplayableLocalSocketAddress());</span>
 <span class="nc" id="L75">		} catch (final RuntimeException e) {</span>
 <span class="nc" id="L76">			log.error(&quot;Unexpected exception in server socket thread, server is stopped&quot;, e);</span>
 <span class="nc" id="L77">			throw e;</span>
@@ -79,29 +79,29 @@ class ServerThread extends Thread {
 <span class="nc" id="L79">			log.error(&quot;Unexpected error in server socket thread, server is stopped&quot;, e);</span>
 <span class="nc" id="L80">			throw e;</span>
 		} finally {
-<span class="nc" id="L82">			MDC.remove(&quot;smtpServerLocalSocketAddress&quot;);</span>
+<span class="fc" id="L82">			MDC.remove(&quot;smtpServerLocalSocketAddress&quot;);</span>
 		}
-<span class="nc" id="L84">	}</span>
+<span class="fc" id="L84">	}</span>
 
 	/**
 	 * Accept connections and run them in session threads until shutdown.
 	 */
 	private void runAcceptLoop() {
-<span class="nc bnc" id="L90" title="All 2 branches missed.">		while (!this.shuttingDown) {</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">		while (!this.shuttingDown) {</span>
 			try {
 				// block if too many connections are open
-<span class="nc" id="L93">				connectionPermits.acquire();</span>
+<span class="fc" id="L93">				connectionPermits.acquire();</span>
 <span class="nc" id="L94">			} catch (final InterruptedException consumed) {</span>
 <span class="nc" id="L95">				continue; // exit or retry</span>
-<span class="nc" id="L96">			}</span>
+<span class="fc" id="L96">			}</span>
 
-<span class="nc" id="L98">			Socket socket = null;</span>
+<span class="fc" id="L98">			Socket socket = null;</span>
 			try {
-<span class="nc" id="L100">				socket = this.serverSocket.accept();</span>
-<span class="nc" id="L101">			} catch (final IOException e) {</span>
-<span class="nc" id="L102">				connectionPermits.release();</span>
+<span class="fc" id="L100">				socket = this.serverSocket.accept();</span>
+<span class="fc" id="L101">			} catch (final IOException e) {</span>
+<span class="fc" id="L102">				connectionPermits.release();</span>
 				// it also happens during shutdown, when the socket is closed
-<span class="nc bnc" id="L104" title="All 2 branches missed.">				if (!this.shuttingDown) {</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">				if (!this.shuttingDown) {</span>
 <span class="nc" id="L105">					log.error(&quot;Error accepting connection&quot;, e);</span>
 					// prevent a possible loop causing 100% processor usage
 					try {
@@ -110,13 +110,13 @@ class ServerThread extends Thread {
 						// fall through
 <span class="nc" id="L111">					}</span>
 				}
-<span class="nc" id="L113">				continue;</span>
-<span class="nc" id="L114">			}</span>
+<span class="fc" id="L113">				continue;</span>
+<span class="fc" id="L114">			}</span>
 
-<span class="nc" id="L116">			Session session = null;</span>
+<span class="fc" id="L116">			Session session = null;</span>
 			try {
-<span class="nc" id="L118">				session = new Session(server, this, socket);</span>
-<span class="nc" id="L119">				session.setUpdateThreadName(isUpdateThreadName());</span>
+<span class="fc" id="L118">				session = new Session(server, this, socket);</span>
+<span class="fc" id="L119">				session.setUpdateThreadName(isUpdateThreadName());</span>
 <span class="nc" id="L120">			} catch (final IOException e) {</span>
 <span class="nc" id="L121">				connectionPermits.release();</span>
 <span class="nc" id="L122">				log.error(&quot;Error while starting a connection&quot;, e);</span>
@@ -126,16 +126,16 @@ class ServerThread extends Thread {
 <span class="nc" id="L126">					log.debug(&quot;Cannot close socket after exception&quot;, e1);</span>
 <span class="nc" id="L127">				}</span>
 <span class="nc" id="L128">				continue;</span>
-<span class="nc" id="L129">			}</span>
+<span class="fc" id="L129">			}</span>
 
 			// add thread before starting it,
 			// because it will check the count of sessions
-<span class="nc" id="L133">			synchronized (this) {</span>
-<span class="nc" id="L134">				this.sessionThreads.add(session);</span>
-<span class="nc" id="L135">			}</span>
+<span class="fc" id="L133">			synchronized (this) {</span>
+<span class="fc" id="L134">				this.sessionThreads.add(session);</span>
+<span class="fc" id="L135">			}</span>
 
 			try {
-<span class="nc" id="L138">				server.getExecutorService().execute(session);</span>
+<span class="fc" id="L138">				server.getExecutorService().execute(session);</span>
 <span class="nc" id="L139">			} catch (final RejectedExecutionException e) {</span>
 <span class="nc" id="L140">				connectionPermits.release();</span>
 <span class="nc" id="L141">				synchronized (this) {</span>
@@ -148,42 +148,42 @@ class ServerThread extends Thread {
 <span class="nc" id="L148">					log.debug(&quot;Cannot close socket after exception&quot;, e1);</span>
 <span class="nc" id="L149">				}</span>
 <span class="nc" id="L150">				continue;</span>
-<span class="nc" id="L151">			}</span>
-<span class="nc" id="L152">		}</span>
-<span class="nc" id="L153">	}</span>
+<span class="fc" id="L151">			}</span>
+<span class="fc" id="L152">		}</span>
+<span class="fc" id="L153">	}</span>
 
 	/**
 	 * Closes the server socket and all client sockets.
 	 */
 	public void shutdown() {
 		// First make sure we aren't accepting any new connections
-<span class="nc" id="L160">		shutdownServerThread();</span>
+<span class="fc" id="L160">		shutdownServerThread();</span>
 		// Shut down any open connections.
-<span class="nc" id="L162">		shutdownSessions();</span>
-<span class="nc" id="L163">	}</span>
+<span class="fc" id="L162">		shutdownSessions();</span>
+<span class="fc" id="L163">	}</span>
 
 	private void shutdownServerThread() {
-<span class="nc" id="L166">		shuttingDown = true;</span>
-<span class="nc" id="L167">		closeServerSocket();</span>
-<span class="nc" id="L168">		interrupt();</span>
+<span class="fc" id="L166">		shuttingDown = true;</span>
+<span class="fc" id="L167">		closeServerSocket();</span>
+<span class="fc" id="L168">		interrupt();</span>
 		try {
-<span class="nc" id="L170">			join();</span>
+<span class="fc" id="L170">			join();</span>
 <span class="nc" id="L171">		} catch (final InterruptedException e) {</span>
 <span class="nc" id="L172">			Thread.currentThread().interrupt();</span>
-<span class="nc" id="L173">		}</span>
-<span class="nc" id="L174">	}</span>
+<span class="fc" id="L173">		}</span>
+<span class="fc" id="L174">	}</span>
 
 	/**
 	 * Closes the serverSocket in an orderly way.
 	 */
 	private void closeServerSocket() {
 		try {
-<span class="nc" id="L181">			this.serverSocket.close();</span>
-<span class="nc" id="L182">			log.debug(&quot;SMTP Server socket shut down&quot;);</span>
+<span class="fc" id="L181">			this.serverSocket.close();</span>
+<span class="fc" id="L182">			log.debug(&quot;SMTP Server socket shut down&quot;);</span>
 <span class="nc" id="L183">		} catch (final IOException e) {</span>
 <span class="nc" id="L184">			log.error(&quot;Failed to close server socket.&quot;, e);</span>
-<span class="nc" id="L185">		}</span>
-<span class="nc" id="L186">	}</span>
+<span class="fc" id="L185">		}</span>
+<span class="fc" id="L186">	}</span>
 
 	private void shutdownSessions() {
 		// Copy the sessionThreads collection so the guarding lock on this
@@ -192,24 +192,24 @@ class ServerThread extends Thread {
 		// session threads call back the sessionEnded function in this instance,
 		// which locks this instance.
 		List&lt;Session&gt; sessionsToBeClosed;
-<span class="nc" id="L195">		synchronized (this) {</span>
-<span class="nc" id="L196">			sessionsToBeClosed = new ArrayList&lt;&gt;(sessionThreads);</span>
-<span class="nc" id="L197">		}</span>
-<span class="nc bnc" id="L198" title="All 2 branches missed.">		for (final Session sessionThread : sessionsToBeClosed) {</span>
-<span class="nc" id="L199">			sessionThread.quit();</span>
-<span class="nc" id="L200">		}</span>
+<span class="fc" id="L195">		synchronized (this) {</span>
+<span class="fc" id="L196">			sessionsToBeClosed = new ArrayList&lt;&gt;(sessionThreads);</span>
+<span class="fc" id="L197">		}</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">		for (final Session sessionThread : sessionsToBeClosed) {</span>
+<span class="fc" id="L199">			sessionThread.quit();</span>
+<span class="fc" id="L200">		}</span>
 
-<span class="nc" id="L202">		server.getExecutorService().shutdown();</span>
+<span class="fc" id="L202">		server.getExecutorService().shutdown();</span>
 		try {
-<span class="nc" id="L204">			server.getExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);</span>
+<span class="fc" id="L204">			server.getExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);</span>
 <span class="nc" id="L205">		} catch (final InterruptedException e) {</span>
 <span class="nc" id="L206">			log.warn(&quot;Interrupted waiting for termination of session threads&quot;, e);</span>
 <span class="nc" id="L207">			Thread.currentThread().interrupt();</span>
-<span class="nc" id="L208">		}</span>
-<span class="nc" id="L209">	}</span>
+<span class="fc" id="L208">		}</span>
+<span class="fc" id="L209">	}</span>
 
 	public synchronized boolean hasTooManyConnections() {
-<span class="nc bnc" id="L212" title="All 2 branches missed.">		return sessionThreads.size() &gt; server.getMaxConnections();</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">		return sessionThreads.size() &gt; server.getMaxConnections();</span>
 	}
 
 	public synchronized int getNumberOfConnections() {
@@ -221,18 +221,18 @@ class ServerThread extends Thread {
 	 * must call this function.
 	 */
 	public void sessionEnded(final Session session) {
-<span class="nc" id="L224">		synchronized (this) {</span>
-<span class="nc" id="L225">			sessionThreads.remove(session);</span>
-<span class="nc" id="L226">		}</span>
-<span class="nc" id="L227">		connectionPermits.release();</span>
-<span class="nc" id="L228">	}</span>
+<span class="fc" id="L224">		synchronized (this) {</span>
+<span class="fc" id="L225">			sessionThreads.remove(session);</span>
+<span class="fc" id="L226">		}</span>
+<span class="fc" id="L227">		connectionPermits.release();</span>
+<span class="fc" id="L228">	}</span>
 
 	public boolean isUpdateThreadName() {
-<span class="nc" id="L231">		return updateThreadName;</span>
+<span class="fc" id="L231">		return updateThreadName;</span>
 	}
 
 	public void setUpdateThreadName(final boolean updateThreadName) {
-<span class="nc" id="L235">		this.updateThreadName = updateThreadName;</span>
-<span class="nc" id="L236">	}</span>
+<span class="fc" id="L235">		this.updateThreadName = updateThreadName;</span>
+<span class="fc" id="L236">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

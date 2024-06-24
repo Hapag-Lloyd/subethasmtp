@@ -31,46 +31,46 @@ import org.subethamail.smtp.util.TextUtils;
  * @author Jeff Schnitzer
  */
 public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory {
-<span class="nc" id="L34">	static List&lt;String&gt; MECHANISMS = new ArrayList&lt;&gt;(1);</span>
+<span class="fc" id="L34">	static List&lt;String&gt; MECHANISMS = new ArrayList&lt;&gt;(1);</span>
 	static {
-<span class="nc" id="L36">		MECHANISMS.add(&quot;LOGIN&quot;);</span>
-<span class="nc" id="L37">	}</span>
+<span class="fc" id="L36">		MECHANISMS.add(&quot;LOGIN&quot;);</span>
+<span class="fc" id="L37">	}</span>
 
 	private final UsernamePasswordValidator helper;
 
-<span class="nc" id="L41">	public LoginAuthenticationHandlerFactory(final UsernamePasswordValidator helper) {</span>
-<span class="nc" id="L42">		this.helper = helper;</span>
-<span class="nc" id="L43">	}</span>
+<span class="fc" id="L41">	public LoginAuthenticationHandlerFactory(final UsernamePasswordValidator helper) {</span>
+<span class="fc" id="L42">		this.helper = helper;</span>
+<span class="fc" id="L43">	}</span>
 
 	@Override
 	public List&lt;String&gt; getAuthenticationMechanisms() {
-<span class="nc" id="L47">		return MECHANISMS;</span>
+<span class="fc" id="L47">		return MECHANISMS;</span>
 	}
 
 	@Override
 	public AuthenticationHandler create() {
-<span class="nc" id="L52">		return new Handler();</span>
+<span class="fc" id="L52">		return new Handler();</span>
 	}
 
 	/**
 	 */
-<span class="nc" id="L57">	class Handler implements AuthenticationHandler {</span>
+<span class="fc" id="L57">	class Handler implements AuthenticationHandler {</span>
 		private String username;
 
 		private String password;
 
 		@Override
 		public String auth(final String clientInput) throws RejectException {
-<span class="nc" id="L64">			final StringTokenizer stk = new StringTokenizer(clientInput);</span>
-<span class="nc" id="L65">			final String token = stk.nextToken();</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">			if (token.trim().equalsIgnoreCase(&quot;AUTH&quot;)) {</span>
-<span class="nc bnc" id="L67" title="All 2 branches missed.">				if (!stk.nextToken().trim().equalsIgnoreCase(&quot;LOGIN&quot;)) {</span>
+<span class="fc" id="L64">			final StringTokenizer stk = new StringTokenizer(clientInput);</span>
+<span class="fc" id="L65">			final String token = stk.nextToken();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">			if (token.trim().equalsIgnoreCase(&quot;AUTH&quot;)) {</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">				if (!stk.nextToken().trim().equalsIgnoreCase(&quot;LOGIN&quot;)) {</span>
 					// Mechanism mismatch
 <span class="nc" id="L69">					throw new RejectException(504, &quot;AUTH mechanism mismatch&quot;);</span>
 				}
 
-<span class="nc bnc" id="L72" title="All 2 branches missed.">				if (!stk.hasMoreTokens()) {</span>
-<span class="nc" id="L73">					return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Username:&quot;), false);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">				if (!stk.hasMoreTokens()) {</span>
+<span class="fc" id="L73">					return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Username:&quot;), false);</span>
 				}
 				// The client submitted an initial response, which should be
 				// the username.
@@ -86,33 +86,33 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 <span class="nc" id="L86">				return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Password:&quot;), false);</span>
 			}
 
-<span class="nc bnc" id="L89" title="All 2 branches missed.">			if (this.username == null) {</span>
-<span class="nc" id="L90">				final byte[] decoded = Base64.decode(clientInput);</span>
-<span class="nc bnc" id="L91" title="All 2 branches missed.">				if (decoded == null) {</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">			if (this.username == null) {</span>
+<span class="fc" id="L90">				final byte[] decoded = Base64.decode(clientInput);</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">				if (decoded == null) {</span>
 <span class="nc" id="L92">					throw new RejectException(501, /* 5.5.4 */</span>
 							&quot;Invalid command argument, not a valid Base64 string&quot;);
 				}
 
-<span class="nc" id="L96">				this.username = TextUtils.getStringUtf8(decoded);</span>
+<span class="fc" id="L96">				this.username = TextUtils.getStringUtf8(decoded);</span>
 
-<span class="nc" id="L98">				return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Password:&quot;), false);</span>
+<span class="fc" id="L98">				return &quot;334 &quot; + Base64.encodeToString(TextUtils.getAsciiBytes(&quot;Password:&quot;), false);</span>
 			}
 
-<span class="nc" id="L101">			final byte[] decoded = Base64.decode(clientInput);</span>
-<span class="nc bnc" id="L102" title="All 2 branches missed.">			if (decoded == null) {</span>
+<span class="fc" id="L101">			final byte[] decoded = Base64.decode(clientInput);</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">			if (decoded == null) {</span>
 <span class="nc" id="L103">				throw new RejectException(501, /* 5.5.4 */</span>
 						&quot;Invalid command argument, not a valid Base64 string&quot;);
 			}
 
-<span class="nc" id="L107">			this.password = TextUtils.getStringUtf8(decoded);</span>
+<span class="fc" id="L107">			this.password = TextUtils.getStringUtf8(decoded);</span>
 			try {
-<span class="nc" id="L109">				LoginAuthenticationHandlerFactory.this.helper.login(this.username, this.password);</span>
+<span class="fc" id="L109">				LoginAuthenticationHandlerFactory.this.helper.login(this.username, this.password);</span>
 <span class="nc" id="L110">			} catch (final LoginFailedException lfe) {</span>
 <span class="nc" id="L111">				throw new RejectException(535, /* 5.7.8 */</span>
 						&quot;Authentication credentials invalid&quot;);
-<span class="nc" id="L113">			}</span>
+<span class="fc" id="L113">			}</span>
 
-<span class="nc" id="L115">			return null;</span>
+<span class="fc" id="L115">			return null;</span>
 		}
 
 		/* */
@@ -122,4 +122,4 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 		}
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

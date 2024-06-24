@@ -12,15 +12,15 @@ public class EasyAuthenticationHandlerFactory extends MultipleAuthenticationHand
 	/** Just hold on to this so that the caller can get it later, if necessary */
 	UsernamePasswordValidator validator;
 
-<span class="nc" id="L15">	public EasyAuthenticationHandlerFactory(final UsernamePasswordValidator validator) {</span>
-<span class="nc" id="L16">		this.validator = validator;</span>
+<span class="fc" id="L15">	public EasyAuthenticationHandlerFactory(final UsernamePasswordValidator validator) {</span>
+<span class="fc" id="L16">		this.validator = validator;</span>
 
-<span class="nc" id="L18">		this.addFactory(new PlainAuthenticationHandlerFactory(this.validator));</span>
-<span class="nc" id="L19">		this.addFactory(new LoginAuthenticationHandlerFactory(this.validator));</span>
-<span class="nc" id="L20">	}</span>
+<span class="fc" id="L18">		this.addFactory(new PlainAuthenticationHandlerFactory(this.validator));</span>
+<span class="fc" id="L19">		this.addFactory(new LoginAuthenticationHandlerFactory(this.validator));</span>
+<span class="fc" id="L20">	}</span>
 
 	public UsernamePasswordValidator getValidator() {
 <span class="nc" id="L23">		return this.validator;</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

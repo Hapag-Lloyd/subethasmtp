@@ -19,30 +19,30 @@ import org.subethamail.smtp.util.Base64;
  * @author Ian White &amp;lt;ibwhite@gmail.com&amp;gt;
  */
 public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerFactory {
-<span class="nc" id="L22">	static List&lt;String&gt; MECHANISMS = new ArrayList&lt;&gt;(1);</span>
+<span class="fc" id="L22">	static List&lt;String&gt; MECHANISMS = new ArrayList&lt;&gt;(1);</span>
 	static {
-<span class="nc" id="L24">		MECHANISMS.add(&quot;PLAIN&quot;);</span>
-<span class="nc" id="L25">	}</span>
+<span class="fc" id="L24">		MECHANISMS.add(&quot;PLAIN&quot;);</span>
+<span class="fc" id="L25">	}</span>
 
 	private final UsernamePasswordValidator helper;
 
-<span class="nc" id="L29">	public PlainAuthenticationHandlerFactory(final UsernamePasswordValidator helper) {</span>
-<span class="nc" id="L30">		this.helper = helper;</span>
-<span class="nc" id="L31">	}</span>
+<span class="fc" id="L29">	public PlainAuthenticationHandlerFactory(final UsernamePasswordValidator helper) {</span>
+<span class="fc" id="L30">		this.helper = helper;</span>
+<span class="fc" id="L31">	}</span>
 
 	@Override
 	public List&lt;String&gt; getAuthenticationMechanisms() {
-<span class="nc" id="L35">		return MECHANISMS;</span>
+<span class="fc" id="L35">		return MECHANISMS;</span>
 	}
 
 	@Override
 	public AuthenticationHandler create() {
-<span class="nc" id="L40">		return new Handler();</span>
+<span class="fc" id="L40">		return new Handler();</span>
 	}
 
 	/**
 	 */
-<span class="nc" id="L45">	class Handler implements AuthenticationHandler {</span>
+<span class="fc" id="L45">	class Handler implements AuthenticationHandler {</span>
 		private String username;
 
 		private String password;
@@ -50,26 +50,26 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 		/* */
 		@Override
 		public String auth(final String clientInput) throws RejectException {
-<span class="nc" id="L53">			final StringTokenizer stk = new StringTokenizer(clientInput);</span>
-<span class="nc" id="L54">			String secret = stk.nextToken();</span>
-<span class="nc bnc" id="L55" title="All 2 branches missed.">			if (secret.trim().equalsIgnoreCase(&quot;AUTH&quot;)) {</span>
+<span class="fc" id="L53">			final StringTokenizer stk = new StringTokenizer(clientInput);</span>
+<span class="fc" id="L54">			String secret = stk.nextToken();</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">			if (secret.trim().equalsIgnoreCase(&quot;AUTH&quot;)) {</span>
 				// Let's read the RFC2554 &quot;initial-response&quot; parameter
 				// The line could be in the form of &quot;AUTH PLAIN &lt;base64Secret&gt;&quot;
-<span class="nc bnc" id="L58" title="All 2 branches missed.">				if (!stk.nextToken().trim().equalsIgnoreCase(&quot;PLAIN&quot;)) {</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">				if (!stk.nextToken().trim().equalsIgnoreCase(&quot;PLAIN&quot;)) {</span>
 					// Mechanism mismatch
 <span class="nc" id="L60">					throw new RejectException(504, &quot;AUTH mechanism mismatch&quot;);</span>
 				}
 
-<span class="nc bnc" id="L63" title="All 2 branches missed.">				if (!stk.hasMoreTokens()) {</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">				if (!stk.hasMoreTokens()) {</span>
 					// the client did not submit an initial response, we'll get it in the next pass
-<span class="nc" id="L65">					return &quot;334 Ok&quot;;</span>
+<span class="fc" id="L65">					return &quot;334 Ok&quot;;</span>
 				}
 				// the client submitted an initial response
 <span class="nc" id="L68">				secret = stk.nextToken();</span>
 			}
 
-<span class="nc" id="L71">			final byte[] decodedSecret = Base64.decode(secret);</span>
-<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (decodedSecret == null) {</span>
+<span class="fc" id="L71">			final byte[] decodedSecret = Base64.decode(secret);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">			if (decodedSecret == null) {</span>
 <span class="nc" id="L73">				throw new RejectException(501, /* 5.5.4 */</span>
 						&quot;Invalid command argument, not a valid Base64 string&quot;);
 			}
@@ -82,37 +82,37 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 			 */
 
 			int i, j;
-<span class="nc bnc" id="L85" title="All 4 branches missed.">			for (i = 0; i &lt; decodedSecret.length &amp;&amp; decodedSecret[i] != 0; i++) {}</span>
-<span class="nc bnc" id="L86" title="All 2 branches missed.">			if (i &gt;= decodedSecret.length) {</span>
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">			for (i = 0; i &lt; decodedSecret.length &amp;&amp; decodedSecret[i] != 0; i++) {}</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">			if (i &gt;= decodedSecret.length) {</span>
 <span class="nc" id="L87">				throw new RejectException(501, /* 5.5.4 */</span>
 						&quot;Invalid command argument, does not contain NUL&quot;);
 			}
 
-<span class="nc bnc" id="L91" title="All 4 branches missed.">			for (j = i + 1; j &lt; decodedSecret.length &amp;&amp; decodedSecret[j] != 0; j++) {}</span>
-<span class="nc bnc" id="L92" title="All 2 branches missed.">			if (j &gt;= decodedSecret.length) {</span>
+<span class="pc bpc" id="L91" title="1 of 4 branches missed.">			for (j = i + 1; j &lt; decodedSecret.length &amp;&amp; decodedSecret[j] != 0; j++) {}</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">			if (j &gt;= decodedSecret.length) {</span>
 <span class="nc" id="L93">				throw new RejectException(501, /* 5.5.4 */</span>
 						&quot;Invalid command argument, does not contain the second NUL&quot;);
 			}
 
 			@SuppressWarnings(&quot;unused&quot;)
-<span class="nc" id="L98">			final String authorizationId = new String(decodedSecret, 0, i);</span>
-<span class="nc" id="L99">			final String authenticationId = new String(decodedSecret, i + 1, j - i - 1);</span>
-<span class="nc" id="L100">			final String passwd = new String(decodedSecret, j + 1, decodedSecret.length - j - 1);</span>
+<span class="fc" id="L98">			final String authorizationId = new String(decodedSecret, 0, i);</span>
+<span class="fc" id="L99">			final String authenticationId = new String(decodedSecret, i + 1, j - i - 1);</span>
+<span class="fc" id="L100">			final String passwd = new String(decodedSecret, j + 1, decodedSecret.length - j - 1);</span>
 
 			// might be nice to do something with authorizationId, but for
 			// purposes of the UsernamePasswordValidator, we just want to use
 			// authenticationId
 
-<span class="nc" id="L106">			this.username = authenticationId;</span>
-<span class="nc" id="L107">			this.password = passwd;</span>
+<span class="fc" id="L106">			this.username = authenticationId;</span>
+<span class="fc" id="L107">			this.password = passwd;</span>
 			try {
-<span class="nc" id="L109">				PlainAuthenticationHandlerFactory.this.helper.login(this.username.toString(), this.password);</span>
+<span class="fc" id="L109">				PlainAuthenticationHandlerFactory.this.helper.login(this.username.toString(), this.password);</span>
 <span class="nc" id="L110">			} catch (final LoginFailedException lfe) {</span>
 <span class="nc" id="L111">				throw new RejectException(535, /* 5.7.8 */</span>
 						&quot;Authentication credentials invalid&quot;);
-<span class="nc" id="L113">			}</span>
+<span class="fc" id="L113">			}</span>
 
-<span class="nc" id="L115">			return null;</span>
+<span class="fc" id="L115">			return null;</span>
 		}
 
 		/* */
@@ -122,4 +122,4 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 		}
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

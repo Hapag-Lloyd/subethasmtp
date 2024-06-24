@@ -11,12 +11,12 @@ import org.subethamail.smtp.server.Session;
  */
 public class VerifyCommand extends BaseCommand {
 	public VerifyCommand() {
-<span class="nc" id="L14">		super(&quot;VRFY&quot;, &quot;The vrfy command.&quot;);</span>
-<span class="nc" id="L15">	}</span>
+<span class="fc" id="L14">		super(&quot;VRFY&quot;, &quot;The vrfy command.&quot;);</span>
+<span class="fc" id="L15">	}</span>
 
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
 <span class="nc" id="L19">		sess.sendResponse(&quot;502 VRFY command is disabled&quot;);</span>
 <span class="nc" id="L20">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

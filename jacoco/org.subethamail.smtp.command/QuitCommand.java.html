@@ -12,13 +12,13 @@ import org.subethamail.smtp.server.Session;
  */
 public class QuitCommand extends BaseCommand {
 	public QuitCommand() {
-<span class="nc" id="L15">		super(&quot;QUIT&quot;, &quot;Exit the SMTP session.&quot;);</span>
-<span class="nc" id="L16">	}</span>
+<span class="fc" id="L15">		super(&quot;QUIT&quot;, &quot;Exit the SMTP session.&quot;);</span>
+<span class="fc" id="L16">	}</span>
 
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException {
-<span class="nc" id="L20">		sess.sendResponse(&quot;221 Bye&quot;);</span>
-<span class="nc" id="L21">		sess.quit();</span>
-<span class="nc" id="L22">	}</span>
+<span class="fc" id="L20">		sess.sendResponse(&quot;221 Bye&quot;);</span>
+<span class="fc" id="L21">		sess.quit();</span>
+<span class="fc" id="L22">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

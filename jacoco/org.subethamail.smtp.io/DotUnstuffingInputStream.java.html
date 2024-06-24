@@ -27,11 +27,11 @@ public class DotUnstuffingInputStream extends FilterInputStream {
 	 * stream to detect '\r\n' sequences even when they occur across read
 	 * boundaries.
 	 */
-<span class="nc" id="L30">	protected int[] last = { -1, -1 };</span>
+<span class="fc" id="L30">	protected int[] last = { -1, -1 };</span>
 
 	public DotUnstuffingInputStream(final InputStream in) {
-<span class="nc" id="L33">		super(in);</span>
-<span class="nc" id="L34">	}</span>
+<span class="fc" id="L33">		super(in);</span>
+<span class="fc" id="L34">	}</span>
 
 	/**
 	 * Read through the stream, checking for '\r\n.'
@@ -40,14 +40,14 @@ public class DotUnstuffingInputStream extends FilterInputStream {
 	 */
 	@Override
 	public int read() throws IOException {
-<span class="nc" id="L43">		int b = this.in.read();</span>
-<span class="nc bnc" id="L44" title="All 6 branches missed.">		if (b == '.' &amp;&amp; this.last[0] == '\r' &amp;&amp; this.last[1] == '\n') {</span>
+<span class="fc" id="L43">		int b = this.in.read();</span>
+<span class="pc bpc" id="L44" title="3 of 6 branches missed.">		if (b == '.' &amp;&amp; this.last[0] == '\r' &amp;&amp; this.last[1] == '\n') {</span>
 			// skip this '.' because it should have been stuffed
 <span class="nc" id="L46">			b = this.in.read();</span>
 		}
-<span class="nc" id="L48">		this.last[0] = this.last[1];</span>
-<span class="nc" id="L49">		this.last[1] = b;</span>
-<span class="nc" id="L50">		return b;</span>
+<span class="fc" id="L48">		this.last[0] = this.last[1];</span>
+<span class="fc" id="L49">		this.last[1] = b;</span>
+<span class="fc" id="L50">		return b;</span>
 	}
 
 	/**
@@ -60,33 +60,33 @@ public class DotUnstuffingInputStream extends FilterInputStream {
 	 */
 	@Override
 	public int read(final byte[] b, final int off, final int len) throws IOException {
-<span class="nc bnc" id="L63" title="All 2 branches missed.">		if (b == null) {</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">		if (b == null) {</span>
 <span class="nc" id="L64">			throw new NullPointerException();</span>
 		}
-<span class="nc bnc" id="L66" title="All 10 branches missed.">		if (off &lt; 0 || off &gt; b.length || len &lt; 0 || off + len &gt; b.length || off + len &lt; 0) {</span>
+<span class="pc bpc" id="L66" title="5 of 10 branches missed.">		if (off &lt; 0 || off &gt; b.length || len &lt; 0 || off + len &gt; b.length || off + len &lt; 0) {</span>
 <span class="nc" id="L67">			throw new IndexOutOfBoundsException();</span>
 		}
-<span class="nc bnc" id="L69" title="All 2 branches missed.">		if (len == 0) {</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">		if (len == 0) {</span>
 <span class="nc" id="L70">			return 0;</span>
 		}
 
-<span class="nc" id="L73">		int c = this.read();</span>
-<span class="nc bnc" id="L74" title="All 2 branches missed.">		if (c == -1) {</span>
-<span class="nc" id="L75">			return -1;</span>
+<span class="fc" id="L73">		int c = this.read();</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">		if (c == -1) {</span>
+<span class="fc" id="L75">			return -1;</span>
 		}
-<span class="nc" id="L77">		b[off] = (byte) c;</span>
+<span class="fc" id="L77">		b[off] = (byte) c;</span>
 
-<span class="nc" id="L79">		int i = 1;</span>
+<span class="fc" id="L79">		int i = 1;</span>
 
-<span class="nc bnc" id="L81" title="All 2 branches missed.">		for (; i &lt; len; i++) {</span>
-<span class="nc" id="L82">			c = this.read();</span>
-<span class="nc bnc" id="L83" title="All 2 branches missed.">			if (c == -1) {</span>
-<span class="nc" id="L84">				break;</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">		for (; i &lt; len; i++) {</span>
+<span class="fc" id="L82">			c = this.read();</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">			if (c == -1) {</span>
+<span class="fc" id="L84">				break;</span>
 			}
-<span class="nc" id="L86">			b[off + i] = (byte) c;</span>
+<span class="fc" id="L86">			b[off + i] = (byte) c;</span>
 		}
 
-<span class="nc" id="L89">		return i;</span>
+<span class="fc" id="L89">		return i;</span>
 	}
 
 	/**
@@ -96,4 +96,4 @@ public class DotUnstuffingInputStream extends FilterInputStream {
 <span class="nc" id="L96">		return this.in;</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

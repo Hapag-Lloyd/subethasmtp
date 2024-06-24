@@ -16,21 +16,21 @@ public class RequireAuthCommandWrapper implements Command {
 	/**
 	 * @param wrapped the wrapped command (not null)
 	 */
-<span class="nc" id="L19">	public RequireAuthCommandWrapper(final Command wrapped) {</span>
-<span class="nc" id="L20">		this.wrapped = wrapped;</span>
-<span class="nc" id="L21">	}</span>
+<span class="fc" id="L19">	public RequireAuthCommandWrapper(final Command wrapped) {</span>
+<span class="fc" id="L20">		this.wrapped = wrapped;</span>
+<span class="fc" id="L21">	}</span>
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void execute(final String commandString, final Session sess) throws IOException, DropConnectionException {
-<span class="nc bnc" id="L28" title="All 4 branches missed.">		if (!sess.getServer().getRequireAuth() || sess.isAuthenticated()) {</span>
-<span class="nc" id="L29">			wrapped.execute(commandString, sess);</span>
+<span class="fc bfc" id="L28" title="All 4 branches covered.">		if (!sess.getServer().getRequireAuth() || sess.isAuthenticated()) {</span>
+<span class="fc" id="L29">			wrapped.execute(commandString, sess);</span>
 		} else {
-<span class="nc" id="L31">			sess.sendResponse(&quot;530 5.7.0  Authentication required&quot;);</span>
+<span class="fc" id="L31">			sess.sendResponse(&quot;530 5.7.0  Authentication required&quot;);</span>
 		}
-<span class="nc" id="L33">	}</span>
+<span class="fc" id="L33">	}</span>
 
 	/**
 	 * {@inheritDoc}
@@ -45,7 +45,7 @@ public class RequireAuthCommandWrapper implements Command {
 	 */
 	@Override
 	public String getName() {
-<span class="nc" id="L48">		return wrapped.getName();</span>
+<span class="fc" id="L48">		return wrapped.getName();</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -42,15 +42,15 @@ public class DeferredFileOutputStream extends ThresholdingOutputStream {
 	/** When the output stream is closed, this becomes true */
 	boolean closed;
 
-<span class="nc" id="L45">	boolean thresholdReached = false;</span>
+<span class="fc" id="L45">	boolean thresholdReached = false;</span>
 
 	/**
 	 * @param transitionSize is the number of bytes at which to convert from a byte
 	 *                       array to a real file.
 	 */
 	public DeferredFileOutputStream(final int transitionSize) {
-<span class="nc" id="L52">		super(new BetterByteArrayOutputStream(INITIAL_BUF_SIZE), transitionSize);</span>
-<span class="nc" id="L53">	}</span>
+<span class="fc" id="L52">		super(new BetterByteArrayOutputStream(INITIAL_BUF_SIZE), transitionSize);</span>
+<span class="fc" id="L53">	}</span>
 
 	/*
 	 * (non-Javadoc)
@@ -77,8 +77,8 @@ public class DeferredFileOutputStream extends ThresholdingOutputStream {
 	 *         depending on what state we are in.
 	 */
 	public InputStream getInputStream() throws IOException {
-<span class="nc bnc" id="L80" title="All 2 branches missed.">		if (this.output instanceof BetterByteArrayOutputStream) {</span>
-<span class="nc" id="L81">			return ((BetterByteArrayOutputStream) this.output).getInputStream();</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">		if (this.output instanceof BetterByteArrayOutputStream) {</span>
+<span class="fc" id="L81">			return ((BetterByteArrayOutputStream) this.output).getInputStream();</span>
 		}
 <span class="nc bnc" id="L83" title="All 2 branches missed.">		if (!this.closed) {</span>
 <span class="nc" id="L84">			this.output.flush();</span>
@@ -96,15 +96,15 @@ public class DeferredFileOutputStream extends ThresholdingOutputStream {
 	 */
 	@Override
 	public void close() throws IOException {
-<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (!this.closed) {</span>
-<span class="nc" id="L100">			this.output.flush();</span>
-<span class="nc" id="L101">			this.output.close();</span>
-<span class="nc" id="L102">			this.closed = true;</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">		if (!this.closed) {</span>
+<span class="fc" id="L100">			this.output.flush();</span>
+<span class="fc" id="L101">			this.output.close();</span>
+<span class="fc" id="L102">			this.closed = true;</span>
 		}
 
-<span class="nc bnc" id="L105" title="All 2 branches missed.">		if (this.outFile != null) {</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">		if (this.outFile != null) {</span>
 <span class="nc" id="L106">			this.outFile.delete();</span>
 		}
-<span class="nc" id="L108">	}</span>
+<span class="fc" id="L108">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

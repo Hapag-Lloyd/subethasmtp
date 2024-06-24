@@ -17,7 +17,7 @@ import org.subethamail.smtp.DropConnectionException;
  */
 abstract public class BaseCommand implements Command {
 	@SuppressWarnings(&quot;unused&quot;)
-<span class="nc" id="L20">	private final static Logger log = LoggerFactory.getLogger(BaseCommand.class);</span>
+<span class="fc" id="L20">	private final static Logger log = LoggerFactory.getLogger(BaseCommand.class);</span>
 
 	/** Name of the command, ie HELO */
 	private final String name;
@@ -25,15 +25,15 @@ abstract public class BaseCommand implements Command {
 	/** The help message for this command */
 	private final HelpMessage helpMsg;
 
-<span class="nc" id="L28">	protected BaseCommand(final String name, final String help) {</span>
-<span class="nc" id="L29">		this.name = name;</span>
-<span class="nc" id="L30">		this.helpMsg = new HelpMessage(name, help);</span>
-<span class="nc" id="L31">	}</span>
+<span class="fc" id="L28">	protected BaseCommand(final String name, final String help) {</span>
+<span class="fc" id="L29">		this.name = name;</span>
+<span class="fc" id="L30">		this.helpMsg = new HelpMessage(name, help);</span>
+<span class="fc" id="L31">	}</span>
 
-<span class="nc" id="L33">	protected BaseCommand(final String name, final String help, final String argumentDescription) {</span>
-<span class="nc" id="L34">		this.name = name;</span>
-<span class="nc" id="L35">		this.helpMsg = new HelpMessage(name, help, argumentDescription);</span>
-<span class="nc" id="L36">	}</span>
+<span class="fc" id="L33">	protected BaseCommand(final String name, final String help, final String argumentDescription) {</span>
+<span class="fc" id="L34">		this.name = name;</span>
+<span class="fc" id="L35">		this.helpMsg = new HelpMessage(name, help, argumentDescription);</span>
+<span class="fc" id="L36">	}</span>
 
 	/**
 	 * This is the main method that you need to override in order to implement a
@@ -49,25 +49,25 @@ abstract public class BaseCommand implements Command {
 
 	@Override
 	public String getName() {
-<span class="nc" id="L52">		return this.name;</span>
+<span class="fc" id="L52">		return this.name;</span>
 	}
 
 	protected String getArgPredicate(final String commandString) {
-<span class="nc bnc" id="L56" title="All 4 branches missed.">		if (commandString == null || commandString.length() &lt; 4) {</span>
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">		if (commandString == null || commandString.length() &lt; 4) {</span>
 <span class="nc" id="L57">			return &quot;&quot;;</span>
 		}
 
-<span class="nc" id="L60">		return commandString.substring(4).trim();</span>
+<span class="fc" id="L60">		return commandString.substring(4).trim();</span>
 	}
 
 	protected String[] getArgs(final String commandString) {
-<span class="nc" id="L64">		final List&lt;String&gt; strings = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L65">		final StringTokenizer stringTokenizer = new StringTokenizer(commandString);</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">		while (stringTokenizer.hasMoreTokens()) {</span>
-<span class="nc" id="L67">			strings.add(stringTokenizer.nextToken());</span>
+<span class="fc" id="L64">		final List&lt;String&gt; strings = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L65">		final StringTokenizer stringTokenizer = new StringTokenizer(commandString);</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">		while (stringTokenizer.hasMoreTokens()) {</span>
+<span class="fc" id="L67">			strings.add(stringTokenizer.nextToken());</span>
 		}
 
-<span class="nc" id="L70">		return strings.toArray(new String[strings.size()]);</span>
+<span class="fc" id="L70">		return strings.toArray(new String[strings.size()]);</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

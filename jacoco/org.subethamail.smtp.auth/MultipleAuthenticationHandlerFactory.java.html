@@ -23,17 +23,17 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	 * Maps the auth type (eg &quot;PLAIN&quot;) to a handler. The mechanism name (key) is in
 	 * upper case.
 	 */
-<span class="nc" id="L26">	Map&lt;String, AuthenticationHandlerFactory&gt; plugins = new HashMap&lt;&gt;();</span>
+<span class="pc" id="L26">	Map&lt;String, AuthenticationHandlerFactory&gt; plugins = new HashMap&lt;&gt;();</span>
 
 	/**
 	 * A more orderly list of the supported mechanisms. Mechanism names are in upper
 	 * case.
 	 */
-<span class="nc" id="L32">	List&lt;String&gt; mechanisms = new ArrayList&lt;&gt;();</span>
+<span class="pc" id="L32">	List&lt;String&gt; mechanisms = new ArrayList&lt;&gt;();</span>
 
-<span class="nc" id="L34">	public MultipleAuthenticationHandlerFactory() {</span>
+<span class="fc" id="L34">	public MultipleAuthenticationHandlerFactory() {</span>
 		// Starting with an empty list is ok, let the user add them all
-<span class="nc" id="L36">	}</span>
+<span class="fc" id="L36">	}</span>
 
 <span class="nc" id="L38">	public MultipleAuthenticationHandlerFactory(final Collection&lt;AuthenticationHandlerFactory&gt; factories) {</span>
 <span class="nc bnc" id="L39" title="All 2 branches missed.">		for (final AuthenticationHandlerFactory fact : factories) {</span>
@@ -42,52 +42,52 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 <span class="nc" id="L42">	}</span>
 
 	public void addFactory(final AuthenticationHandlerFactory fact) {
-<span class="nc" id="L45">		final List&lt;String&gt; partialMechanisms = fact.getAuthenticationMechanisms();</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">		for (final String mechanism : partialMechanisms) {</span>
-<span class="nc bnc" id="L47" title="All 2 branches missed.">			if (!this.mechanisms.contains(mechanism)) {</span>
-<span class="nc" id="L48">				this.mechanisms.add(mechanism);</span>
-<span class="nc" id="L49">				this.plugins.put(mechanism, fact);</span>
+<span class="fc" id="L45">		final List&lt;String&gt; partialMechanisms = fact.getAuthenticationMechanisms();</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">		for (final String mechanism : partialMechanisms) {</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">			if (!this.mechanisms.contains(mechanism)) {</span>
+<span class="fc" id="L48">				this.mechanisms.add(mechanism);</span>
+<span class="fc" id="L49">				this.plugins.put(mechanism, fact);</span>
 			}
-<span class="nc" id="L51">		}</span>
-<span class="nc" id="L52">	}</span>
+<span class="fc" id="L51">		}</span>
+<span class="fc" id="L52">	}</span>
 
 	@Override
 	public List&lt;String&gt; getAuthenticationMechanisms() {
-<span class="nc" id="L56">		return this.mechanisms;</span>
+<span class="fc" id="L56">		return this.mechanisms;</span>
 	}
 
 	@Override
 	public AuthenticationHandler create() {
-<span class="nc" id="L61">		return new Handler();</span>
+<span class="fc" id="L61">		return new Handler();</span>
 	}
 
 	/**
 	 */
-<span class="nc" id="L66">	class Handler implements AuthenticationHandler {</span>
+<span class="fc" id="L66">	class Handler implements AuthenticationHandler {</span>
 		AuthenticationHandler active;
 
 		/* */
 		@Override
 		public String auth(final String clientInput) throws RejectException {
-<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (this.active == null) {</span>
-<span class="nc" id="L73">				final StringTokenizer stk = new StringTokenizer(clientInput);</span>
-<span class="nc" id="L74">				final String auth = stk.nextToken();</span>
-<span class="nc bnc" id="L75" title="All 2 branches missed.">				if (!&quot;AUTH&quot;.equalsIgnoreCase(auth)) {</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">			if (this.active == null) {</span>
+<span class="fc" id="L73">				final StringTokenizer stk = new StringTokenizer(clientInput);</span>
+<span class="fc" id="L74">				final String auth = stk.nextToken();</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">				if (!&quot;AUTH&quot;.equalsIgnoreCase(auth)) {</span>
 <span class="nc" id="L76">					throw new IllegalArgumentException(&quot;Not an AUTH command: &quot; + clientInput);</span>
 				}
 
-<span class="nc" id="L79">				final String method = stk.nextToken();</span>
-<span class="nc" id="L80">				final AuthenticationHandlerFactory fact</span>
-<span class="nc" id="L81">						= MultipleAuthenticationHandlerFactory.this.plugins.get(method.toUpperCase(Locale.ENGLISH));</span>
+<span class="fc" id="L79">				final String method = stk.nextToken();</span>
+<span class="fc" id="L80">				final AuthenticationHandlerFactory fact</span>
+<span class="fc" id="L81">						= MultipleAuthenticationHandlerFactory.this.plugins.get(method.toUpperCase(Locale.ENGLISH));</span>
 
-<span class="nc bnc" id="L83" title="All 2 branches missed.">				if (fact == null) {</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">				if (fact == null) {</span>
 <span class="nc" id="L84">					throw new RejectException(504, &quot;Method not supported&quot;);</span>
 				}
 
-<span class="nc" id="L87">				this.active = fact.create();</span>
+<span class="fc" id="L87">				this.active = fact.create();</span>
 			}
 
-<span class="nc" id="L90">			return this.active.auth(clientInput);</span>
+<span class="fc" id="L90">			return this.active.auth(clientInput);</span>
 		}
 
 		/* */
@@ -97,4 +97,4 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 		}
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

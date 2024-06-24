@@ -12,16 +12,16 @@ import java.util.Iterator;
 	 * @return a delimited string containing the specified items
 	 */
 	public static String joinTogether(final Collection&lt;String&gt; items, final String delim) {
-<span class="nc" id="L15">		final StringBuffer ret = new StringBuffer();</span>
+<span class="fc" id="L15">		final StringBuffer ret = new StringBuffer();</span>
 
-<span class="nc bnc" id="L17" title="All 2 branches missed.">		for (final Iterator&lt;String&gt; it = items.iterator(); it.hasNext();) {</span>
-<span class="nc" id="L18">			ret.append(it.next());</span>
-<span class="nc bnc" id="L19" title="All 2 branches missed.">			if (it.hasNext()) {</span>
-<span class="nc" id="L20">				ret.append(delim);</span>
+<span class="fc bfc" id="L17" title="All 2 branches covered.">		for (final Iterator&lt;String&gt; it = items.iterator(); it.hasNext();) {</span>
+<span class="fc" id="L18">			ret.append(it.next());</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">			if (it.hasNext()) {</span>
+<span class="fc" id="L20">				ret.append(delim);</span>
 			}
 		}
 
-<span class="nc" id="L24">		return ret.toString();</span>
+<span class="fc" id="L24">		return ret.toString();</span>
 	}
 
 	/**
@@ -29,7 +29,7 @@ import java.util.Iterator;
 	 */
 	public static byte[] getBytes(final String str, final String charset) {
 		try {
-<span class="nc" id="L32">			return str.getBytes(charset);</span>
+<span class="fc" id="L32">			return str.getBytes(charset);</span>
 <span class="nc" id="L33">		} catch (final UnsupportedEncodingException ex) {</span>
 <span class="nc" id="L34">			throw new IllegalStateException(ex);</span>
 		}
@@ -37,7 +37,7 @@ import java.util.Iterator;
 
 	/** @return the string as US-ASCII bytes */
 	public static byte[] getAsciiBytes(final String str) {
-<span class="nc" id="L40">		return getBytes(str, &quot;US-ASCII&quot;);</span>
+<span class="fc" id="L40">		return getBytes(str, &quot;US-ASCII&quot;);</span>
 	}
 
 	/** @return the string as UTF-8 bytes */
@@ -53,7 +53,7 @@ import java.util.Iterator;
 	 */
 	private static String getString(final byte[] bytes, final String charset) {
 		try {
-<span class="nc" id="L56">			return new String(bytes, charset);</span>
+<span class="fc" id="L56">			return new String(bytes, charset);</span>
 <span class="nc" id="L57">		} catch (final UnsupportedEncodingException e) {</span>
 <span class="nc" id="L58">			throw new IllegalArgumentException(e);</span>
 		}
@@ -70,7 +70,7 @@ import java.util.Iterator;
 	 * Converts the specified bytes to String using UTF-8 encoding.
 	 */
 	public static String getStringUtf8(final byte[] bytes) {
-<span class="nc" id="L73">		return getString(bytes, &quot;UTF-8&quot;);</span>
+<span class="fc" id="L73">		return getString(bytes, &quot;UTF-8&quot;);</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

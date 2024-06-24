@@ -24,38 +24,38 @@ import org.subethamail.smtp.command.VerifyCommand;
  *
  * @author Marco Trevisan &amp;lt;mrctrevisan@yahoo.it&amp;gt;
  */
-<span class="nc" id="L27">public enum CommandRegistry {</span>
-<span class="nc" id="L28">	AUTH(new AuthCommand(), true, false),</span>
-<span class="nc" id="L29">	DATA(new DataCommand(), true, true),</span>
-<span class="nc" id="L30">	EHLO(new EhloCommand(), false, false),</span>
-<span class="nc" id="L31">	HELO(new HelloCommand(), true, false),</span>
-<span class="nc" id="L32">	HELP(new HelpCommand(), true, true),</span>
-<span class="nc" id="L33">	MAIL(new MailCommand(), true, true),</span>
-<span class="nc" id="L34">	NOOP(new NoopCommand(), false, false),</span>
-<span class="nc" id="L35">	QUIT(new QuitCommand(), false, false),</span>
-<span class="nc" id="L36">	RCPT(new ReceiptCommand(), true, true),</span>
-<span class="nc" id="L37">	RSET(new ResetCommand(), true, false),</span>
-<span class="nc" id="L38">	STARTTLS(new StartTLSCommand(), false, false),</span>
-<span class="nc" id="L39">	VRFY(new VerifyCommand(), true, true),</span>
-<span class="nc" id="L40">	EXPN(new ExpandCommand(), true, true);</span>
+<span class="fc" id="L27">public enum CommandRegistry {</span>
+<span class="fc" id="L28">	AUTH(new AuthCommand(), true, false),</span>
+<span class="fc" id="L29">	DATA(new DataCommand(), true, true),</span>
+<span class="fc" id="L30">	EHLO(new EhloCommand(), false, false),</span>
+<span class="fc" id="L31">	HELO(new HelloCommand(), true, false),</span>
+<span class="fc" id="L32">	HELP(new HelpCommand(), true, true),</span>
+<span class="fc" id="L33">	MAIL(new MailCommand(), true, true),</span>
+<span class="fc" id="L34">	NOOP(new NoopCommand(), false, false),</span>
+<span class="fc" id="L35">	QUIT(new QuitCommand(), false, false),</span>
+<span class="fc" id="L36">	RCPT(new ReceiptCommand(), true, true),</span>
+<span class="fc" id="L37">	RSET(new ResetCommand(), true, false),</span>
+<span class="fc" id="L38">	STARTTLS(new StartTLSCommand(), false, false),</span>
+<span class="fc" id="L39">	VRFY(new VerifyCommand(), true, true),</span>
+<span class="fc" id="L40">	EXPN(new ExpandCommand(), true, true);</span>
 
 	private Command command;
 
 	CommandRegistry(final Command cmd,
 			final boolean checkForStartedTLSWhenRequired,
-<span class="nc" id="L46">			final boolean checkForAuthIfRequired) {</span>
-<span class="nc bnc" id="L47" title="All 2 branches missed.">		if (checkForStartedTLSWhenRequired) {</span>
-<span class="nc" id="L48">			this.command = new RequireTLSCommandWrapper(cmd);</span>
+<span class="fc" id="L46">			final boolean checkForAuthIfRequired) {</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">		if (checkForStartedTLSWhenRequired) {</span>
+<span class="fc" id="L48">			this.command = new RequireTLSCommandWrapper(cmd);</span>
 		} else {
-<span class="nc" id="L50">			this.command = cmd;</span>
+<span class="fc" id="L50">			this.command = cmd;</span>
 		}
-<span class="nc bnc" id="L52" title="All 2 branches missed.">		if (checkForAuthIfRequired) {</span>
-<span class="nc" id="L53">			this.command = new RequireAuthCommandWrapper(this.command);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">		if (checkForAuthIfRequired) {</span>
+<span class="fc" id="L53">			this.command = new RequireAuthCommandWrapper(this.command);</span>
 		}
-<span class="nc" id="L55">	}</span>
+<span class="fc" id="L55">	}</span>
 
 	public Command getCommand() {
-<span class="nc" id="L58">		return this.command;</span>
+<span class="fc" id="L58">		return this.command;</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

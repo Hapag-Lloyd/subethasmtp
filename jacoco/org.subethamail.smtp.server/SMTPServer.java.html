@@ -41,20 +41,20 @@ import org.subethamail.smtp.Version;
  * @author Jeff Schnitzer
  */
 public class SMTPServer {
-<span class="nc" id="L44">	private final static Logger log = LoggerFactory.getLogger(SMTPServer.class);</span>
+<span class="fc" id="L44">	private final static Logger log = LoggerFactory.getLogger(SMTPServer.class);</span>
 
 	/** Hostname used if we can't find one */
 	private final static String UNKNOWN_HOSTNAME = &quot;localhost&quot;;
 
-<span class="nc" id="L49">	private InetAddress bindAddress = null; // default to all interfaces</span>
+<span class="fc" id="L49">	private InetAddress bindAddress = null; // default to all interfaces</span>
 
-<span class="nc" id="L51">	private int port = 25; // default to 25</span>
+<span class="fc" id="L51">	private int port = 25; // default to 25</span>
 
 	private String hostName; // defaults to a lookup of the local address
 
-<span class="nc" id="L55">	private int backlog = 50;</span>
+<span class="fc" id="L55">	private int backlog = 50;</span>
 
-<span class="nc" id="L57">	private String softwareName = &quot;SubEthaSMTP &quot; + Version.getSpecification();</span>
+<span class="fc" id="L57">	private String softwareName = &quot;SubEthaSMTP &quot; + Version.getSpecification();</span>
 
 	private MessageHandlerFactory messageHandlerFactory;
 
@@ -68,7 +68,7 @@ public class SMTPServer {
 	@GuardedBy(&quot;this&quot;)
 	private ServerThread serverThread;
 
-<span class="nc" id="L71">	private boolean updateThreadName = true;</span>
+<span class="fc" id="L71">	private boolean updateThreadName = true;</span>
 
 	/**
 	 * True if this SMTPServer was started. It remains true even if the SMTPServer
@@ -76,44 +76,44 @@ public class SMTPServer {
 	 * it was shutdown properly, it cannot be restarted, because the contained
 	 * thread pool object itself cannot be restarted.
 	 **/
-<span class="nc" id="L79">	@GuardedBy(&quot;this&quot;)</span>
+<span class="fc" id="L79">	@GuardedBy(&quot;this&quot;)</span>
 	private boolean started = false;
 
 	/** If true, TLS is enabled */
-<span class="nc" id="L83">	private boolean enableTLS = false;</span>
+<span class="fc" id="L83">	private boolean enableTLS = false;</span>
 
 	/** If true, TLS is not announced; ignored if enableTLS=false */
-<span class="nc" id="L86">	private boolean hideTLS = false;</span>
+<span class="fc" id="L86">	private boolean hideTLS = false;</span>
 
 	/** If true, a TLS handshake is required; ignored if enableTLS=false */
-<span class="nc" id="L89">	private boolean requireTLS = false;</span>
+<span class="fc" id="L89">	private boolean requireTLS = false;</span>
 
 	/**
 	 * If true, this server will accept no mail until auth succeeded; ignored if no
 	 * AuthenticationHandlerFactory has been set
 	 */
-<span class="nc" id="L95">	private boolean requireAuth = false;</span>
+<span class="fc" id="L95">	private boolean requireAuth = false;</span>
 
 	/** If true, no Received headers will be inserted */
-<span class="nc" id="L98">	private boolean disableReceivedHeaders = false;</span>
+<span class="fc" id="L98">	private boolean disableReceivedHeaders = false;</span>
 
 	/**
 	 * set a hard limit on the maximum number of connections this server will accept
 	 * once we reach this limit, the server will gracefully reject new connections.
 	 * Default is 1000.
 	 */
-<span class="nc" id="L105">	private int maxConnections = 1000;</span>
+<span class="fc" id="L105">	private int maxConnections = 1000;</span>
 
 	/**
 	 * The timeout for waiting for data on a connection is one minute: 1000 * 60 * 1
 	 */
-<span class="nc" id="L110">	private int connectionTimeout = 1000 * 60 * 1;</span>
+<span class="fc" id="L110">	private int connectionTimeout = 1000 * 60 * 1;</span>
 
 	/**
 	 * The maximal number of recipients that this server accepts per message
 	 * delivery request.
 	 */
-<span class="nc" id="L116">	private int maxRecipients = 1000;</span>
+<span class="fc" id="L116">	private int maxRecipients = 1000;</span>
 
 	/**
 	 * The maximum size of a message that the server will accept. This value is
@@ -123,16 +123,16 @@ public class SMTPServer {
 	 * limits on the message being read; you must do that yourself when reading
 	 * data.
 	 */
-<span class="nc" id="L126">	private int maxMessageSize = 0;</span>
+<span class="fc" id="L126">	private int maxMessageSize = 0;</span>
 
-<span class="nc" id="L128">	private SessionIdFactory sessionIdFactory = new TimeBasedSessionIdFactory();</span>
+<span class="fc" id="L128">	private SessionIdFactory sessionIdFactory = new TimeBasedSessionIdFactory();</span>
 
 	/**
 	 * Simple constructor.
 	 */
 	public SMTPServer(final MessageHandlerFactory handlerFactory) {
-<span class="nc" id="L134">		this(handlerFactory, null, null);</span>
-<span class="nc" id="L135">	}</span>
+<span class="fc" id="L134">		this(handlerFactory, null, null);</span>
+<span class="fc" id="L135">	}</span>
 
 	/**
 	 * Constructor with {@link AuthenticationHandlerFactory}.
@@ -162,37 +162,37 @@ public class SMTPServer {
 	 */
 	public SMTPServer(final MessageHandlerFactory msgHandlerFact,
 			final AuthenticationHandlerFactory authHandlerFact,
-<span class="nc" id="L165">			final ExecutorService executorService) {</span>
-<span class="nc" id="L166">		this.messageHandlerFactory = msgHandlerFact;</span>
-<span class="nc" id="L167">		this.authenticationHandlerFactory = authHandlerFact;</span>
+<span class="fc" id="L165">			final ExecutorService executorService) {</span>
+<span class="fc" id="L166">		this.messageHandlerFactory = msgHandlerFact;</span>
+<span class="fc" id="L167">		this.authenticationHandlerFactory = authHandlerFact;</span>
 
-<span class="nc bnc" id="L169" title="All 2 branches missed.">		if (executorService != null) {</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">		if (executorService != null) {</span>
 <span class="nc" id="L170">			this.executorService = executorService;</span>
 		} else {
-<span class="nc" id="L172">			this.executorService = Executors.newCachedThreadPool();</span>
+<span class="fc" id="L172">			this.executorService = Executors.newCachedThreadPool();</span>
 		}
 
 		try {
-<span class="nc" id="L176">			this.hostName = InetAddress.getLocalHost().getCanonicalHostName();</span>
+<span class="fc" id="L176">			this.hostName = InetAddress.getLocalHost().getCanonicalHostName();</span>
 <span class="nc" id="L177">		} catch (final UnknownHostException e) {</span>
 <span class="nc" id="L178">			this.hostName = UNKNOWN_HOSTNAME;</span>
-<span class="nc" id="L179">		}</span>
+<span class="fc" id="L179">		}</span>
 
-<span class="nc" id="L181">		this.commandHandler = new CommandHandler();</span>
-<span class="nc" id="L182">	}</span>
+<span class="fc" id="L181">		this.commandHandler = new CommandHandler();</span>
+<span class="fc" id="L182">	}</span>
 
 	/** @return the host name that will be reported to SMTP clients */
 	public String getHostName() {
-<span class="nc bnc" id="L186" title="All 2 branches missed.">		if (this.hostName == null) {</span>
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">		if (this.hostName == null) {</span>
 <span class="nc" id="L187">			return UNKNOWN_HOSTNAME;</span>
 		}
-<span class="nc" id="L189">		return this.hostName;</span>
+<span class="fc" id="L189">		return this.hostName;</span>
 	}
 
 	/** The host name that will be reported to SMTP clients */
 	public void setHostName(final String hostName) {
-<span class="nc" id="L194">		this.hostName = hostName;</span>
-<span class="nc" id="L195">	}</span>
+<span class="fc" id="L194">		this.hostName = hostName;</span>
+<span class="fc" id="L195">	}</span>
 
 	/** null means all interfaces */
 	public InetAddress getBindAddress() {
@@ -209,15 +209,15 @@ public class SMTPServer {
 	}
 
 	public void setPort(final int port) {
-<span class="nc" id="L212">		this.port = port;</span>
-<span class="nc" id="L213">	}</span>
+<span class="fc" id="L212">		this.port = port;</span>
+<span class="fc" id="L213">	}</span>
 
 	/**
 	 * The string reported to the public as the software running here. Defaults to
 	 * SubEthaSTP and the version number.
 	 */
 	public String getSoftwareName() {
-<span class="nc" id="L220">		return this.softwareName;</span>
+<span class="fc" id="L220">		return this.softwareName;</span>
 	}
 
 	/**
@@ -231,7 +231,7 @@ public class SMTPServer {
 	 * @return the ExecutorService handling client connections
 	 */
 	public ExecutorService getExecutorService() {
-<span class="nc" id="L234">		return executorService;</span>
+<span class="fc" id="L234">		return executorService;</span>
 	}
 
 	/**
@@ -269,11 +269,11 @@ public class SMTPServer {
 	 * An SMTPServer which has been shut down, must not be reused.
 	 */
 	public synchronized void start() {
-<span class="nc bnc" id="L272" title="All 2 branches missed.">		if (log.isInfoEnabled()) {</span>
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">		if (log.isInfoEnabled()) {</span>
 <span class="nc" id="L273">			log.info(&quot;SMTP server {} starting&quot;, getDisplayableLocalSocketAddress());</span>
 		}
 
-<span class="nc bnc" id="L276" title="All 2 branches missed.">		if (this.started) {</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">		if (this.started) {</span>
 <span class="nc" id="L277">			throw new IllegalStateException(&quot;SMTPServer can only be started once. &quot;</span>
 					+ &quot;Restarting is not allowed even after a proper shutdown.&quot;);
 		}
@@ -281,31 +281,31 @@ public class SMTPServer {
 		// Create our server socket here.
 		ServerSocket serverSocket;
 		try {
-<span class="nc" id="L284">			serverSocket = this.createServerSocket();</span>
+<span class="fc" id="L284">			serverSocket = this.createServerSocket();</span>
 <span class="nc" id="L285">		} catch (final Exception e) {</span>
 <span class="nc" id="L286">			throw new RuntimeException(e);</span>
-<span class="nc" id="L287">		}</span>
+<span class="fc" id="L287">		}</span>
 
-<span class="nc" id="L289">		this.serverThread = new ServerThread(this, serverSocket);</span>
-<span class="nc" id="L290">		this.serverThread.setUpdateThreadName(isUpdateThreadName());</span>
-<span class="nc" id="L291">		this.serverThread.start();</span>
-<span class="nc" id="L292">		this.started = true;</span>
-<span class="nc" id="L293">	}</span>
+<span class="fc" id="L289">		this.serverThread = new ServerThread(this, serverSocket);</span>
+<span class="fc" id="L290">		this.serverThread.setUpdateThreadName(isUpdateThreadName());</span>
+<span class="fc" id="L291">		this.serverThread.start();</span>
+<span class="fc" id="L292">		this.started = true;</span>
+<span class="fc" id="L293">	}</span>
 
 	/**
 	 * Shut things down gracefully.
 	 */
 	public synchronized void stop() {
-<span class="nc" id="L299">		log.info(&quot;SMTP server {} stopping...&quot;, getDisplayableLocalSocketAddress());</span>
-<span class="nc bnc" id="L300" title="All 2 branches missed.">		if (this.serverThread == null) {</span>
+<span class="fc" id="L299">		log.info(&quot;SMTP server {} stopping...&quot;, getDisplayableLocalSocketAddress());</span>
+<span class="pc bpc" id="L300" title="1 of 2 branches missed.">		if (this.serverThread == null) {</span>
 <span class="nc" id="L301">			return;</span>
 		}
 
-<span class="nc" id="L304">		this.serverThread.shutdown();</span>
-<span class="nc" id="L305">		this.serverThread = null;</span>
+<span class="fc" id="L304">		this.serverThread.shutdown();</span>
+<span class="fc" id="L305">		this.serverThread = null;</span>
 
-<span class="nc" id="L307">		log.info(&quot;SMTP server {} stopped&quot;, getDisplayableLocalSocketAddress());</span>
-<span class="nc" id="L308">	}</span>
+<span class="fc" id="L307">		log.info(&quot;SMTP server {} stopped&quot;, getDisplayableLocalSocketAddress());</span>
+<span class="fc" id="L308">	}</span>
 
 	/**
 	 * Override this method if you want to create your own server sockets. You must
@@ -316,20 +316,20 @@ public class SMTPServer {
 	protected ServerSocket createServerSocket() throws IOException {
 		InetSocketAddress isa;
 
-<span class="nc bnc" id="L319" title="All 2 branches missed.">		if (this.bindAddress == null) {</span>
-<span class="nc" id="L320">			isa = new InetSocketAddress(this.port);</span>
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">		if (this.bindAddress == null) {</span>
+<span class="fc" id="L320">			isa = new InetSocketAddress(this.port);</span>
 		} else {
 <span class="nc" id="L322">			isa = new InetSocketAddress(this.bindAddress, this.port);</span>
 		}
 
-<span class="nc" id="L325">		final ServerSocket serverSocket = new ServerSocket();</span>
-<span class="nc" id="L326">		serverSocket.bind(isa, this.backlog);</span>
+<span class="fc" id="L325">		final ServerSocket serverSocket = new ServerSocket();</span>
+<span class="fc" id="L326">		serverSocket.bind(isa, this.backlog);</span>
 
-<span class="nc bnc" id="L328" title="All 2 branches missed.">		if (this.port == 0) {</span>
+<span class="pc bpc" id="L328" title="1 of 2 branches missed.">		if (this.port == 0) {</span>
 <span class="nc" id="L329">			this.port = serverSocket.getLocalPort();</span>
 		}
 
-<span class="nc" id="L332">		return serverSocket;</span>
+<span class="fc" id="L332">		return serverSocket;</span>
 	}
 
 	/**
@@ -359,14 +359,14 @@ public class SMTPServer {
 	}
 
 	public String getDisplayableLocalSocketAddress() {
-<span class="nc bnc" id="L362" title="All 2 branches missed.">		return (this.bindAddress == null ? &quot;*&quot; : this.bindAddress) + &quot;:&quot; + this.port;</span>
+<span class="pc bpc" id="L362" title="1 of 2 branches missed.">		return (this.bindAddress == null ? &quot;*&quot; : this.bindAddress) + &quot;:&quot; + this.port;</span>
 	}
 
 	/**
 	 * @return the factory for message handlers, cannot be null
 	 */
 	public MessageHandlerFactory getMessageHandlerFactory() {
-<span class="nc" id="L369">		return this.messageHandlerFactory;</span>
+<span class="fc" id="L369">		return this.messageHandlerFactory;</span>
 	}
 
 	public void setMessageHandlerFactory(final MessageHandlerFactory fact) {
@@ -378,12 +378,12 @@ public class SMTPServer {
 	 *         set.
 	 */
 	public AuthenticationHandlerFactory getAuthenticationHandlerFactory() {
-<span class="nc" id="L381">		return this.authenticationHandlerFactory;</span>
+<span class="fc" id="L381">		return this.authenticationHandlerFactory;</span>
 	}
 
 	public void setAuthenticationHandlerFactory(final AuthenticationHandlerFactory fact) {
-<span class="nc" id="L385">		this.authenticationHandlerFactory = fact;</span>
-<span class="nc" id="L386">	}</span>
+<span class="fc" id="L385">		this.authenticationHandlerFactory = fact;</span>
+<span class="fc" id="L386">	}</span>
 
 	/**
 	 * The CommandHandler manages handling the SMTP commands such as QUIT, MAIL,
@@ -392,11 +392,11 @@ public class SMTPServer {
 	 * @return An instance of CommandHandler
 	 */
 	public CommandHandler getCommandHandler() {
-<span class="nc" id="L395">		return this.commandHandler;</span>
+<span class="fc" id="L395">		return this.commandHandler;</span>
 	}
 
 	public int getMaxConnections() {
-<span class="nc" id="L399">		return this.maxConnections;</span>
+<span class="fc" id="L399">		return this.maxConnections;</span>
 	}
 
 	/**
@@ -414,7 +414,7 @@ public class SMTPServer {
 <span class="nc" id="L414">	}</span>
 
 	public int getConnectionTimeout() {
-<span class="nc" id="L417">		return this.connectionTimeout;</span>
+<span class="fc" id="L417">		return this.connectionTimeout;</span>
 	}
 
 	/**
@@ -427,7 +427,7 @@ public class SMTPServer {
 <span class="nc" id="L427">	}</span>
 
 	public int getMaxRecipients() {
-<span class="nc" id="L430">		return this.maxRecipients;</span>
+<span class="fc" id="L430">		return this.maxRecipients;</span>
 	}
 
 	/**
@@ -461,7 +461,7 @@ public class SMTPServer {
 <span class="nc" id="L461">	}</span>
 
 	public boolean getEnableTLS() {
-<span class="nc" id="L464">		return enableTLS;</span>
+<span class="fc" id="L464">		return enableTLS;</span>
 	}
 
 	/**
@@ -493,7 +493,7 @@ public class SMTPServer {
 <span class="nc" id="L493">	}</span>
 
 	public boolean getRequireTLS() {
-<span class="nc" id="L496">		return this.requireTLS;</span>
+<span class="fc" id="L496">		return this.requireTLS;</span>
 	}
 
 	/**
@@ -502,11 +502,11 @@ public class SMTPServer {
 	 *                   disableTLS=true.
 	 */
 	public void setRequireTLS(final boolean requireTLS) {
-<span class="nc" id="L505">		this.requireTLS = requireTLS;</span>
-<span class="nc" id="L506">	}</span>
+<span class="fc" id="L505">		this.requireTLS = requireTLS;</span>
+<span class="fc" id="L506">	}</span>
 
 	public boolean getRequireAuth() {
-<span class="nc" id="L509">		return requireAuth;</span>
+<span class="fc" id="L509">		return requireAuth;</span>
 	}
 
 	/**
@@ -516,25 +516,25 @@ public class SMTPServer {
 	 *                    authentication. Defaults to false.
 	 */
 	public void setRequireAuth(final boolean requireAuth) {
-<span class="nc" id="L519">		this.requireAuth = requireAuth;</span>
-<span class="nc" id="L520">	}</span>
+<span class="fc" id="L519">		this.requireAuth = requireAuth;</span>
+<span class="fc" id="L520">	}</span>
 
 	/**
 	 * @return the maxMessageSize
 	 */
 	public int getMaxMessageSize() {
-<span class="nc" id="L526">		return maxMessageSize;</span>
+<span class="fc" id="L526">		return maxMessageSize;</span>
 	}
 
 	/**
 	 * @param maxMessageSize the maxMessageSize to set
 	 */
 	public void setMaxMessageSize(final int maxMessageSize) {
-<span class="nc" id="L533">		this.maxMessageSize = maxMessageSize;</span>
-<span class="nc" id="L534">	}</span>
+<span class="fc" id="L533">		this.maxMessageSize = maxMessageSize;</span>
+<span class="fc" id="L534">	}</span>
 
 	public boolean getDisableReceivedHeaders() {
-<span class="nc" id="L537">		return disableReceivedHeaders;</span>
+<span class="fc" id="L537">		return disableReceivedHeaders;</span>
 	}
 
 	/**
@@ -546,7 +546,7 @@ public class SMTPServer {
 <span class="nc" id="L546">	}</span>
 
 	public SessionIdFactory getSessionIdFactory() {
-<span class="nc" id="L549">		return sessionIdFactory;</span>
+<span class="fc" id="L549">		return sessionIdFactory;</span>
 	}
 
 	/**
@@ -558,11 +558,11 @@ public class SMTPServer {
 <span class="nc" id="L558">	}</span>
 
 	public boolean isUpdateThreadName() {
-<span class="nc" id="L561">		return updateThreadName;</span>
+<span class="fc" id="L561">		return updateThreadName;</span>
 	}
 
 	public void setUpdateThreadName(final boolean updateThreadName) {
 <span class="nc" id="L565">		this.updateThreadName = updateThreadName;</span>
 <span class="nc" id="L566">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

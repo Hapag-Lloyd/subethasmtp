@@ -28,7 +28,7 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 	 * 5 megs by default. The server will buffer incoming messages to disk when they
 	 * hit this limit in the DATA received.
 	 */
-<span class="nc" id="L31">	private static int DEFAULT_DATA_DEFERRED_SIZE = 1024 * 1024 * 5;</span>
+<span class="fc" id="L31">	private static int DEFAULT_DATA_DEFERRED_SIZE = 1024 * 1024 * 5;</span>
 
 	private final Collection&lt;SimpleMessageListener&gt; listeners;
 
@@ -40,8 +40,8 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 	 * Default data deferred size is 5 megs.
 	 */
 	public SimpleMessageListenerAdapter(final SimpleMessageListener listener) {
-<span class="nc" id="L43">		this(Collections.singleton(listener), DEFAULT_DATA_DEFERRED_SIZE);</span>
-<span class="nc" id="L44">	}</span>
+<span class="fc" id="L43">		this(Collections.singleton(listener), DEFAULT_DATA_DEFERRED_SIZE);</span>
+<span class="fc" id="L44">	}</span>
 
 	/**
 	 * Initializes this factory with the listeners.
@@ -58,10 +58,10 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 	 * @param dataDeferredSize The server will buffer incoming messages to disk when
 	 *                         they hit this limit in the DATA received.
 	 */
-<span class="nc" id="L61">	public SimpleMessageListenerAdapter(final Collection&lt;SimpleMessageListener&gt; listeners, final int dataDeferredSize) {</span>
-<span class="nc" id="L62">		this.listeners = listeners;</span>
-<span class="nc" id="L63">		this.dataDeferredSize = dataDeferredSize;</span>
-<span class="nc" id="L64">	}</span>
+<span class="fc" id="L61">	public SimpleMessageListenerAdapter(final Collection&lt;SimpleMessageListener&gt; listeners, final int dataDeferredSize) {</span>
+<span class="fc" id="L62">		this.listeners = listeners;</span>
+<span class="fc" id="L63">		this.dataDeferredSize = dataDeferredSize;</span>
+<span class="fc" id="L64">	}</span>
 
 	/*
 	 * (non-Javadoc)
@@ -71,7 +71,7 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 	 */
 	@Override
 	public MessageHandler create(final MessageContext ctx) {
-<span class="nc" id="L74">		return new Handler(ctx);</span>
+<span class="fc" id="L74">		return new Handler(ctx);</span>
 	}
 
 	/**
@@ -81,19 +81,19 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 		SimpleMessageListener listener;
 
 		public SimpleMessageListener getListener() {
-<span class="nc" id="L84">			return this.listener;</span>
+<span class="fc" id="L84">			return this.listener;</span>
 		}
 
 		String recipient;
 
 		public String getRecipient() {
-<span class="nc" id="L90">			return this.recipient;</span>
+<span class="fc" id="L90">			return this.recipient;</span>
 		}
 
-<span class="nc" id="L93">		public Delivery(final SimpleMessageListener listener, final String recipient) {</span>
-<span class="nc" id="L94">			this.listener = listener;</span>
-<span class="nc" id="L95">			this.recipient = recipient;</span>
-<span class="nc" id="L96">		}</span>
+<span class="fc" id="L93">		public Delivery(final SimpleMessageListener listener, final String recipient) {</span>
+<span class="fc" id="L94">			this.listener = listener;</span>
+<span class="fc" id="L95">			this.recipient = recipient;</span>
+<span class="fc" id="L96">		}</span>
 	}
 
 	/**
@@ -104,55 +104,55 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory {
 
 		String from;
 
-<span class="nc" id="L107">		List&lt;Delivery&gt; deliveries = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L107">		List&lt;Delivery&gt; deliveries = new ArrayList&lt;&gt;();</span>
 
-<span class="nc" id="L109">		public Handler(final MessageContext ctx) {</span>
-<span class="nc" id="L110">			this.ctx = ctx;</span>
-<span class="nc" id="L111">		}</span>
+<span class="fc" id="L109">		public Handler(final MessageContext ctx) {</span>
+<span class="fc" id="L110">			this.ctx = ctx;</span>
+<span class="fc" id="L111">		}</span>
 
 		@Override
 		public void from(final String from) throws RejectException {
-<span class="nc" id="L115">			this.from = from;</span>
-<span class="nc" id="L116">		}</span>
+<span class="fc" id="L115">			this.from = from;</span>
+<span class="fc" id="L116">		}</span>
 
 		@Override
 		public void recipient(final String recipient) throws RejectException {
-<span class="nc" id="L120">			boolean addedListener = false;</span>
+<span class="fc" id="L120">			boolean addedListener = false;</span>
 
-<span class="nc bnc" id="L122" title="All 2 branches missed.">			for (final SimpleMessageListener listener : SimpleMessageListenerAdapter.this.listeners) {</span>
-<span class="nc bnc" id="L123" title="All 2 branches missed.">				if (listener.accept(this.from, recipient)) {</span>
-<span class="nc" id="L124">					this.deliveries.add(new Delivery(listener, recipient));</span>
-<span class="nc" id="L125">					addedListener = true;</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">			for (final SimpleMessageListener listener : SimpleMessageListenerAdapter.this.listeners) {</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">				if (listener.accept(this.from, recipient)) {</span>
+<span class="fc" id="L124">					this.deliveries.add(new Delivery(listener, recipient));</span>
+<span class="fc" id="L125">					addedListener = true;</span>
 				}
-<span class="nc" id="L127">			}</span>
+<span class="fc" id="L127">			}</span>
 
-<span class="nc bnc" id="L129" title="All 2 branches missed.">			if (!addedListener) {</span>
-<span class="nc" id="L130">				throw new RejectException(553, &quot;&lt;&quot; + recipient + &quot;&gt; address unknown.&quot;);</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">			if (!addedListener) {</span>
+<span class="fc" id="L130">				throw new RejectException(553, &quot;&lt;&quot; + recipient + &quot;&gt; address unknown.&quot;);</span>
 			}
-<span class="nc" id="L132">		}</span>
+<span class="fc" id="L132">		}</span>
 
 		@Override
 		public void data(final InputStream data) throws TooMuchDataException, IOException {
-<span class="nc bnc" id="L136" title="All 2 branches missed.">			if (this.deliveries.size() == 1) {</span>
-<span class="nc" id="L137">				final Delivery delivery = this.deliveries.get(0);</span>
-<span class="nc" id="L138">				delivery.getListener().deliver(this.from, delivery.getRecipient(), data);</span>
-<span class="nc" id="L139">			} else {</span>
-<span class="nc" id="L140">				try (DeferredFileOutputStream dfos</span>
-<span class="nc" id="L141">						= new DeferredFileOutputStream(SimpleMessageListenerAdapter.this.dataDeferredSize)) {</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">			if (this.deliveries.size() == 1) {</span>
+<span class="fc" id="L137">				final Delivery delivery = this.deliveries.get(0);</span>
+<span class="fc" id="L138">				delivery.getListener().deliver(this.from, delivery.getRecipient(), data);</span>
+<span class="fc" id="L139">			} else {</span>
+<span class="fc" id="L140">				try (DeferredFileOutputStream dfos</span>
+<span class="fc" id="L141">						= new DeferredFileOutputStream(SimpleMessageListenerAdapter.this.dataDeferredSize)) {</span>
 					int value;
-<span class="nc bnc" id="L143" title="All 2 branches missed.">					while ((value = data.read()) &gt;= 0) {</span>
-<span class="nc" id="L144">						dfos.write(value);</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">					while ((value = data.read()) &gt;= 0) {</span>
+<span class="fc" id="L144">						dfos.write(value);</span>
 					}
 
-<span class="nc bnc" id="L147" title="All 2 branches missed.">					for (final Delivery delivery : this.deliveries) {</span>
-<span class="nc" id="L148">						delivery.getListener().deliver(this.from, delivery.getRecipient(), dfos.getInputStream());</span>
-<span class="nc" id="L149">					}</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">					for (final Delivery delivery : this.deliveries) {</span>
+<span class="fc" id="L148">						delivery.getListener().deliver(this.from, delivery.getRecipient(), dfos.getInputStream());</span>
+<span class="fc" id="L149">					}</span>
 				}
 			}
-<span class="nc" id="L152">		}</span>
+<span class="fc" id="L152">		}</span>
 
 		@Override
-<span class="nc" id="L155">		public void done() {}</span>
+<span class="fc" id="L155">		public void done() {}</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

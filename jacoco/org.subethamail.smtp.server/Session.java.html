@@ -30,7 +30,7 @@ import org.subethamail.smtp.io.CRLFTerminatedReader;
  * @author Jeff Schnitzer
  */
 public class Session implements Runnable, MessageContext {
-<span class="nc" id="L33">	private final static Logger log = LoggerFactory.getLogger(Session.class);</span>
+<span class="fc" id="L33">	private final static Logger log = LoggerFactory.getLogger(Session.class);</span>
 
 	/** A link to our parent server */
 	private final SMTPServer server;
@@ -46,7 +46,7 @@ public class Session implements Runnable, MessageContext {
 	 * is the one which calls the constructor. MDC is usually inherited by new
 	 * threads, but this mechanism does not work with executors.
 	 */
-<span class="nc" id="L49">	private final Map&lt;String, String&gt; parentLoggingMdcContext = MDC.getCopyOfContextMap();</span>
+<span class="fc" id="L49">	private final Map&lt;String, String&gt; parentLoggingMdcContext = MDC.getCopyOfContextMap();</span>
 
 	/**
 	 * Uniquely identifies this session within an extended time period, useful for
@@ -55,7 +55,7 @@ public class Session implements Runnable, MessageContext {
 	private String sessionId;
 
 	/** Set this true when doing an ordered shutdown */
-<span class="nc" id="L58">	private volatile boolean quitting = false;</span>
+<span class="fc" id="L58">	private volatile boolean quitting = false;</span>
 
 	/** I/O to the client */
 	private Socket socket;
@@ -92,14 +92,14 @@ public class Session implements Runnable, MessageContext {
 	 * If the client told us the size of the message, this is the value. If they
 	 * didn't, the value will be 0.
 	 */
-<span class="nc" id="L95">	private int declaredMessageSize = 0;</span>
+<span class="fc" id="L95">	private int declaredMessageSize = 0;</span>
 
 	/** Some more state information */
 	private boolean tlsStarted;
 
 	private Certificate[] tlsPeerCertificates;
 
-<span class="nc" id="L102">	private boolean updateThreadName = true;</span>
+<span class="fc" id="L102">	private boolean updateThreadName = true;</span>
 
 	/**
 	 * Creates the Runnable Session object.
@@ -108,18 +108,18 @@ public class Session implements Runnable, MessageContext {
 	 * @param socket is the socket to the client
 	 * @throws IOException on IO error
 	 */
-<span class="nc" id="L111">	public Session(final SMTPServer server, final ServerThread serverThread, final Socket socket) throws IOException {</span>
-<span class="nc" id="L112">		this.server = server;</span>
-<span class="nc" id="L113">		this.serverThread = serverThread;</span>
+<span class="fc" id="L111">	public Session(final SMTPServer server, final ServerThread serverThread, final Socket socket) throws IOException {</span>
+<span class="fc" id="L112">		this.server = server;</span>
+<span class="fc" id="L113">		this.serverThread = serverThread;</span>
 
-<span class="nc" id="L115">		this.setSocket(socket);</span>
-<span class="nc" id="L116">	}</span>
+<span class="fc" id="L115">		this.setSocket(socket);</span>
+<span class="fc" id="L116">	}</span>
 
 	/**
 	 * @return a reference to the master server object
 	 */
 	public SMTPServer getServer() {
-<span class="nc" id="L122">		return this.server;</span>
+<span class="fc" id="L122">		return this.server;</span>
 	}
 
 	/**
@@ -128,19 +128,19 @@ public class Session implements Runnable, MessageContext {
 	 */
 	@Override
 	public void run() {
-<span class="nc" id="L131">		MDC.setContextMap(parentLoggingMdcContext);</span>
-<span class="nc" id="L132">		sessionId = server.getSessionIdFactory().create();</span>
-<span class="nc" id="L133">		MDC.put(&quot;SessionId&quot;, sessionId);</span>
+<span class="fc" id="L131">		MDC.setContextMap(parentLoggingMdcContext);</span>
+<span class="fc" id="L132">		sessionId = server.getSessionIdFactory().create();</span>
+<span class="fc" id="L133">		MDC.put(&quot;SessionId&quot;, sessionId);</span>
 		final String originalName;
-<span class="nc bnc" id="L135" title="All 2 branches missed.">		if (updateThreadName) {</span>
-<span class="nc" id="L136">			originalName = Thread.currentThread().getName();</span>
-<span class="nc" id="L137">			Thread.currentThread()</span>
-<span class="nc" id="L138">					.setName(Session.class.getName() + &quot;-&quot; + socket.getInetAddress() + &quot;:&quot; + socket.getPort());</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">		if (updateThreadName) {</span>
+<span class="fc" id="L136">			originalName = Thread.currentThread().getName();</span>
+<span class="fc" id="L137">			Thread.currentThread()</span>
+<span class="fc" id="L138">					.setName(Session.class.getName() + &quot;-&quot; + socket.getInetAddress() + &quot;:&quot; + socket.getPort());</span>
 		} else {
 <span class="nc" id="L140">			originalName = null;</span>
 		}
 
-<span class="nc bnc" id="L143" title="All 2 branches missed.">		if (log.isDebugEnabled()) {</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">		if (log.isDebugEnabled()) {</span>
 <span class="nc" id="L144">			final InetAddress remoteInetAddress = this.getRemoteAddress().getAddress();</span>
 <span class="nc" id="L145">			remoteInetAddress.getHostName(); // Causes future toString() to print the name too</span>
 
@@ -150,9 +150,9 @@ public class Session implements Runnable, MessageContext {
 		}
 
 		try {
-<span class="nc" id="L153">			runCommandLoop();</span>
-<span class="nc" id="L154">		} catch (final IOException e1) {</span>
-<span class="nc bnc" id="L155" title="All 2 branches missed.">			if (!this.quitting) {</span>
+<span class="fc" id="L153">			runCommandLoop();</span>
+<span class="fc" id="L154">		} catch (final IOException e1) {</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">			if (!this.quitting) {</span>
 				try {
 					// Send a temporary failure back so that the server will try to resend
 					// the message later.
@@ -163,30 +163,30 @@ public class Session implements Runnable, MessageContext {
 <span class="nc" id="L163">					log.warn(&quot;Exception during SMTP transaction&quot;, e1);</span>
 				}
 			}
-<span class="nc" id="L166">		} catch (final Throwable e) {</span>
-<span class="nc" id="L167">			log.error(&quot;Unexpected error in the SMTP handler thread&quot;, e);</span>
+<span class="fc" id="L166">		} catch (final Throwable e) {</span>
+<span class="fc" id="L167">			log.error(&quot;Unexpected error in the SMTP handler thread&quot;, e);</span>
 			try {
-<span class="nc" id="L169">				this.sendResponse(&quot;421 4.3.0 Mail system failure, closing transmission channel&quot;);</span>
+<span class="fc" id="L169">				this.sendResponse(&quot;421 4.3.0 Mail system failure, closing transmission channel&quot;);</span>
 <span class="nc" id="L170">			} catch (final IOException e1) {</span>
 				// just swallow this, the outer exception is the real problem.
-<span class="nc" id="L172">			}</span>
-<span class="nc bnc" id="L173" title="All 2 branches missed.">			if (e instanceof RuntimeException) {</span>
-<span class="nc" id="L174">				throw (RuntimeException) e;</span>
+<span class="fc" id="L172">			}</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">			if (e instanceof RuntimeException) {</span>
+<span class="fc" id="L174">				throw (RuntimeException) e;</span>
 			}
 <span class="nc bnc" id="L176" title="All 2 branches missed.">			if (e instanceof Error) {</span>
 <span class="nc" id="L177">				throw (Error) e;</span>
 			}
 <span class="nc" id="L179">			throw new RuntimeException(&quot;Unexpected exception&quot;, e);</span>
 		} finally {
-<span class="nc" id="L181">			this.closeConnection();</span>
-<span class="nc" id="L182">			this.endMessageHandler();</span>
-<span class="nc" id="L183">			serverThread.sessionEnded(this);</span>
-<span class="nc bnc" id="L184" title="All 2 branches missed.">			if (updateThreadName) {</span>
-<span class="nc" id="L185">				Thread.currentThread().setName(originalName);</span>
+<span class="fc" id="L181">			this.closeConnection();</span>
+<span class="fc" id="L182">			this.endMessageHandler();</span>
+<span class="fc" id="L183">			serverThread.sessionEnded(this);</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">			if (updateThreadName) {</span>
+<span class="fc" id="L185">				Thread.currentThread().setName(originalName);</span>
 			}
-<span class="nc" id="L187">			MDC.clear();</span>
+<span class="fc" id="L187">			MDC.clear();</span>
 		}
-<span class="nc" id="L189">	}</span>
+<span class="fc" id="L189">	}</span>
 
 	/**
 	 * Sends the welcome message and starts receiving and processing client
@@ -197,41 +197,41 @@ public class Session implements Runnable, MessageContext {
 	 * @throws IOException if sending to or receiving from the client fails.
 	 */
 	private void runCommandLoop() throws IOException {
-<span class="nc bnc" id="L200" title="All 2 branches missed.">		if (this.serverThread.hasTooManyConnections()) {</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">		if (this.serverThread.hasTooManyConnections()) {</span>
 <span class="nc" id="L201">			log.debug(&quot;SMTP Too many connections!&quot;);</span>
 
 <span class="nc" id="L203">			this.sendResponse(&quot;421 Too many connections, try again later&quot;);</span>
 <span class="nc" id="L204">			return;</span>
 		}
 
-<span class="nc" id="L207">		this.sendResponse(&quot;220 &quot; + this.server.getHostName() + &quot; ESMTP &quot; + this.server.getSoftwareName());</span>
+<span class="fc" id="L207">		this.sendResponse(&quot;220 &quot; + this.server.getHostName() + &quot; ESMTP &quot; + this.server.getSoftwareName());</span>
 
-<span class="nc bnc" id="L209" title="All 2 branches missed.">		while (!this.quitting) {</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">		while (!this.quitting) {</span>
 			try {
-<span class="nc" id="L211">				String line = null;</span>
+<span class="fc" id="L211">				String line = null;</span>
 				try {
-<span class="nc" id="L213">					line = this.reader.readLine();</span>
-<span class="nc" id="L214">				} catch (final SocketException ex) {</span>
+<span class="fc" id="L213">					line = this.reader.readLine();</span>
+<span class="fc" id="L214">				} catch (final SocketException ex) {</span>
 					// Lots of clients just &quot;hang up&quot; rather than issuing QUIT,
 					// which would
 					// fill our logs with the warning in the outer catch.
-<span class="nc bnc" id="L218" title="All 2 branches missed.">					if (log.isDebugEnabled()) {</span>
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">					if (log.isDebugEnabled()) {</span>
 <span class="nc" id="L219">						log.debug(&quot;Error reading client command: &quot; + ex.getMessage(), ex);</span>
 					}
 
-<span class="nc" id="L222">					return;</span>
-<span class="nc" id="L223">				}</span>
+<span class="fc" id="L222">					return;</span>
+<span class="fc" id="L223">				}</span>
 
-<span class="nc bnc" id="L225" title="All 2 branches missed.">				if (line == null) {</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">				if (line == null) {</span>
 <span class="nc" id="L226">					log.debug(&quot;no more lines from client&quot;);</span>
 <span class="nc" id="L227">					return;</span>
 				}
 
-<span class="nc bnc" id="L230" title="All 2 branches missed.">				if (log.isDebugEnabled()) {</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">				if (log.isDebugEnabled()) {</span>
 <span class="nc" id="L231">					log.debug(&quot;Client: &quot; + line);</span>
 				}
 
-<span class="nc" id="L234">				this.server.getCommandHandler().handleCommand(this, line);</span>
+<span class="fc" id="L234">				this.server.getCommandHandler().handleCommand(this, line);</span>
 <span class="nc" id="L235">			} catch (final DropConnectionException ex) {</span>
 <span class="nc" id="L236">				this.sendResponse(ex.getErrorResponse());</span>
 <span class="nc" id="L237">				return;</span>
@@ -256,9 +256,9 @@ public class Session implements Runnable, MessageContext {
 
 				// if people are screwing with things, close connection
 <span class="nc" id="L258">				return;</span>
-<span class="nc" id="L259">			}</span>
+<span class="fc" id="L259">			}</span>
 		}
-<span class="nc" id="L261">	}</span>
+<span class="fc" id="L261">	}</span>
 
 	/**
 	 * Close reader, writer, and socket, logging exceptions but otherwise ignoring
@@ -267,15 +267,15 @@ public class Session implements Runnable, MessageContext {
 	private void closeConnection() {
 		try {
 			try {
-<span class="nc" id="L270">				this.writer.close();</span>
-<span class="nc" id="L271">				this.input.close();</span>
+<span class="fc" id="L270">				this.writer.close();</span>
+<span class="fc" id="L271">				this.input.close();</span>
 			} finally {
-<span class="nc" id="L273">				this.closeSocket();</span>
+<span class="fc" id="L273">				this.closeSocket();</span>
 			}
 <span class="nc" id="L275">		} catch (final IOException e) {</span>
 <span class="nc" id="L276">			log.info(e.toString());</span>
-<span class="nc" id="L277">		}</span>
-<span class="nc" id="L278">	}</span>
+<span class="fc" id="L277">		}</span>
+<span class="fc" id="L278">	}</span>
 
 	/**
 	 * Initializes our reader, writer, and the i/o filter chains based on the
@@ -283,13 +283,13 @@ public class Session implements Runnable, MessageContext {
 	 * is started.
 	 */
 	public void setSocket(final Socket socket) throws IOException {
-<span class="nc" id="L286">		this.socket = socket;</span>
-<span class="nc" id="L287">		this.input = this.socket.getInputStream();</span>
-<span class="nc" id="L288">		this.reader = new CRLFTerminatedReader(this.input, StandardCharsets.US_ASCII);</span>
-<span class="nc" id="L289">		this.writer = new PrintWriter(new OutputStreamWriter(this.socket.getOutputStream(), StandardCharsets.US_ASCII));</span>
+<span class="fc" id="L286">		this.socket = socket;</span>
+<span class="fc" id="L287">		this.input = this.socket.getInputStream();</span>
+<span class="fc" id="L288">		this.reader = new CRLFTerminatedReader(this.input, StandardCharsets.US_ASCII);</span>
+<span class="fc" id="L289">		this.writer = new PrintWriter(new OutputStreamWriter(this.socket.getOutputStream(), StandardCharsets.US_ASCII));</span>
 
-<span class="nc" id="L291">		this.socket.setSoTimeout(this.server.getConnectionTimeout());</span>
-<span class="nc" id="L292">	}</span>
+<span class="fc" id="L291">		this.socket.setSoTimeout(this.server.getConnectionTimeout());</span>
+<span class="fc" id="L292">	}</span>
 
 	/**
 	 * This method is only used by the start tls command
@@ -302,41 +302,41 @@ public class Session implements Runnable, MessageContext {
 
 	/** Close the client socket if it is open */
 	public void closeSocket() throws IOException {
-<span class="nc bnc" id="L305" title="All 6 branches missed.">		if (this.socket != null &amp;&amp; this.socket.isBound() &amp;&amp; !this.socket.isClosed()) {</span>
+<span class="pc bpc" id="L305" title="3 of 6 branches missed.">		if (this.socket != null &amp;&amp; this.socket.isBound() &amp;&amp; !this.socket.isClosed()) {</span>
 <span class="nc" id="L306">			this.socket.close();</span>
 		}
-<span class="nc" id="L308">	}</span>
+<span class="fc" id="L308">	}</span>
 
 	/**
 	 * @return the raw input stream from the client
 	 */
 	public InputStream getRawInput() {
-<span class="nc" id="L314">		return this.input;</span>
+<span class="fc" id="L314">		return this.input;</span>
 	}
 
 	/**
 	 * @return the cooked CRLF-terminated reader from the client
 	 */
 	public CRLFTerminatedReader getReader() {
-<span class="nc" id="L321">		return this.reader;</span>
+<span class="fc" id="L321">		return this.reader;</span>
 	}
 
 	/** Sends the response to the client */
 	public void sendResponse(final String response) throws IOException {
-<span class="nc bnc" id="L326" title="All 2 branches missed.">		if (log.isDebugEnabled()) {</span>
+<span class="pc bpc" id="L326" title="1 of 2 branches missed.">		if (log.isDebugEnabled()) {</span>
 <span class="nc" id="L327">			log.debug(&quot;Server: &quot; + response);</span>
 		}
 
-<span class="nc" id="L330">		this.writer.print(response + &quot;\r\n&quot;);</span>
-<span class="nc" id="L331">		this.writer.flush();</span>
-<span class="nc" id="L332">	}</span>
+<span class="fc" id="L330">		this.writer.print(response + &quot;\r\n&quot;);</span>
+<span class="fc" id="L331">		this.writer.flush();</span>
+<span class="fc" id="L332">	}</span>
 
 	/**
 	 * Returns an identifier of the session which is reasonably unique within an
 	 * extended time period.
 	 */
 	public String getSessionId() {
-<span class="nc" id="L339">		return sessionId;</span>
+<span class="fc" id="L339">		return sessionId;</span>
 	}
 
 	/*
@@ -346,7 +346,7 @@ public class Session implements Runnable, MessageContext {
 	 */
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-<span class="nc" id="L349">		return (InetSocketAddress) this.socket.getRemoteSocketAddress();</span>
+<span class="fc" id="L349">		return (InetSocketAddress) this.socket.getRemoteSocketAddress();</span>
 	}
 
 	/*
@@ -363,18 +363,18 @@ public class Session implements Runnable, MessageContext {
 	 * @return the current message handler
 	 */
 	public MessageHandler getMessageHandler() {
-<span class="nc" id="L366">		return this.messageHandler;</span>
+<span class="fc" id="L366">		return this.messageHandler;</span>
 	}
 
 	/** Simple state */
 	@Override
 	public String getHelo() {
-<span class="nc" id="L372">		return this.helo;</span>
+<span class="fc" id="L372">		return this.helo;</span>
 	}
 
 	public void setHelo(final String value) {
-<span class="nc" id="L376">		this.helo = value;</span>
-<span class="nc" id="L377">	}</span>
+<span class="fc" id="L376">		this.helo = value;</span>
+<span class="fc" id="L377">	}</span>
 
 	/** @deprecated use {@link #isMailTransactionInProgress()} */
 	@Deprecated
@@ -383,12 +383,12 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	public void addRecipient(final String recipientAddress) {
-<span class="nc" id="L386">		this.recipientCount++;</span>
-<span class="nc bnc" id="L387" title="All 2 branches missed.">		this.singleRecipient = this.recipientCount == 1 ? recipientAddress : null;</span>
-<span class="nc" id="L388">	}</span>
+<span class="fc" id="L386">		this.recipientCount++;</span>
+<span class="fc bfc" id="L387" title="All 2 branches covered.">		this.singleRecipient = this.recipientCount == 1 ? recipientAddress : null;</span>
+<span class="fc" id="L388">	}</span>
 
 	public int getRecipientCount() {
-<span class="nc" id="L391">		return this.recipientCount;</span>
+<span class="fc" id="L391">		return this.recipientCount;</span>
 	}
 
 	/**
@@ -396,11 +396,11 @@ public class Session implements Runnable, MessageContext {
 	 * recipient, otherwise it returns null.
 	 */
 	public String getSingleRecipient() {
-<span class="nc" id="L399">		return singleRecipient;</span>
+<span class="fc" id="L399">		return singleRecipient;</span>
 	}
 
 	public boolean isAuthenticated() {
-<span class="nc bnc" id="L403" title="All 2 branches missed.">		return this.authenticationHandler != null;</span>
+<span class="fc bfc" id="L403" title="All 2 branches covered.">		return this.authenticationHandler != null;</span>
 	}
 
 	@Override
@@ -414,8 +414,8 @@ public class Session implements Runnable, MessageContext {
 	 * AuthenticationHandlerFactory.
 	 */
 	public void setAuthenticationHandler(final AuthenticationHandler handler) {
-<span class="nc" id="L417">		this.authenticationHandler = handler;</span>
-<span class="nc" id="L418">	}</span>
+<span class="fc" id="L417">		this.authenticationHandler = handler;</span>
+<span class="fc" id="L418">	}</span>
 
 	/**
 	 * @return the maxMessageSize
@@ -428,8 +428,8 @@ public class Session implements Runnable, MessageContext {
 	 * @param declaredMessageSize the size that the client says the message will be
 	 */
 	public void setDeclaredMessageSize(final int declaredMessageSize) {
-<span class="nc" id="L431">		this.declaredMessageSize = declaredMessageSize;</span>
-<span class="nc" id="L432">	}</span>
+<span class="fc" id="L431">		this.declaredMessageSize = declaredMessageSize;</span>
+<span class="fc" id="L432">	}</span>
 
 	/**
 	 * Starts a mail transaction by creating a new message handler.
@@ -437,11 +437,11 @@ public class Session implements Runnable, MessageContext {
 	 * @throws IllegalStateException if a mail transaction is already in progress
 	 */
 	public void startMailTransaction() throws IllegalStateException {
-<span class="nc bnc" id="L440" title="All 2 branches missed.">		if (this.messageHandler != null) {</span>
+<span class="pc bpc" id="L440" title="1 of 2 branches missed.">		if (this.messageHandler != null) {</span>
 <span class="nc" id="L441">			throw new IllegalStateException(&quot;Mail transaction is already in progress&quot;);</span>
 		}
-<span class="nc" id="L443">		this.messageHandler = this.server.getMessageHandlerFactory().create(this);</span>
-<span class="nc" id="L444">	}</span>
+<span class="fc" id="L443">		this.messageHandler = this.server.getMessageHandlerFactory().create(this);</span>
+<span class="fc" id="L444">	}</span>
 
 	/**
 	 * Returns true if a mail transaction is started, i.e. a MAIL command is
@@ -450,7 +450,7 @@ public class Session implements Runnable, MessageContext {
 	 * at the end of the DATA command.
 	 */
 	public boolean isMailTransactionInProgress() {
-<span class="nc bnc" id="L453" title="All 2 branches missed.">		return this.messageHandler != null;</span>
+<span class="fc bfc" id="L453" title="All 2 branches covered.">		return this.messageHandler != null;</span>
 	}
 
 	/**
@@ -462,12 +462,12 @@ public class Session implements Runnable, MessageContext {
 	 * Some state is not; seeing hello, TLS, authentication.
 	 */
 	public void resetMailTransaction() {
-<span class="nc" id="L465">		this.endMessageHandler();</span>
-<span class="nc" id="L466">		this.messageHandler = null;</span>
-<span class="nc" id="L467">		this.recipientCount = 0;</span>
-<span class="nc" id="L468">		this.singleRecipient = null;</span>
-<span class="nc" id="L469">		this.declaredMessageSize = 0;</span>
-<span class="nc" id="L470">	}</span>
+<span class="fc" id="L465">		this.endMessageHandler();</span>
+<span class="fc" id="L466">		this.messageHandler = null;</span>
+<span class="fc" id="L467">		this.recipientCount = 0;</span>
+<span class="fc" id="L468">		this.singleRecipient = null;</span>
+<span class="fc" id="L469">		this.declaredMessageSize = 0;</span>
+<span class="fc" id="L470">	}</span>
 
 	/** @deprecated use {@link #resetMailTransaction()} */
 	@Deprecated
@@ -477,14 +477,14 @@ public class Session implements Runnable, MessageContext {
 
 	/** Safely calls done() on a message hander, if one exists */
 	private void endMessageHandler() {
-<span class="nc bnc" id="L480" title="All 2 branches missed.">		if (this.messageHandler != null) {</span>
+<span class="fc bfc" id="L480" title="All 2 branches covered.">		if (this.messageHandler != null) {</span>
 			try {
-<span class="nc" id="L482">				this.messageHandler.done();</span>
+<span class="fc" id="L482">				this.messageHandler.done();</span>
 <span class="nc" id="L483">			} catch (final Throwable ex) {</span>
 <span class="nc" id="L484">				log.error(&quot;done() threw exception&quot;, ex);</span>
-<span class="nc" id="L485">			}</span>
+<span class="fc" id="L485">			}</span>
 		}
-<span class="nc" id="L487">	}</span>
+<span class="fc" id="L487">	}</span>
 
 	/**
 	 * Reset the SMTP protocol to the initial state, which is the state after a
@@ -499,15 +499,15 @@ public class Session implements Runnable, MessageContext {
 	 * Triggers the shutdown of the thread and the closing of the connection.
 	 */
 	public void quit() {
-<span class="nc" id="L502">		this.quitting = true;</span>
-<span class="nc" id="L503">		this.closeConnection();</span>
-<span class="nc" id="L504">	}</span>
+<span class="fc" id="L502">		this.quitting = true;</span>
+<span class="fc" id="L503">		this.closeConnection();</span>
+<span class="fc" id="L504">	}</span>
 
 	/**
 	 * @return true when the TLS handshake was completed, false otherwise
 	 */
 	public boolean isTLSStarted() {
-<span class="nc" id="L510">		return tlsStarted;</span>
+<span class="fc" id="L510">		return tlsStarted;</span>
 	}
 
 	/**
@@ -534,7 +534,7 @@ public class Session implements Runnable, MessageContext {
 	}
 
 	public void setUpdateThreadName(final boolean updateThreadName) {
-<span class="nc" id="L537">		this.updateThreadName = updateThreadName;</span>
-<span class="nc" id="L538">	}</span>
+<span class="fc" id="L537">		this.updateThreadName = updateThreadName;</span>
+<span class="fc" id="L538">	}</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

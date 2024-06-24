@@ -15,16 +15,16 @@ public class HelpMessage {
 
 	private String outputString;
 
-<span class="nc" id="L18">	public HelpMessage(final String commandName, final String helpMessage, final String argumentDescription) {</span>
-<span class="nc" id="L19">		this.commandName = commandName;</span>
-<span class="nc bnc" id="L20" title="All 2 branches missed.">		this.argumentDescription = argumentDescription == null ? &quot;&quot; : &quot; &quot; + argumentDescription;</span>
-<span class="nc" id="L21">		this.helpMessage = helpMessage;</span>
-<span class="nc" id="L22">		this.buildOutputString();</span>
-<span class="nc" id="L23">	}</span>
+<span class="fc" id="L18">	public HelpMessage(final String commandName, final String helpMessage, final String argumentDescription) {</span>
+<span class="fc" id="L19">		this.commandName = commandName;</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">		this.argumentDescription = argumentDescription == null ? &quot;&quot; : &quot; &quot; + argumentDescription;</span>
+<span class="fc" id="L21">		this.helpMessage = helpMessage;</span>
+<span class="fc" id="L22">		this.buildOutputString();</span>
+<span class="fc" id="L23">	}</span>
 
 	public HelpMessage(final String commandName, final String helpMessage) {
-<span class="nc" id="L26">		this(commandName, helpMessage, null);</span>
-<span class="nc" id="L27">	}</span>
+<span class="fc" id="L26">		this(commandName, helpMessage, null);</span>
+<span class="fc" id="L27">	}</span>
 
 	public String getName() {
 <span class="nc" id="L30">		return this.commandName;</span>
@@ -35,16 +35,16 @@ public class HelpMessage {
 	}
 
 	private void buildOutputString() {
-<span class="nc" id="L38">		final StringTokenizer stringTokenizer = new StringTokenizer(this.helpMessage, &quot;\n&quot;);</span>
-<span class="nc" id="L39">		final StringBuilder stringBuilder</span>
-<span class="nc" id="L40">				= new StringBuilder().append(&quot;214-&quot;).append(this.commandName).append(this.argumentDescription);</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">		while (stringTokenizer.hasMoreTokens()) {</span>
-<span class="nc" id="L42">			stringBuilder.append(&quot;\n214-    &quot;).append(stringTokenizer.nextToken());</span>
+<span class="fc" id="L38">		final StringTokenizer stringTokenizer = new StringTokenizer(this.helpMessage, &quot;\n&quot;);</span>
+<span class="fc" id="L39">		final StringBuilder stringBuilder</span>
+<span class="fc" id="L40">				= new StringBuilder().append(&quot;214-&quot;).append(this.commandName).append(this.argumentDescription);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">		while (stringTokenizer.hasMoreTokens()) {</span>
+<span class="fc" id="L42">			stringBuilder.append(&quot;\n214-    &quot;).append(stringTokenizer.nextToken());</span>
 		}
 
-<span class="nc" id="L45">		stringBuilder.append(&quot;\n214 End of &quot;).append(this.commandName).append(&quot; info&quot;);</span>
-<span class="nc" id="L46">		this.outputString = stringBuilder.toString();</span>
-<span class="nc" id="L47">	}</span>
+<span class="fc" id="L45">		stringBuilder.append(&quot;\n214 End of &quot;).append(this.commandName).append(&quot; info&quot;);</span>
+<span class="fc" id="L46">		this.outputString = stringBuilder.toString();</span>
+<span class="fc" id="L47">	}</span>
 
 	@Override
 	public boolean equals(final Object o) {
@@ -74,4 +74,4 @@ public class HelpMessage {
 <span class="nc" id="L74">		return result;</span>
 	}
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
