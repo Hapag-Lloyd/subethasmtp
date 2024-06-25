@@ -5,9 +5,14 @@ updates:
     schedule:
       interval: daily
     ignore:
+        # Ignoring dependencies with Jakarta class paths
       - dependency-name: com.sun.mail:jakarta.mail
         versions: "[2.0.0,)"
       - dependency-name: jakarta.activation:jakarta.activation-api
         versions: "[2.0.0,)"
       - dependency-name: jakarta.mail:jakarta.mail-api
         versions: "[2.0.0,)"
+
+        # No more JDK 8 support
+      - dependency-name: org.jmockit:jmockit
+        versions: "[1.24,)"
