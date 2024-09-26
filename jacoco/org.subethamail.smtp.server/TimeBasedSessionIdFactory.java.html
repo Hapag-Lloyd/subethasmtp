@@ -19,8 +19,8 @@ import javax.annotation.concurrent.ThreadSafe;
 	public String create() {
 <span class="fc" id="L20">		long id = System.currentTimeMillis();</span>
 <span class="fc" id="L21">		synchronized (this) {</span>
-<span class="pc bpc" id="L22" title="1 of 2 branches missed.">			if (id &lt;= lastAllocatedId) {</span>
-<span class="nc" id="L23">				id = lastAllocatedId + 1;</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">			if (id &lt;= lastAllocatedId) {</span>
+<span class="fc" id="L23">				id = lastAllocatedId + 1;</span>
 			}
 <span class="fc" id="L25">			lastAllocatedId = id;</span>
 <span class="fc" id="L26">		}</span>
