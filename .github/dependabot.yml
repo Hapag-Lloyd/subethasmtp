@@ -14,5 +14,7 @@ updates:
         versions: "[2.0.0,)"
 
         # No more JDK 8 support
+      - dependency-name: org.junit.vintage:junit-vintage-engine
+        versions: "[6.0.0,)"
       - dependency-name: org.jmockit:jmockit
         versions: "[1.24,)"
